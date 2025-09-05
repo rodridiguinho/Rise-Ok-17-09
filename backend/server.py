@@ -60,6 +60,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Add startup and shutdown events
 @app.on_event("startup")
 async def startup_db_client():
     await connect_to_mongo()
