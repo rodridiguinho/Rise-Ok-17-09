@@ -2,23 +2,6 @@ from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 from datetime import datetime, date
 from enum import Enum
-from bson import ObjectId
-
-
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, field_schema):
-        field_schema.update(type="string")
 
 
 class TransactionType(str, Enum):
@@ -78,8 +61,6 @@ class TransactionUpdate(BaseModel):
 
 
 class Transaction(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    userId: PyObjectId
     date: date = Field(default_factory=date.today)
     time: str = Field(default_factory=lambda: datetime.now().strftime("%H:%M"))
     type: TransactionType
@@ -94,9 +75,7 @@ class Transaction(BaseModel):
     updatedAt: datetime = Field(default_factory=datetime.utcnow)
 
     class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str, date: str}
+        json_encoders = {date: str, datetime: str}
         use_enum_values = True
 
 
@@ -113,9 +92,6 @@ class TransactionResponse(BaseModel):
     supplier: Optional[str] = None
     status: str
     createdAt: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class TransactionSummary(BaseModel):

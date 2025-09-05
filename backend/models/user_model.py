@@ -1,23 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Dict, Any
 from datetime import datetime
-from bson import ObjectId
-
-
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, field_schema):
-        field_schema.update(type="string")
 
 
 class UserSettings(BaseModel):
@@ -54,7 +37,6 @@ class UserLogin(BaseModel):
 
 
 class User(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     email: EmailStr
     password: str
     name: str
@@ -67,9 +49,7 @@ class User(BaseModel):
     updatedAt: datetime = Field(default_factory=datetime.utcnow)
 
     class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+        json_encoders = {datetime: str}
 
 
 class UserResponse(BaseModel):
@@ -81,9 +61,6 @@ class UserResponse(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     settings: UserSettings
-
-    class Config:
-        from_attributes = True
 
 
 class UserUpdate(BaseModel):

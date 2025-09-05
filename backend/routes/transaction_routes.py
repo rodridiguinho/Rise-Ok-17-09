@@ -195,11 +195,8 @@ async def create_transaction(
         transaction_dict.pop("transactionDate", None)
         transaction_dict.pop("transactionTime", None)
         
-        # Criar transação
-        transaction = Transaction(**transaction_dict)
-        
         # Inserir no banco
-        result = await db.transactions.insert_one(transaction.dict(by_alias=True))
+        result = await db.transactions.insert_one(transaction_dict)
         
         # Buscar transação criada
         created_transaction = await db.transactions.find_one({"_id": result.inserted_id})
@@ -224,67 +221,6 @@ async def create_transaction(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creating transaction"
-        )
-
-
-@router.put("/{transaction_id}", response_model=TransactionResponse)
-async def update_transaction(
-    transaction_id: str,
-    transaction_data: TransactionUpdate,
-    payload: dict = Depends(auth_handler.auth_wrapper),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Atualizar transação"""
-    try:
-        user_id = ObjectId(payload.get("user_id"))
-        
-        # Verificar se a transação existe e pertence ao usuário
-        existing_transaction = await db.transactions.find_one({
-            "_id": ObjectId(transaction_id),
-            "userId": user_id
-        })
-        
-        if not existing_transaction:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Transaction not found"
-            )
-        
-        # Preparar dados para atualização
-        update_data = {k: v for k, v in transaction_data.dict().items() if v is not None}
-        update_data["updatedAt"] = datetime.utcnow()
-        
-        # Atualizar no banco
-        await db.transactions.update_one(
-            {"_id": ObjectId(transaction_id)},
-            {"$set": update_data}
-        )
-        
-        # Buscar transação atualizada
-        updated_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
-        
-        return TransactionResponse(
-            id=str(updated_transaction["_id"]),
-            date=updated_transaction["date"].strftime("%Y-%m-%d"),
-            time=updated_transaction["time"],
-            type=updated_transaction["type"],
-            category=updated_transaction["category"],
-            description=updated_transaction["description"],
-            amount=updated_transaction["amount"],
-            paymentMethod=updated_transaction["paymentMethod"],
-            client=updated_transaction.get("client"),
-            supplier=updated_transaction.get("supplier"),
-            status=updated_transaction["status"],
-            createdAt=updated_transaction["createdAt"]
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error updating transaction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error updating transaction"
         )
 
 
