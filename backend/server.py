@@ -75,7 +75,7 @@ def decode_jwt_token(token: str) -> dict:
 # Routes
 @api_router.get("/")
 async def root():
-    return {"message": "AgentePro Controle de Caixa API - Running"}
+    return {"message": "Rise Travel - Controle de Caixa API - Running"}
 
 @api_router.get("/health")
 async def health_check():
