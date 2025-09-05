@@ -30,7 +30,7 @@ const Header = ({ user, toggleSidebar }) => {
             <Menu className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
               Rise Travel
             </h1>
             <p className="text-sm text-gray-500">Sistema de Controle de Caixa</p>
@@ -45,7 +45,7 @@ const Header = ({ user, toggleSidebar }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-400 rounded-full flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-sm font-medium text-gray-700">{user.name}</span>

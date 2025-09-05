@@ -57,8 +57,16 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {isOpen && (
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
+            <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-orange-400 rounded-xl flex items-center justify-center relative">
+              {/* Suitcase shape */}
+              <div className="w-6 h-5 bg-white rounded-sm relative">
+                {/* Airplane icon */}
+                <svg viewBox="0 0 24 24" className="w-3 h-3 absolute top-1 left-1.5 text-pink-500 fill-current">
+                  <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                </svg>
+              </div>
+              {/* Handle */}
+              <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2 h-1.5 border-2 border-white rounded-t-md"></div>
             </div>
             <div>
               <h2 className="text-lg font-bold text-gray-900">Rise Travel</h2>
@@ -87,7 +95,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
               variant={isActive ? "default" : "ghost"}
               className={`w-full justify-start transition-colors ${
                 isActive 
-                  ? 'bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700' 
+                  ? 'bg-gradient-to-r from-pink-500 to-orange-400 text-white hover:from-pink-600 hover:to-orange-500 shadow-lg' 
                   : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
               } ${!isOpen ? 'px-2' : ''}`}
               onClick={() => setActiveTab(item.id)}

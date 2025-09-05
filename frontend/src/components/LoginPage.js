@@ -41,8 +41,16 @@ const LoginPage = () => {
         <div className="w-full max-w-md space-y-6">
           {/* Logo */}
           <div className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">R</span>
+            <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-orange-400 rounded-xl flex items-center justify-center relative">
+              {/* Suitcase shape */}
+              <div className="w-8 h-6 bg-white rounded-sm relative">
+                {/* Airplane icon */}
+                <svg viewBox="0 0 24 24" className="w-4 h-4 absolute top-1 left-2 text-pink-500 fill-current">
+                  <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                </svg>
+              </div>
+              {/* Handle */}
+              <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-2 border-2 border-white rounded-t-lg"></div>
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Rise Travel</h1>
@@ -76,7 +84,7 @@ const LoginPage = () => {
                 <Label htmlFor="password">Senha</Label>
                 <button
                   type="button"
-                  className="text-sm text-blue-600 hover:text-blue-500"
+                  className="text-sm text-pink-600 hover:text-pink-500"
                   onClick={() => {/* Handle forgot password */}}
                 >
                   Esqueceu sua senha?
@@ -104,7 +112,7 @@ const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-medium"
+              className="w-full h-12 bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500 text-white font-medium shadow-lg"
               disabled={loading}
             >
               {loading ? "Entrando..." : "Login"}
@@ -113,7 +121,7 @@ const LoginPage = () => {
 
           <p className="text-center text-sm text-gray-600">
             Não possui conta?{' '}
-            <button className="text-blue-600 hover:text-blue-500 underline">
+            <button className="text-pink-600 hover:text-pink-500 underline">
               Entre em contato
             </button>
           </p>
@@ -121,58 +129,70 @@ const LoginPage = () => {
       </div>
 
       {/* Right side - Branding */}
-      <div className="flex-1 bg-gradient-to-br from-emerald-600 via-blue-700 to-indigo-800 flex items-center justify-center p-8 relative overflow-hidden">
+      <div className="flex-1 bg-gradient-to-br from-pink-500 via-pink-600 to-orange-500 flex items-center justify-center p-8 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 right-20 w-32 h-32 bg-white/10 rounded-full"></div>
-          <div className="absolute bottom-32 left-16 w-20 h-20 bg-white/15 rounded-full"></div>
-          <div className="absolute top-1/2 right-32 w-16 h-16 bg-white/10 rounded-full"></div>
-          <div className="absolute top-40 left-1/3 w-12 h-12 bg-white/5 rounded-full"></div>
+          <div className="absolute top-20 right-20 w-32 h-32 bg-white/10 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-32 left-16 w-20 h-20 bg-white/15 rounded-full animate-pulse delay-75"></div>
+          <div className="absolute top-1/2 right-32 w-16 h-16 bg-white/10 rounded-full animate-pulse delay-150"></div>
+          <div className="absolute top-40 left-1/3 w-12 h-12 bg-white/5 rounded-full animate-pulse delay-300"></div>
         </div>
 
         <div className="relative z-10 text-center text-white">
           <div className="mb-8">
-            <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl font-bold">R</span>
+            {/* Main Logo */}
+            <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+              <div className="w-16 h-12 bg-white rounded-lg relative">
+                {/* Airplane icon */}
+                <svg viewBox="0 0 24 24" className="w-8 h-8 absolute top-2 left-4 text-pink-500 fill-current">
+                  <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                </svg>
+              </div>
+              {/* Suitcase handle */}
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-6 h-4 border-4 border-white rounded-t-xl"></div>
+              {/* Wheels */}
+              <div className="absolute -bottom-1 left-2 w-2 h-2 bg-white rounded-full"></div>
+              <div className="absolute -bottom-1 right-2 w-2 h-2 bg-white rounded-full"></div>
             </div>
-            <h1 className="text-5xl font-bold mb-2">Rise Travel</h1>
-            <p className="text-xl opacity-90">SISTEMA DE CONTROLE DE CAIXA</p>
+            
+            <h1 className="text-5xl font-bold mb-2 tracking-wide">RISE</h1>
+            <h2 className="text-4xl font-light mb-4 tracking-widest">TRAVEL</h2>
+            <p className="text-xl opacity-90 font-medium">SISTEMA DE CONTROLE DE CAIXA</p>
           </div>
           
-          {/* Travel icons */}
-          <div className="relative mx-auto w-96 h-48 mb-8">
-            {/* Airplane */}
-            <svg viewBox="0 0 400 200" className="w-full h-full">
+          {/* Travel elements */}
+          <div className="relative mx-auto w-96 h-32 mb-8">
+            {/* Airplane path */}
+            <svg viewBox="0 0 400 120" className="w-full h-full">
+              {/* Flight path */}
               <path
-                d="M80 100 L140 85 L220 95 L260 100 L290 102 L260 104 L220 105 L140 115 L80 100 Z"
-                fill="rgba(255,255,255,0.3)"
+                d="M50 60 Q200 20 350 60"
+                stroke="rgba(255,255,255,0.4)"
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray="5,5"
                 className="animate-pulse"
               />
-              <path
-                d="M140 85 L155 75 L170 80 L140 95 Z"
-                fill="rgba(255,255,255,0.4)"
-              />
-              <path
-                d="M140 115 L155 125 L170 120 L140 105 Z"
-                fill="rgba(255,255,255,0.4)"
-              />
-              {/* Trail */}
-              <path
-                d="M60 100 L80 98 L80 102 L60 100 Z"
-                fill="rgba(255,255,255,0.6)"
-              />
+              {/* Airplane */}
+              <circle cx="350" cy="60" r="6" fill="white" className="animate-bounce">
+                <animateMotion
+                  dur="8s"
+                  repeatCount="indefinite"
+                  path="M50,60 Q200,20 350,60 Q200,100 50,60"
+                />
+              </circle>
             </svg>
             
-            {/* Location pins */}
-            <div className="absolute top-8 right-16 w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
+            {/* Destination markers */}
+            <div className="absolute top-4 left-12 w-4 h-4 bg-white/40 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
             </div>
-            <div className="absolute bottom-8 left-20 w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
+            <div className="absolute bottom-4 right-12 w-4 h-4 bg-white/40 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
             </div>
           </div>
 
-          <p className="text-lg opacity-80">
+          <p className="text-lg opacity-90 max-w-md mx-auto leading-relaxed">
             Controle financeiro completo para sua agência de viagens
           </p>
         </div>
