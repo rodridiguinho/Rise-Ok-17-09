@@ -102,12 +102,12 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Testar o backend do sistema de controle de caixa AgentePro. Validar conectividade da API, autenticação, transações e relatórios."
+user_problem_statement: "Testar especificamente as APIs de usuários que acabamos de corrigir: GET /api/users, POST /api/users, PUT /api/users/{id}, DELETE /api/users/{id}. Verificar se os dados estão sendo salvos corretamente no MongoDB, se as respostas estão no formato JSON correto, se não há erros de serialização e se as operações CRUD funcionam completamente."
 
 backend:
   - task: "API Health Check Endpoint"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "medium"
@@ -116,6 +116,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "GET /api/health endpoint not implemented in server.py. Only /api/ root endpoint exists and works correctly."
+        - working: true
+          agent: "testing"
+          comment: "GET /api/health endpoint now implemented and working correctly. Returns proper health status response."
 
   - task: "API Root Endpoint"
     implemented: true
@@ -127,7 +130,7 @@ backend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "GET /api/ endpoint working correctly. Returns proper message: 'AgentePro Controle de Caixa API - Running'"
+          comment: "GET /api/ endpoint working correctly. Returns proper message: 'Rise Travel - Controle de Caixa API - Running'"
 
   - task: "User Authentication System"
     implemented: true
@@ -202,8 +205,8 @@ backend:
           comment: "POST /api/transactions working correctly. Successfully creates new transactions and returns proper response with generated ID and transaction details."
 
   - task: "Delete Transaction API"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "medium"
@@ -212,6 +215,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "DELETE /api/transactions/{id} endpoint not implemented in server.py. Returns 404 when accessed."
+        - working: true
+          agent: "testing"
+          comment: "DELETE /api/transactions/{id} endpoint now implemented and working correctly. Returns success response when deleting transactions."
 
   - task: "PDF Export API"
     implemented: true
@@ -226,16 +232,19 @@ backend:
           comment: "POST /api/reports/export/pdf working correctly. Returns success response indicating PDF export initiated (mock implementation)."
 
   - task: "Excel Export API"
-    implemented: true
-    working: true
-    file: "backend/server.py"
-    stuck_count: 0
+    implemented: false
+    working: false
+    file: "backend/routes/reports_routes.py"
+    stuck_count: 1
     priority: "medium"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
           comment: "POST /api/reports/export/excel working correctly. Returns success response indicating Excel export initiated (mock implementation)."
+        - working: false
+          agent: "testing"
+          comment: "POST /api/reports/export/excel endpoint returns 404. The route exists in backend/routes/reports_routes.py but is not included in main server.py. The separate route files are not being loaded by the main application."
 
   - task: "JWT Token System"
     implemented: true
@@ -260,6 +269,54 @@ backend:
         - working: true
           agent: "testing"
           comment: "MongoDB connection working correctly. Default user created successfully during startup. Database operations functional."
+
+  - task: "User List API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/users working perfectly. Successfully retrieves all users from MongoDB with proper JSON serialization. Password field correctly excluded from responses. All required fields (id, email, name, role) present in response structure."
+
+  - task: "User Creation API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "POST /api/users working perfectly. Successfully creates new users in MongoDB with all data fields (name, email, role, phone, status) correctly saved. Password properly hashed and excluded from response. Duplicate email validation working correctly with 400 status. Database persistence verified - created users are immediately available in subsequent GET requests."
+
+  - task: "User Update API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "PUT /api/users/{id} working perfectly. Successfully updates existing users in MongoDB with all field changes (name, role, phone, status) correctly persisted. Updated data immediately available in subsequent GET requests. Proper validation for duplicate emails when updating."
+
+  - task: "User Deletion API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "DELETE /api/users/{id} working perfectly. Successfully deletes users from MongoDB database. Deletion is immediately persisted - deleted users are no longer available in subsequent GET requests. Returns proper success response with confirmation message."
 
 frontend:
   # Frontend testing not performed by testing agent
