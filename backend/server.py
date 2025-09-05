@@ -77,6 +77,20 @@ def decode_jwt_token(token: str) -> dict:
 async def root():
     return {"message": "AgentePro Controle de Caixa API - Running"}
 
+@api_router.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "cashcontrol-api"}
+
+@api_router.delete("/transactions/{transaction_id}")
+async def delete_transaction(transaction_id: str):
+    """Deletar transação (mockado)"""
+    try:
+        # Por enquanto apenas simula deleção
+        return {"success": True, "message": "Transaction deleted successfully"}
+    except Exception as e:
+        logging.error(f"Delete transaction error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error deleting transaction")
+
 @api_router.post("/auth/login")
 async def login(login_data: UserLogin):
     """Login do usuário"""
