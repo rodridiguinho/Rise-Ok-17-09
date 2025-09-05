@@ -21,6 +21,21 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
       icon: ArrowRightLeft,
     },
     {
+      id: 'clients',
+      label: 'Clientes',
+      icon: Users,
+    },
+    {
+      id: 'suppliers',
+      label: 'Fornecedores',
+      icon: Building2,
+    },
+    {
+      id: 'users',
+      label: 'Usuários',
+      icon: UserCog,
+    },
+    {
       id: 'reports',
       label: 'Relatórios',
       icon: FileText,
