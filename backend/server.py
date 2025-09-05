@@ -273,10 +273,10 @@ async def startup_db_client():
         logger.info("✅ Connected to MongoDB")
         
         # Criar usuário padrão se não existir
-        existing_user = await db.users.find_one({"email": "rorigo@risetravel.com.br"})
+        existing_user = await db.users.find_one({"email": "rodrigo@risetravel.com.br"})
         if not existing_user:
             default_user = {
-                "email": "rorigo@risetravel.com.br",
+                "email": "rodrigo@risetravel.com.br",
                 "password": hash_password("Emily2030*"),
                 "name": "Rodrigo Silva",
                 "role": "Gerente",
