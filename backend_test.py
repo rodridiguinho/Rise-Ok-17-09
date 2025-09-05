@@ -58,7 +58,7 @@ def test_api_connectivity():
         response = requests.get(f"{API_URL}/", timeout=10)
         if response.status_code == 200:
             data = response.json()
-            if "message" in data and "AgentePro" in data["message"]:
+            if "message" in data and ("AgentePro" in data["message"] or "Rise Travel" in data["message"]):
                 print_result(True, "GET /api/ - Root endpoint working", f"Response: {data}")
             else:
                 print_result(False, "GET /api/ - Unexpected response format", f"Response: {data}")
