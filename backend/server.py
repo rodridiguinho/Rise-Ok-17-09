@@ -249,6 +249,12 @@ async def get_users():
         users = await db.users.find({}, {"password": 0}).to_list(100)  # Exclude password
         for user in users:
             user["id"] = str(user["_id"])
+            user["_id"] = str(user["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in user:
+                user["createdAt"] = user["createdAt"].isoformat()
+            if "updatedAt" in user:
+                user["updatedAt"] = user["updatedAt"].isoformat()
         return users
     except Exception as e:
         logging.error(f"Error getting users: {str(e)}")
