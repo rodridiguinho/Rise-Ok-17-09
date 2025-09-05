@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { mockSummary, mockTransactions } from '../../data/mockData';
+import { transactionsAPI } from '../../services/api';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -10,8 +10,21 @@ import {
   ArrowUpCircle,
   ArrowDownCircle
 } from 'lucide-react';
+import { useToast } from '../../hooks/use-toast';
 
 const Overview = () => {
+  const [summary, setSummary] = useState({
+    totalEntradas: 0,
+    totalSaidas: 0,
+    saldoAtual: 0,
+    transacoesHoje: 0,
+    clientesAtendidos: 0,
+    ticketMedio: 0
+  });
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -23,7 +36,52 @@ const Overview = () => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const recentTransactions = mockTransactions.slice(0, 5);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar resumo
+        const summaryData = await transactionsAPI.getSummary();
+        setSummary(summaryData);
+        
+        // Buscar transações recentes
+        const transactionsData = await transactionsAPI.getTransactions({ limit: 5 });
+        setTransactions(transactionsData);
+        
+      } catch (error) {
+        console.error('Error fetching overview data:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Erro ao carregar dados do dashboard",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [toast]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -38,7 +96,7 @@ const Overview = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600">
-              {formatCurrency(mockSummary.totalEntradas)}
+              {formatCurrency(summary.totalEntradas)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
               +12.5% em relação a ontem
@@ -55,7 +113,7 @@ const Overview = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {formatCurrency(mockSummary.totalSaidas)}
+              {formatCurrency(summary.totalSaidas)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
               -8.2% em relação a ontem
@@ -72,7 +130,7 @@ const Overview = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {formatCurrency(mockSummary.saldoAtual)}
+              {formatCurrency(summary.saldoAtual)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
               Atualizado agora
@@ -89,10 +147,10 @@ const Overview = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              {mockSummary.clientesAtendidos}
+              {summary.clientesAtendidos}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Ticket médio: {formatCurrency(mockSummary.ticketMedio)}
+              Ticket médio: {formatCurrency(summary.ticketMedio)}
             </p>
           </CardContent>
         </Card>
@@ -108,7 +166,7 @@ const Overview = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentTransactions.map((transaction) => (
+            {transactions.map((transaction) => (
               <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex items-center space-x-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -141,6 +199,13 @@ const Overview = () => {
                 </div>
               </div>
             ))}
+            
+            {transactions.length === 0 && (
+              <div className="text-center text-gray-500 py-8">
+                <Calendar className="mx-auto h-12 w-12 text-gray-300 mb-2" />
+                <p>Nenhuma transação encontrada</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
