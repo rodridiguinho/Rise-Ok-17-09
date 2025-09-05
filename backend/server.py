@@ -249,7 +249,6 @@ async def get_users():
         users = await db.users.find({}, {"password": 0}).to_list(100)  # Exclude password
         for user in users:
             user["id"] = str(user["_id"])
-            user["_id"] = str(user["_id"])
         return users
     except Exception as e:
         logging.error(f"Error getting users: {str(e)}")
@@ -262,15 +261,43 @@ async def create_user(user_data: dict):
         # Check if email already exists
         existing_user = await db.users.find_one({"email": user_data["email"]})
         if existing_user:
-            raise HTTPException(status_code=400, detail="Email already exists")
+            raise HTTPException(status_code=400, detail="Email já existe")
         
         # Hash password
-        user_data["password"] = hash_password(user_data["password"])
-        user_data["createdAt"] = datetime.utcnow()
-        user_data["updatedAt"] = datetime.utcnow()
+        hashed_password = hash_password(user_data["password"])
+        
+        # Prepare user data
+        new_user = {
+            "email": user_data["email"],
+            "password": hashed_password,
+            "name": user_data["name"],
+            "role": user_data.get("role", "Vendedor"),
+            "phone": user_data.get("phone", ""),
+            "status": user_data.get("status", "Ativo"),
+            "companyName": "Rise Travel",
+            "settings": {
+                "currency": "BRL",
+                "timezone": "America/Sao_Paulo",
+                "notifications": {
+                    "emailNotifications": True,
+                    "pushNotifications": False,
+                    "dailyReport": True,
+                    "transactionAlerts": True,
+                    "lowCashAlert": True
+                },
+                "preferences": {
+                    "theme": "light",
+                    "autoExport": False,
+                    "backupFrequency": "weekly",
+                    "decimalPlaces": 2
+                }
+            },
+            "createdAt": datetime.utcnow(),
+            "updatedAt": datetime.utcnow()
+        }
         
         # Insert user
-        result = await db.users.insert_one(user_data)
+        result = await db.users.insert_one(new_user)
         
         # Get created user (without password)
         created_user = await db.users.find_one({"_id": result.inserted_id}, {"password": 0})
@@ -287,22 +314,34 @@ async def create_user(user_data: dict):
 async def update_user(user_id: str, user_data: dict):
     """Atualizar usuário"""
     try:
-        # Remove id fields from update data
-        user_data.pop("id", None)
-        user_data.pop("_id", None)
-        user_data["updatedAt"] = datetime.utcnow()
+        # Prepare update data
+        update_data = {
+            "name": user_data.get("name"),
+            "role": user_data.get("role"),
+            "phone": user_data.get("phone", ""),
+            "status": user_data.get("status", "Ativo"),
+            "updatedAt": datetime.utcnow()
+        }
+        
+        # Only update email if provided and different
+        if user_data.get("email"):
+            # Check if email already exists for another user
+            existing_user = await db.users.find_one({
+                "email": user_data["email"],
+                "_id": {"$ne": ObjectId(user_id)}
+            })
+            if existing_user:
+                raise HTTPException(status_code=400, detail="Email já existe")
+            update_data["email"] = user_data["email"]
         
         # If password is being updated, hash it
-        if "password" in user_data and user_data["password"]:
-            user_data["password"] = hash_password(user_data["password"])
-        else:
-            # Remove password field if empty
-            user_data.pop("password", None)
+        if user_data.get("password") and user_data["password"].strip():
+            update_data["password"] = hash_password(user_data["password"])
         
         # Update user
         result = await db.users.update_one(
             {"_id": ObjectId(user_id)},
-            {"$set": user_data}
+            {"$set": update_data}
         )
         
         if result.matched_count == 0:
@@ -323,6 +362,7 @@ async def update_user(user_id: str, user_data: dict):
 async def delete_user(user_id: str):
     """Deletar usuário"""
     try:
+        # Don't allow deleting the current user (you could add this check)
         result = await db.users.delete_one({"_id": ObjectId(user_id)})
         
         if result.deleted_count == 0:
