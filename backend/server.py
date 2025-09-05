@@ -241,10 +241,99 @@ async def export_pdf():
     """Exportar PDF (mockado)"""
     return {"success": True, "message": "PDF export initiated"}
 
-@api_router.post("/reports/export/excel") 
-async def export_excel():
-    """Exportar Excel (mockado)"""
-    return {"success": True, "message": "Excel export initiated"}
+# Users API endpoints
+@api_router.get("/users")
+async def get_users():
+    """Obter lista de usuários"""
+    try:
+        users = await db.users.find({}, {"password": 0}).to_list(100)  # Exclude password
+        for user in users:
+            user["id"] = str(user["_id"])
+            user["_id"] = str(user["_id"])
+        return users
+    except Exception as e:
+        logging.error(f"Error getting users: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting users")
+
+@api_router.post("/users")
+async def create_user(user_data: dict):
+    """Criar novo usuário"""
+    try:
+        # Check if email already exists
+        existing_user = await db.users.find_one({"email": user_data["email"]})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already exists")
+        
+        # Hash password
+        user_data["password"] = hash_password(user_data["password"])
+        user_data["createdAt"] = datetime.utcnow()
+        user_data["updatedAt"] = datetime.utcnow()
+        
+        # Insert user
+        result = await db.users.insert_one(user_data)
+        
+        # Get created user (without password)
+        created_user = await db.users.find_one({"_id": result.inserted_id}, {"password": 0})
+        created_user["id"] = str(created_user["_id"])
+        
+        return created_user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error creating user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error creating user")
+
+@api_router.put("/users/{user_id}")
+async def update_user(user_id: str, user_data: dict):
+    """Atualizar usuário"""
+    try:
+        # Remove id fields from update data
+        user_data.pop("id", None)
+        user_data.pop("_id", None)
+        user_data["updatedAt"] = datetime.utcnow()
+        
+        # If password is being updated, hash it
+        if "password" in user_data and user_data["password"]:
+            user_data["password"] = hash_password(user_data["password"])
+        else:
+            # Remove password field if empty
+            user_data.pop("password", None)
+        
+        # Update user
+        result = await db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": user_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get updated user (without password)
+        updated_user = await db.users.find_one({"_id": ObjectId(user_id)}, {"password": 0})
+        updated_user["id"] = str(updated_user["_id"])
+        
+        return updated_user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error updating user")
+
+@api_router.delete("/users/{user_id}")
+async def delete_user(user_id: str):
+    """Deletar usuário"""
+    try:
+        result = await db.users.delete_one({"_id": ObjectId(user_id)})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"success": True, "message": "User deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error deleting user")
 
 # Include the main router in the app
 app.include_router(api_router)
