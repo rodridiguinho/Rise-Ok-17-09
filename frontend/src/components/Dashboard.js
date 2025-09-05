@@ -5,6 +5,9 @@ import Header from './Dashboard/Header';
 import Sidebar from './Dashboard/Sidebar';
 import Overview from './Dashboard/Overview';
 import Transactions from './Dashboard/Transactions';
+import Clients from './Dashboard/Clients';
+import Suppliers from './Dashboard/Suppliers';
+import Users from './Dashboard/Users';
 import Reports from './Dashboard/Reports';
 import Settings from './Dashboard/Settings';
 
