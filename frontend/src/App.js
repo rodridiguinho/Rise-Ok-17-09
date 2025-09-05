@@ -17,6 +17,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>
+        <Toaster />
       </AuthProvider>
     </div>
   );
