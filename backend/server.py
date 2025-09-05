@@ -356,7 +356,14 @@ async def update_user(user_id: str, user_data: dict):
         
         # Get updated user (without password)
         updated_user = await db.users.find_one({"_id": ObjectId(user_id)}, {"password": 0})
-        updated_user["id"] = str(updated_user["_id"])
+        if updated_user:
+            updated_user["id"] = str(updated_user["_id"])
+            updated_user["_id"] = str(updated_user["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in updated_user:
+                updated_user["createdAt"] = updated_user["createdAt"].isoformat()
+            if "updatedAt" in updated_user:
+                updated_user["updatedAt"] = updated_user["updatedAt"].isoformat()
         
         return updated_user
     except HTTPException:
