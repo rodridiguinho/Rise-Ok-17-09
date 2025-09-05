@@ -26,8 +26,8 @@ ALGORITHM = "HS256"
 
 # Create the main app
 app = FastAPI(
-    title="AgentePro - Controle de Caixa API",
-    description="API para sistema de controle de caixa para agências de turismo",
+    title="Rise Travel - Controle de Caixa API",
+    description="API para sistema de controle de caixa da Rise Travel",
     version="1.0.0"
 )
 
