@@ -280,7 +280,7 @@ async def startup_db_client():
                 "password": hash_password("Emily2030*"),
                 "name": "Rodrigo Silva",
                 "role": "Gerente",
-                "companyName": "AgentePro Turismo",
+                "companyName": "Rise Travel",
                 "phone": "+55 11 99999-9999",
                 "address": "Rua das Flores, 123 - São Paulo, SP",
                 "settings": {
