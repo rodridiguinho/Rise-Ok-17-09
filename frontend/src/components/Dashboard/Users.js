@@ -372,16 +372,20 @@ const Users = () => {
                         <Shield className="h-3 w-3 mr-1" />
                         {user.role}
                       </Badge>
-                      <Badge className={getStatusBadgeColor(user.status)}>
-                        {user.status}
+                      <Badge className={getStatusBadgeColor(user.status || 'Ativo')}>
+                        {user.status || 'Ativo'}
                       </Badge>
                     </div>
                   </div>
                 </div>
                 
                 <div className="text-right">
-                  <p className="text-sm text-gray-900">Criado em: {formatDate(user.createdAt)}</p>
-                  <p className="text-sm text-gray-500">Último login: {user.lastLogin}</p>
+                  <p className="text-sm text-gray-900">
+                    Criado em: {user.createdAt ? formatDate(user.createdAt) : 'N/A'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Último login: {user.lastLogin || 'N/A'}
+                  </p>
                   <div className="flex items-center space-x-2 mt-2">
                     <Button 
                       variant="ghost" 
