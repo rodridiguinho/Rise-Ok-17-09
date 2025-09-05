@@ -248,7 +248,7 @@ const Suppliers = () => {
         <h2 className="text-2xl font-bold text-gray-900">Gestão de Fornecedores</h2>
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
+            <Button className="bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500 text-white shadow-lg">
               <Plus className="mr-2 h-4 w-4" />
               Novo Fornecedor
             </Button>
