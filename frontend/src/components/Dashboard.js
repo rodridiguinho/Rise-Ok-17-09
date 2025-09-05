@@ -15,7 +15,24 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Start closed on mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -25,8 +42,8 @@ const Dashboard = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-pink-500"></div>
       </div>
     );
   }
@@ -52,19 +69,42 @@ const Dashboard = () => {
     }
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // Close sidebar on mobile after selection
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex relative">
+      {/* Mobile backdrop */}
+      {isMobile && sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
+        isMobile={isMobile}
       />
       
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-        <Header user={user} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+        !isMobile && sidebarOpen ? 'lg:ml-64' : !isMobile ? 'lg:ml-16' : ''
+      }`}>
+        <Header 
+          user={user} 
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          isMobile={isMobile}
+        />
         
-        <main className="p-6">
+        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
           {renderContent()}
         </main>
       </div>
