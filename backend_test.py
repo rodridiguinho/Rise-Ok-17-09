@@ -488,6 +488,7 @@ def run_all_tests():
     test_authentication()
     test_transactions()
     test_reports()
+    test_users_api()  # Added comprehensive user API testing
     test_jwt_validation()
     
     print(f"\n{'='*60}")
