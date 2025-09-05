@@ -5,7 +5,10 @@ import {
   ArrowRightLeft, 
   FileText, 
   Settings,
-  ChevronLeft
+  ChevronLeft,
+  Users,
+  Building2,
+  UserCog
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
