@@ -37,6 +37,12 @@ const Dashboard = () => {
         return <Overview />;
       case 'transactions':
         return <Transactions />;
+      case 'clients':
+        return <Clients />;
+      case 'suppliers':
+        return <Suppliers />;
+      case 'users':
+        return <Users />;
       case 'reports':
         return <Reports />;
       case 'settings':
