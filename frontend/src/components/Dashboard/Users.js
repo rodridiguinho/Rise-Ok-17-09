@@ -29,45 +29,15 @@ import {
   Phone
 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { usersAPI } from '../../services/api';
 
 const Users = () => {
-  const [users, setUsers] = useState([
-    {
-      id: '1',
-      name: 'Rodrigo Silva',
-      email: 'rodrigo@risetravel.com.br',
-      role: 'Administrador',
-      phone: '+55 11 99999-9999',
-      status: 'Ativo',
-      createdAt: '2025-01-01',
-      lastLogin: '2025-01-05 14:30'
-    },
-    {
-      id: '2',
-      name: 'Maria Santos',
-      email: 'maria@agentepro.com',
-      role: 'Vendedor',
-      phone: '+55 11 88888-8888',
-      status: 'Ativo',
-      createdAt: '2025-01-02',
-      lastLogin: '2025-01-05 10:15'
-    },
-    {
-      id: '3',
-      name: 'João Costa',
-      email: 'joao@agentepro.com',
-      role: 'Operador',
-      phone: '+55 11 77777-7777',
-      status: 'Inativo',
-      createdAt: '2025-01-03',
-      lastLogin: '2025-01-04 16:45'
-    }
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const [newUser, setNewUser] = useState({
@@ -79,17 +49,38 @@ const Users = () => {
     status: 'Ativo'
   });
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const usersData = await usersAPI.getUsers();
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao carregar usuários",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.password) {
       toast({
         variant: "destructive",
@@ -99,69 +90,118 @@ const Users = () => {
       return;
     }
 
-    const user = {
-      id: Date.now().toString(),
-      ...newUser,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastLogin: '-'
-    };
-
-    setUsers([...users, user]);
-    setNewUser({
-      name: '',
-      email: '',
-      password: '',
-      role: 'Vendedor',
-      phone: '',
-      status: 'Ativo'
-    });
-    setIsAddModalOpen(false);
-    
-    toast({
-      title: "Usuário adicionado",
-      description: "O usuário foi criado com sucesso.",
-    });
+    try {
+      const createdUser = await usersAPI.createUser(newUser);
+      setUsers([...users, createdUser]);
+      
+      setNewUser({
+        name: '',
+        email: '',
+        password: '',
+        role: 'Vendedor',
+        phone: '',
+        status: 'Ativo'
+      });
+      setIsAddModalOpen(false);
+      
+      toast({
+        title: "Usuário adicionado",
+        description: "O usuário foi criado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      const errorMessage = error.response?.data?.detail || "Erro ao criar usuário";
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: errorMessage,
+      });
+    }
   };
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
-    setNewUser({ ...user });
+    setNewUser({ 
+      name: user.name || '',
+      email: user.email || '',
+      password: '', // Don't prefill password
+      role: user.role || 'Vendedor',
+      phone: user.phone || '',
+      status: user.status || 'Ativo'
+    });
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateUser = () => {
-    setUsers(users.map(user => 
-      user.id === selectedUser.id ? { ...user, ...newUser } : user
-    ));
-    
-    setIsEditModalOpen(false);
-    setSelectedUser(null);
-    setNewUser({
-      name: '',
-      email: '',
-      password: '',
-      role: 'Vendedor',
-      phone: '',
-      status: 'Ativo'
-    });
-    
-    toast({
-      title: "Usuário atualizado",
-      description: "As informações foram atualizadas com sucesso.",
-    });
+  const handleUpdateUser = async () => {
+    if (!newUser.name || !newUser.email) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+      });
+      return;
+    }
+
+    try {
+      const updateData = { ...newUser };
+      // Only include password if it's not empty
+      if (!updateData.password) {
+        delete updateData.password;
+      }
+      
+      const updatedUser = await usersAPI.updateUser(selectedUser.id, updateData);
+      setUsers(users.map(user => 
+        user.id === selectedUser.id ? updatedUser : user
+      ));
+      
+      setIsEditModalOpen(false);
+      setSelectedUser(null);
+      setNewUser({
+        name: '',
+        email: '',
+        password: '',
+        role: 'Vendedor',
+        phone: '',
+        status: 'Ativo'
+      });
+      
+      toast({
+        title: "Usuário atualizado",
+        description: "As informações foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      const errorMessage = error.response?.data?.detail || "Erro ao atualizar usuário";
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: errorMessage,
+      });
+    }
   };
 
-  const handleDeleteUser = (id) => {
-    setUsers(users.filter(user => user.id !== id));
-    toast({
-      title: "Usuário removido",
-      description: "O usuário foi removido com sucesso.",
-    });
+  const handleDeleteUser = async (userId) => {
+    try {
+      await usersAPI.deleteUser(userId);
+      setUsers(users.filter(user => user.id !== userId));
+      toast({
+        title: "Usuário removido",
+        description: "O usuário foi removido com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao remover usuário",
+      });
+    }
   };
 
   const getRoleBadgeColor = (role) => {
     switch (role) {
       case 'Administrador': return 'bg-red-100 text-red-800';
+      case 'Gerente': return 'bg-purple-100 text-purple-800';
       case 'Vendedor': return 'bg-blue-100 text-blue-800';
       case 'Operador': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -171,6 +211,29 @@ const Users = () => {
   const getStatusBadgeColor = (status) => {
     return status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Gestão de Usuários</h2>
+          <div className="animate-pulse h-10 w-32 bg-gray-200 rounded"></div>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="animate-pulse">
+              <div className="h-10 bg-gray-200 rounded mb-4"></div>
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
