@@ -56,12 +56,12 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
     }`}>
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {isOpen && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">R</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">AgentePro</h2>
+              <h2 className="text-lg font-bold text-gray-900">Rise Travel</h2>
               <p className="text-xs text-gray-500">Controle de Caixa</p>
             </div>
           </div>
@@ -87,7 +87,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
               variant={isActive ? "default" : "ghost"}
               className={`w-full justify-start transition-colors ${
                 isActive 
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
+                  ? 'bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700' 
                   : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
               } ${!isOpen ? 'px-2' : ''}`}
               onClick={() => setActiveTab(item.id)}

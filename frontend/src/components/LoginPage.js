@@ -40,15 +40,19 @@ const LoginPage = () => {
       <div className="flex-1 flex items-center justify-center bg-white p-8">
         <div className="w-full max-w-md space-y-6">
           {/* Logo */}
-          <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xl">R</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Rise Travel</h1>
+              <p className="text-xs text-gray-500">Controle de Caixa</p>
             </div>
           </div>
 
           {/* Title */}
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-gray-900">Login</h1>
+            <h2 className="text-2xl font-bold text-gray-900">Login</h2>
             <p className="text-gray-600">Faça login utilizando suas credenciais</p>
           </div>
 
@@ -100,7 +104,7 @@ const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+              className="w-full h-12 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-medium"
               disabled={loading}
             >
               {loading ? "Entrando..." : "Login"}
@@ -110,60 +114,67 @@ const LoginPage = () => {
           <p className="text-center text-sm text-gray-600">
             Não possui conta?{' '}
             <button className="text-blue-600 hover:text-blue-500 underline">
-              Cadastre-se
+              Entre em contato
             </button>
           </p>
         </div>
       </div>
 
       {/* Right side - Branding */}
-      <div className="flex-1 bg-gradient-to-br from-indigo-900 via-blue-800 to-purple-900 flex items-center justify-center p-8 relative overflow-hidden">
+      <div className="flex-1 bg-gradient-to-br from-emerald-600 via-blue-700 to-indigo-800 flex items-center justify-center p-8 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 right-20 w-32 h-32 bg-emerald-400 rounded-full opacity-20"></div>
-          <div className="absolute bottom-32 left-16 w-20 h-20 bg-emerald-400 rounded-full opacity-30"></div>
-          <div className="absolute top-1/2 right-32 w-16 h-16 bg-blue-400 rounded-full opacity-25"></div>
+          <div className="absolute top-20 right-20 w-32 h-32 bg-white/10 rounded-full"></div>
+          <div className="absolute bottom-32 left-16 w-20 h-20 bg-white/15 rounded-full"></div>
+          <div className="absolute top-1/2 right-32 w-16 h-16 bg-white/10 rounded-full"></div>
+          <div className="absolute top-40 left-1/3 w-12 h-12 bg-white/5 rounded-full"></div>
         </div>
 
         <div className="relative z-10 text-center text-white">
-          <h1 className="text-5xl font-bold mb-4">agentepro</h1>
-          <p className="text-xl mb-8 opacity-90">SISTEMA PARA AGÊNCIAS DE TURISMO</p>
+          <div className="mb-8">
+            <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-4xl font-bold">R</span>
+            </div>
+            <h1 className="text-5xl font-bold mb-2">Rise Travel</h1>
+            <p className="text-xl opacity-90">SISTEMA DE CONTROLE DE CAIXA</p>
+          </div>
           
-          {/* Airplane illustration */}
-          <div className="relative mx-auto w-96 h-64 mb-8">
-            <svg viewBox="0 0 400 300" className="w-full h-full">
-              {/* Airplane */}
+          {/* Travel icons */}
+          <div className="relative mx-auto w-96 h-48 mb-8">
+            {/* Airplane */}
+            <svg viewBox="0 0 400 200" className="w-full h-full">
               <path
-                d="M100 150 L180 130 L280 140 L320 145 L340 150 L320 155 L280 160 L180 170 L100 150 Z"
-                fill="#60A5FA"
-                className="opacity-90"
+                d="M80 100 L140 85 L220 95 L260 100 L290 102 L260 104 L220 105 L140 115 L80 100 Z"
+                fill="rgba(255,255,255,0.3)"
+                className="animate-pulse"
               />
               <path
-                d="M180 130 L200 120 L220 125 L180 140 Z"
-                fill="#3B82F6"
-                className="opacity-80"
+                d="M140 85 L155 75 L170 80 L140 95 Z"
+                fill="rgba(255,255,255,0.4)"
               />
               <path
-                d="M180 170 L200 180 L220 175 L180 160 Z"
-                fill="#3B82F6"
-                className="opacity-80"
+                d="M140 115 L155 125 L170 120 L140 105 Z"
+                fill="rgba(255,255,255,0.4)"
               />
               {/* Trail */}
               <path
-                d="M80 150 L100 148 L100 152 L80 150 Z"
-                fill="#34D399"
-                className="opacity-60"
+                d="M60 100 L80 98 L80 102 L60 100 Z"
+                fill="rgba(255,255,255,0.6)"
               />
             </svg>
             
             {/* Location pins */}
-            <div className="absolute top-16 right-8 w-8 h-8 bg-emerald-400 rounded-full flex items-center justify-center">
-              <div className="w-4 h-4 bg-emerald-600 rounded-full"></div>
+            <div className="absolute top-8 right-16 w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-full"></div>
             </div>
-            <div className="absolute bottom-16 left-12 w-8 h-8 bg-emerald-400 rounded-full flex items-center justify-center">
-              <div className="w-4 h-4 bg-emerald-600 rounded-full"></div>
+            <div className="absolute bottom-8 left-20 w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-full"></div>
             </div>
           </div>
+
+          <p className="text-lg opacity-80">
+            Controle financeiro completo para sua agência de viagens
+          </p>
         </div>
       </div>
     </div>
