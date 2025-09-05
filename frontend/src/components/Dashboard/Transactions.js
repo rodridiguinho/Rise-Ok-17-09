@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '../ui/select';
 import { Badge } from '../ui/badge';
-import { mockTransactions, mockCategories, mockPaymentMethods } from '../../data/mockData';
+import { transactionsAPI } from '../../services/api';
 import { 
   Plus, 
   Search, 
@@ -31,10 +31,13 @@ import {
 import { useToast } from '../../hooks/use-toast';
 
 const Transactions = () => {
-  const [transactions, setTransactions] = useState(mockTransactions);
+  const [transactions, setTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const [newTransaction, setNewTransaction] = useState({
@@ -58,6 +61,37 @@ const Transactions = () => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Buscar transações, categorias e métodos de pagamento
+      const [transactionsData, categoriesData, paymentMethodsData] = await Promise.all([
+        transactionsAPI.getTransactions(),
+        transactionsAPI.getCategories(),
+        transactionsAPI.getPaymentMethods()
+      ]);
+      
+      setTransactions(transactionsData);
+      setCategories(categoriesData.categories);
+      setPaymentMethods(paymentMethodsData.paymentMethods);
+      
+    } catch (error) {
+      console.error('Error fetching transactions data:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao carregar dados das transações",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -65,7 +99,7 @@ const Transactions = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const handleAddTransaction = () => {
+  const handleAddTransaction = async () => {
     if (!newTransaction.category || !newTransaction.description || !newTransaction.amount) {
       toast({
         variant: "destructive",
@@ -75,40 +109,87 @@ const Transactions = () => {
       return;
     }
 
-    const transaction = {
-      id: Date.now(),
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      ...newTransaction,
-      amount: parseFloat(newTransaction.amount),
-      status: 'Confirmado'
-    };
-
-    setTransactions([transaction, ...transactions]);
-    setNewTransaction({
-      type: 'entrada',
-      category: '',
-      description: '',
-      amount: '',
-      paymentMethod: '',
-      client: '',
-      supplier: ''
-    });
-    setIsAddModalOpen(false);
-    
-    toast({
-      title: "Transação adicionada",
-      description: "A transação foi adicionada com sucesso.",
-    });
+    try {
+      const transactionData = {
+        ...newTransaction,
+        amount: parseFloat(newTransaction.amount)
+      };
+      
+      const createdTransaction = await transactionsAPI.createTransaction(transactionData);
+      
+      // Adicionar a nova transação à lista
+      setTransactions([createdTransaction, ...transactions]);
+      
+      // Resetar formulário
+      setNewTransaction({
+        type: 'entrada',
+        category: '',
+        description: '',
+        amount: '',
+        paymentMethod: '',
+        client: '',
+        supplier: ''
+      });
+      
+      setIsAddModalOpen(false);
+      
+      toast({
+        title: "Transação adicionada",
+        description: "A transação foi adicionada com sucesso.",
+      });
+      
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao criar transação",
+      });
+    }
   };
 
-  const handleDeleteTransaction = (id) => {
-    setTransactions(transactions.filter(t => t.id !== id));
-    toast({
-      title: "Transação removida",
-      description: "A transação foi removida com sucesso.",
-    });
+  const handleDeleteTransaction = async (id) => {
+    try {
+      await transactionsAPI.deleteTransaction(id);
+      setTransactions(transactions.filter(t => t.id !== id));
+      
+      toast({
+        title: "Transação removida",
+        description: "A transação foi removida com sucesso.",
+      });
+      
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao remover transação",
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Transações</h2>
+          <div className="animate-pulse h-10 w-32 bg-gray-200 rounded"></div>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="animate-pulse">
+              <div className="h-10 bg-gray-200 rounded mb-4"></div>
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -147,7 +228,7 @@ const Transactions = () => {
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockCategories.map(category => (
+                    {categories.map(category => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
                   </SelectContent>
@@ -181,7 +262,7 @@ const Transactions = () => {
                     <SelectValue placeholder="Selecione a forma de pagamento" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockPaymentMethods.map(method => (
+                    {paymentMethods.map(method => (
                       <SelectItem key={method} value={method}>{method}</SelectItem>
                     ))}
                   </SelectContent>
@@ -312,6 +393,13 @@ const Transactions = () => {
                 </div>
               </div>
             ))}
+            
+            {filteredTransactions.length === 0 && (
+              <div className="text-center text-gray-500 py-8">
+                <Search className="mx-auto h-12 w-12 text-gray-300 mb-2" />
+                <p>Nenhuma transação encontrada</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

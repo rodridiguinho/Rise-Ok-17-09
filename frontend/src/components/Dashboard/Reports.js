@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { mockTransactions, mockSummary } from '../../data/mockData';
+import { reportsAPI, transactionsAPI } from '../../services/api';
 import { 
   FileText, 
   Download, 
@@ -26,6 +26,13 @@ const Reports = () => {
   const [dateFrom, setDateFrom] = useState('2025-01-01');
   const [dateTo, setDateTo] = useState('2025-01-05');
   const [reportType, setReportType] = useState('summary');
+  const [summary, setSummary] = useState({
+    totalEntradas: 0,
+    totalSaidas: 0,
+    resultadoLiquido: 0
+  });
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const formatCurrency = (value) => {
@@ -35,49 +42,136 @@ const Reports = () => {
     }).format(value);
   };
 
-  const handleExportPDF = () => {
-    toast({
-      title: "Exportando PDF",
-      description: "O relatório está sendo gerado e será baixado em breve.",
-    });
-    // Mock PDF export
-    setTimeout(() => {
-      toast({
-        title: "PDF exportado com sucesso",
-        description: "O arquivo foi salvo na pasta Downloads.",
+  useEffect(() => {
+    fetchReportsData();
+  }, []);
+
+  const fetchReportsData = async () => {
+    try {
+      setLoading(true);
+      
+      const [summaryData, transactionsData] = await Promise.all([
+        transactionsAPI.getSummary(),
+        transactionsAPI.getTransactions({ limit: 8 })
+      ]);
+      
+      setSummary({
+        totalEntradas: summaryData.totalEntradas,
+        totalSaidas: summaryData.totalSaidas,
+        resultadoLiquido: summaryData.saldoAtual
       });
-    }, 2000);
+      
+      setTransactions(transactionsData);
+      
+    } catch (error) {
+      console.error('Error fetching reports data:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao carregar dados dos relatórios",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleExportExcel = () => {
-    toast({
-      title: "Exportando Excel",
-      description: "A planilha está sendo gerada e será baixada em breve.",
-    });
-    // Mock Excel export
-    setTimeout(() => {
+  const handleExportPDF = async () => {
+    try {
+      toast({
+        title: "Exportando PDF",
+        description: "O relatório está sendo gerado e será baixado em breve.",
+      });
+      
+      await reportsAPI.exportPDF({
+        start_date: dateFrom,
+        end_date: dateTo
+      });
+      
+      toast({
+        title: "PDF exportado com sucesso",
+        description: "O arquivo foi gerado com sucesso.",
+      });
+      
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        variant: "destructive", 
+        title: "Erro",
+        description: "Erro ao exportar PDF",
+      });
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      toast({
+        title: "Exportando Excel",
+        description: "A planilha está sendo gerada e será baixada em breve.",
+      });
+      
+      await reportsAPI.exportExcel({
+        start_date: dateFrom,
+        end_date: dateTo
+      });
+      
       toast({
         title: "Excel exportado com sucesso",
-        description: "O arquivo foi salvo na pasta Downloads.",
+        description: "O arquivo foi gerado com sucesso.",
       });
-    }, 2000);
+      
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro", 
+        description: "Erro ao exportar Excel",
+      });
+    }
   };
 
   const getCategoryData = () => {
     const categoryTotals = {};
-    mockTransactions.forEach(transaction => {
+    transactions.forEach(transaction => {
       if (transaction.type === 'entrada') {
         categoryTotals[transaction.category] = (categoryTotals[transaction.category] || 0) + transaction.amount;
       }
     });
+    
+    const total = Object.values(categoryTotals).reduce((sum, amount) => sum + amount, 0);
+    
     return Object.entries(categoryTotals).map(([category, amount]) => ({
       category,
       amount,
-      percentage: ((amount / mockSummary.totalEntradas) * 100).toFixed(1)
+      percentage: total > 0 ? ((amount / total) * 100).toFixed(1) : 0
     }));
   };
 
   const categoryData = getCategoryData();
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Relatórios</h2>
+          <div className="animate-pulse flex space-x-2">
+            <div className="h-10 w-32 bg-gray-200 rounded"></div>
+            <div className="h-10 w-32 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="animate-pulse">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-10 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -145,7 +239,7 @@ const Reports = () => {
               </Select>
             </div>
             <div className="flex items-end">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={fetchReportsData}>
                 Gerar Relatório
               </Button>
             </div>
@@ -164,7 +258,7 @@ const Reports = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600">
-              {formatCurrency(mockSummary.totalEntradas)}
+              {formatCurrency(summary.totalEntradas)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
               Período: {dateFrom} a {dateTo}
@@ -181,7 +275,7 @@ const Reports = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {formatCurrency(mockSummary.totalSaidas)}
+              {formatCurrency(summary.totalSaidas)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
               Período: {dateFrom} a {dateTo}
@@ -198,7 +292,7 @@ const Reports = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {formatCurrency(mockSummary.saldoAtual)}
+              {formatCurrency(summary.resultadoLiquido)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
               Lucro do período
@@ -243,12 +337,19 @@ const Reports = () => {
                         index % 6 === 3 ? 'bg-orange-500' :
                         index % 6 === 4 ? 'bg-pink-500' : 'bg-indigo-500'
                       }`}
-                      style={{ width: `${item.percentage}%` }}
+                      style={{ width: `${Math.min(item.percentage, 100)}%` }}
                     ></div>
                   </div>
                 </div>
               </div>
             ))}
+            
+            {categoryData.length === 0 && (
+              <div className="text-center text-gray-500 py-8">
+                <PieChart className="mx-auto h-12 w-12 text-gray-300 mb-2" />
+                <p>Nenhuma categoria encontrada</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -260,7 +361,7 @@ const Reports = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {mockTransactions.slice(0, 8).map((transaction) => (
+            {transactions.map((transaction) => (
               <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -291,6 +392,13 @@ const Reports = () => {
                 </div>
               </div>
             ))}
+            
+            {transactions.length === 0 && (
+              <div className="text-center text-gray-500 py-8">
+                <Calendar className="mx-auto h-12 w-12 text-gray-300 mb-2" />
+                <p>Nenhuma transação encontrada</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
