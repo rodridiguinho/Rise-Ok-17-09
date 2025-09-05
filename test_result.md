@@ -329,11 +329,15 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All backend API endpoints tested"
-  stuck_tasks: []
+    - "User APIs comprehensive testing completed"
+    - "All CRUD operations for users verified"
+  stuck_tasks:
+    - "Excel Export API - route files not included in main server"
   test_all: true
   test_priority: "high_first"
 
 agent_communication:
     - agent: "testing"
       message: "Completed comprehensive backend API testing. All core functionality working correctly. Two endpoints not implemented: GET /api/health and DELETE /api/transactions/{id}. All other endpoints pass validation including authentication, transactions, and reports."
+    - agent: "testing"
+      message: "COMPREHENSIVE USER API TESTING COMPLETED - ALL TESTS PASSED: ✅ GET /api/users - Successfully retrieves all users with proper JSON serialization ✅ POST /api/users - Creates users correctly, all data persisted to MongoDB ✅ PUT /api/users/{id} - Updates users correctly, changes persisted to database ✅ DELETE /api/users/{id} - Deletes users correctly, removal persisted to database ✅ Security validations working (password hashing, duplicate email prevention) ✅ Database persistence verified for all operations. The user reported issues with 'not saving new users' and 'not saving deletions' are NOT present in the backend - all CRUD operations work perfectly and persist data correctly to MongoDB."
