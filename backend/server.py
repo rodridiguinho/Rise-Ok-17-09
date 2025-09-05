@@ -301,7 +301,14 @@ async def create_user(user_data: dict):
         
         # Get created user (without password)
         created_user = await db.users.find_one({"_id": result.inserted_id}, {"password": 0})
-        created_user["id"] = str(created_user["_id"])
+        if created_user:
+            created_user["id"] = str(created_user["_id"])
+            created_user["_id"] = str(created_user["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in created_user:
+                created_user["createdAt"] = created_user["createdAt"].isoformat()
+            if "updatedAt" in created_user:
+                created_user["updatedAt"] = created_user["updatedAt"].isoformat()
         
         return created_user
     except HTTPException:
