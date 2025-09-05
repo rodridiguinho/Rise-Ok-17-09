@@ -239,7 +239,7 @@ const Reports = () => {
               </Select>
             </div>
             <div className="flex items-end">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={fetchReportsData}>
+              <Button className="w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500 text-white shadow-lg" onClick={fetchReportsData}>
                 Gerar Relatório
               </Button>
             </div>
