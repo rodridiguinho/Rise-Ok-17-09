@@ -181,25 +181,15 @@ const Users = () => {
   };
 
   const handleDeleteUser = async (userId) => {
-    console.log('=== DELETE USER DEBUG ===');
-    console.log('Attempting to delete user with ID:', userId);
-    console.log('User ID type:', typeof userId);
-    
     try {
-      console.log('Making DELETE API call...');
-      const result = await usersAPI.deleteUser(userId);
-      console.log('DELETE API response:', result);
-      
+      await usersAPI.deleteUser(userId);
       setUsers(users.filter(user => user.id !== userId));
-      console.log('Updated local state, user should be removed from list');
-      
       toast({
         title: "Usuário removido",
         description: "O usuário foi removido com sucesso.",
       });
     } catch (error) {
       console.error('Error deleting user:', error);
-      console.error('Error details:', error.response?.data);
       toast({
         variant: "destructive",
         title: "Erro",
