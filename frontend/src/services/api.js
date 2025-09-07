@@ -156,6 +156,29 @@ export const usersAPI = {
   }
 };
 
+// Clients API
+export const clientsAPI = {
+  getClients: async () => {
+    const response = await api.get('/clients');
+    return response.data;
+  },
+  
+  createClient: async (clientData) => {
+    const response = await api.post('/clients', clientData);
+    return response.data;
+  },
+  
+  updateClient: async (clientId, clientData) => {
+    const response = await api.put(`/clients/${clientId}`, clientData);
+    return response.data;
+  },
+  
+  deleteClient: async (clientId) => {
+    const response = await api.delete(`/clients/${clientId}`);
+    return response.data;
+  }
+};
+
 // Analytics API
 export const analyticsAPI = {
   getSalesAnalytics: async () => {
