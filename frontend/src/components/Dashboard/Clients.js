@@ -27,47 +27,7 @@ import { useToast } from '../../hooks/use-toast';
 import { clientsAPI } from '../../services/api';
 
 const Clients = () => {
-  const [clients, setClients] = useState([
-    {
-      id: '1',
-      clientNumber: 'CLI001',
-      name: 'João Silva',
-      email: 'joao.silva@email.com',
-      phone: '+55 11 99999-1111',
-      cpf: '123.456.789-00',
-      address: 'Rua das Flores, 123 - São Paulo, SP',
-      totalPurchases: 15500.00,
-      lastPurchase: '2025-01-05',
-      status: 'Ativo',
-      createdAt: '2024-01-15'
-    },
-    {
-      id: '2',
-      clientNumber: 'CLI002',
-      name: 'Maria Santos',
-      email: 'maria.santos@email.com',
-      phone: '+55 11 88888-2222',
-      cpf: '987.654.321-00',
-      address: 'Av. Paulista, 456 - São Paulo, SP',
-      totalPurchases: 8750.00,
-      lastPurchase: '2025-01-03',
-      status: 'Ativo',
-      createdAt: '2024-02-20'
-    },
-    {
-      id: '3',
-      clientNumber: 'CLI003',
-      name: 'Carlos Oliveira',
-      email: 'carlos.oliveira@email.com',
-      phone: '+55 11 77777-3333',
-      cpf: '456.789.123-00',
-      address: 'Rua Augusta, 789 - São Paulo, SP',
-      totalPurchases: 12300.00,
-      lastPurchase: '2024-12-28',
-      status: 'Inativo',
-      createdAt: '2024-03-10'
-    }
-  ]);
+  const [clients, setClients] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
