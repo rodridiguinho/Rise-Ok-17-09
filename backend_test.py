@@ -230,16 +230,84 @@ def test_transactions():
         print_result(False, "DELETE /api/transactions/{id} - Request failed", "Endpoint not implemented")
 
 def test_reports():
-    """Test report endpoints"""
-    print_test_header("Reports")
+    """Test report endpoints with comprehensive export functionality testing"""
+    print_test_header("Reports - PDF and Excel Export Testing")
     
-    # Test 1: POST /api/reports/export/pdf
+    # Sample report data as specified in the review request
+    sample_report_data = {
+        "startDate": "2025-09-01",
+        "endDate": "2025-09-07", 
+        "transactions": [
+            {
+                "type": "entrada",
+                "category": "Pacote Turístico",
+                "description": "Pacote Europa",
+                "amount": 5000.00,
+                "paymentMethod": "PIX",
+                "date": "2025-09-05",
+                "time": "10:30",
+                "client": "João Silva"
+            },
+            {
+                "type": "saida",
+                "category": "Fornecedor", 
+                "description": "Hotel Payment",
+                "amount": 1200.00,
+                "paymentMethod": "Transferência",
+                "date": "2025-09-06",
+                "time": "14:15",
+                "supplier": "Hotel Ibis"
+            }
+        ]
+    }
+    
+    # Test 1: POST /api/reports/export/pdf with sample data
     try:
-        response = requests.post(f"{API_URL}/reports/export/pdf", timeout=10)
+        response = requests.post(f"{API_URL}/reports/export/pdf", json=sample_report_data, timeout=30)
         if response.status_code == 200:
             data = response.json()
             if data.get("success"):
-                print_result(True, "POST /api/reports/export/pdf - PDF export initiated", data.get("message"))
+                print_result(True, "POST /api/reports/export/pdf - PDF export with sample data", 
+                           f"Message: {data.get('message')}")
+                
+                # Validate response structure
+                required_fields = ["success", "message", "filename", "downloadUrl", "contentType"]
+                missing_fields = [f for f in required_fields if f not in data]
+                
+                if not missing_fields:
+                    print_result(True, "POST /api/reports/export/pdf - Response structure validation", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Validate filename format (should include timestamp)
+                    filename = data.get("filename", "")
+                    if filename.startswith("relatorio_caixa_") and filename.endswith(".pdf"):
+                        print_result(True, "POST /api/reports/export/pdf - Filename format validation", 
+                                   f"Filename correctly formatted: {filename}")
+                    else:
+                        print_result(False, "POST /api/reports/export/pdf - Filename format validation", 
+                                   f"Invalid filename format: {filename}")
+                    
+                    # Validate content type
+                    content_type = data.get("contentType", "")
+                    if content_type == "application/pdf":
+                        print_result(True, "POST /api/reports/export/pdf - Content type validation", 
+                                   f"Correct content type: {content_type}")
+                    else:
+                        print_result(False, "POST /api/reports/export/pdf - Content type validation", 
+                                   f"Expected: application/pdf, Got: {content_type}")
+                    
+                    # Validate download URL format
+                    download_url = data.get("downloadUrl", "")
+                    if download_url.startswith("/api/reports/download/") and filename in download_url:
+                        print_result(True, "POST /api/reports/export/pdf - Download URL validation", 
+                                   f"Download URL correctly formatted: {download_url}")
+                    else:
+                        print_result(False, "POST /api/reports/export/pdf - Download URL validation", 
+                                   f"Invalid download URL format: {download_url}")
+                        
+                else:
+                    print_result(False, "POST /api/reports/export/pdf - Response structure validation", 
+                               f"Missing required fields: {missing_fields}")
             else:
                 print_result(False, "POST /api/reports/export/pdf - Export failed", data)
         else:
@@ -247,19 +315,115 @@ def test_reports():
     except Exception as e:
         print_result(False, "POST /api/reports/export/pdf - Request failed", str(e))
     
-    # Test 2: POST /api/reports/export/excel
+    # Test 2: POST /api/reports/export/excel with sample data
     try:
-        response = requests.post(f"{API_URL}/reports/export/excel", timeout=10)
+        response = requests.post(f"{API_URL}/reports/export/excel", json=sample_report_data, timeout=30)
         if response.status_code == 200:
             data = response.json()
             if data.get("success"):
-                print_result(True, "POST /api/reports/export/excel - Excel export initiated", data.get("message"))
+                print_result(True, "POST /api/reports/export/excel - Excel export with sample data", 
+                           f"Message: {data.get('message')}")
+                
+                # Validate response structure
+                required_fields = ["success", "message", "filename", "downloadUrl", "contentType"]
+                missing_fields = [f for f in required_fields if f not in data]
+                
+                if not missing_fields:
+                    print_result(True, "POST /api/reports/export/excel - Response structure validation", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Validate filename format (should include timestamp)
+                    filename = data.get("filename", "")
+                    if filename.startswith("relatorio_caixa_") and filename.endswith(".xlsx"):
+                        print_result(True, "POST /api/reports/export/excel - Filename format validation", 
+                                   f"Filename correctly formatted: {filename}")
+                    else:
+                        print_result(False, "POST /api/reports/export/excel - Filename format validation", 
+                                   f"Invalid filename format: {filename}")
+                    
+                    # Validate content type
+                    content_type = data.get("contentType", "")
+                    expected_content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    if content_type == expected_content_type:
+                        print_result(True, "POST /api/reports/export/excel - Content type validation", 
+                                   f"Correct content type: {content_type}")
+                    else:
+                        print_result(False, "POST /api/reports/export/excel - Content type validation", 
+                                   f"Expected: {expected_content_type}, Got: {content_type}")
+                    
+                    # Validate download URL format
+                    download_url = data.get("downloadUrl", "")
+                    if download_url.startswith("/api/reports/download/") and filename in download_url:
+                        print_result(True, "POST /api/reports/export/excel - Download URL validation", 
+                                   f"Download URL correctly formatted: {download_url}")
+                    else:
+                        print_result(False, "POST /api/reports/export/excel - Download URL validation", 
+                                   f"Invalid download URL format: {download_url}")
+                        
+                else:
+                    print_result(False, "POST /api/reports/export/excel - Response structure validation", 
+                               f"Missing required fields: {missing_fields}")
             else:
                 print_result(False, "POST /api/reports/export/excel - Export failed", data)
         else:
             print_result(False, f"POST /api/reports/export/excel - HTTP {response.status_code}", response.text)
     except Exception as e:
         print_result(False, "POST /api/reports/export/excel - Request failed", str(e))
+    
+    # Test 3: Error handling - Empty data
+    try:
+        empty_data = {"startDate": "2025-09-01", "endDate": "2025-09-07", "transactions": []}
+        response = requests.post(f"{API_URL}/reports/export/pdf", json=empty_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success"):
+                print_result(True, "POST /api/reports/export/pdf - Empty data handling", 
+                           "Successfully handled empty transaction data")
+            else:
+                print_result(False, "POST /api/reports/export/pdf - Empty data handling", 
+                           f"Failed to handle empty data: {data}")
+        else:
+            print_result(False, f"POST /api/reports/export/pdf - Empty data handling - HTTP {response.status_code}", 
+                        response.text)
+    except Exception as e:
+        print_result(False, "POST /api/reports/export/pdf - Empty data handling failed", str(e))
+    
+    # Test 4: Error handling - Malformed data
+    try:
+        malformed_data = {"invalid": "data", "structure": True}
+        response = requests.post(f"{API_URL}/reports/export/excel", json=malformed_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success"):
+                print_result(True, "POST /api/reports/export/excel - Malformed data handling", 
+                           "Successfully handled malformed data gracefully")
+            else:
+                print_result(False, "POST /api/reports/export/excel - Malformed data handling", 
+                           f"Failed gracefully: {data}")
+        elif response.status_code >= 400 and response.status_code < 500:
+            print_result(True, "POST /api/reports/export/excel - Malformed data handling", 
+                       f"Correctly rejected malformed data with HTTP {response.status_code}")
+        else:
+            print_result(False, f"POST /api/reports/export/excel - Malformed data handling - HTTP {response.status_code}", 
+                        response.text)
+    except Exception as e:
+        print_result(False, "POST /api/reports/export/excel - Malformed data handling failed", str(e))
+    
+    # Test 5: Test without authentication (if required)
+    try:
+        # Test PDF export without any authentication headers
+        response = requests.post(f"{API_URL}/reports/export/pdf", json=sample_report_data, timeout=10)
+        if response.status_code == 200:
+            print_result(True, "POST /api/reports/export/pdf - No authentication required", 
+                       "PDF export works without authentication")
+        elif response.status_code == 401:
+            print_result(True, "POST /api/reports/export/pdf - Authentication required", 
+                       "PDF export correctly requires authentication")
+        else:
+            print_result(False, f"POST /api/reports/export/pdf - Unexpected response - HTTP {response.status_code}", 
+                        response.text)
+    except Exception as e:
+        print_result(False, "POST /api/reports/export/pdf - Authentication test failed", str(e))
 
 def test_users_api():
     """Test user management endpoints - COMPREHENSIVE CRUD TESTING"""
