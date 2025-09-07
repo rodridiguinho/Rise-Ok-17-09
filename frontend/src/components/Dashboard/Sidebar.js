@@ -9,7 +9,9 @@ import {
   Users,
   Building2,
   UserCog,
-  X
+  X,
+  BarChart3,
+  TrendingUp
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
