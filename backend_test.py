@@ -1133,6 +1133,249 @@ def test_analytics_integration():
         print_result(False, "Integration test - Overall endpoint accessibility", 
                    f"Only {successful_endpoints}/{total_endpoints} endpoints accessible ({success_rate:.1f}%)")
 
+def test_client_api():
+    """Test client management endpoints - CRITICAL USER REPORTED PERSISTENCE BUG TESTING"""
+    print_test_header("Client Management APIs - CRITICAL PERSISTENCE BUG INVESTIGATION")
+    
+    created_client_id = None
+    initial_client_count = 0
+    
+    # Test 1: GET /api/clients - List all clients (initial state)
+    try:
+        response = requests.get(f"{API_URL}/clients", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                initial_client_count = len(data)
+                print_result(True, "GET /api/clients - Initial clients list retrieved successfully", 
+                           f"Found {initial_client_count} existing clients in database")
+                
+                # Check if clients have proper structure
+                if len(data) > 0:
+                    client = data[0]
+                    required_fields = ["id", "name", "clientNumber"]
+                    missing_fields = [f for f in required_fields if f not in client]
+                    if not missing_fields:
+                        print_result(True, "GET /api/clients - Client structure validation", 
+                                   f"All required fields present: {required_fields}")
+                    else:
+                        print_result(False, "GET /api/clients - Missing required fields", 
+                                   f"Missing: {missing_fields}")
+            else:
+                print_result(False, "GET /api/clients - Invalid response format", 
+                           "Expected array of clients")
+        else:
+            print_result(False, f"GET /api/clients - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/clients - Request failed", str(e))
+    
+    # Test 2: POST /api/clients - Create new client with EXACT test data from review request
+    try:
+        # Using the exact test data provided in the review request
+        new_client_data = {
+            "name": "Cliente Teste Backend",
+            "email": "teste.backend@test.com",
+            "phone": "11999999999",
+            "document": "123.456.789-00",
+            "address": "Rua Teste Backend, 123",
+            "city": "São Paulo",
+            "state": "SP",
+            "zipCode": "01234-567",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/clients", json=new_client_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data and data.get("email") == new_client_data["email"]:
+                created_client_id = data["id"]
+                print_result(True, "POST /api/clients - Client created successfully", 
+                           f"ID: {created_client_id}, Name: {data.get('name')}, Email: {data.get('email')}")
+                
+                # Verify client number is auto-generated
+                if "clientNumber" in data and data["clientNumber"]:
+                    client_number = data["clientNumber"]
+                    if client_number.startswith("CLI") and len(client_number) >= 6:
+                        print_result(True, "POST /api/clients - Client number generation", 
+                                   f"Client number auto-generated: {client_number}")
+                    else:
+                        print_result(False, "POST /api/clients - Client number generation", 
+                                   f"Invalid client number format: {client_number}")
+                else:
+                    print_result(False, "POST /api/clients - Client number generation", 
+                               "Client number not generated or missing")
+                
+                # Verify all fields are properly saved
+                expected_fields = ["name", "email", "phone", "document", "address", "city", "state", "zipCode", "status"]
+                for field in expected_fields:
+                    if field in data and data[field] == new_client_data[field]:
+                        print_result(True, f"POST /api/clients - Field validation ({field})", 
+                                   f"Correctly saved: {data[field]}")
+                    else:
+                        print_result(False, f"POST /api/clients - Field validation ({field})", 
+                                   f"Expected: {new_client_data[field]}, Got: {data.get(field)}")
+            else:
+                print_result(False, "POST /api/clients - Invalid response format", data)
+        else:
+            print_result(False, f"POST /api/clients - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/clients - Request failed", str(e))
+    
+    # Test 3: CRITICAL - Verify persistence by calling GET /api/clients again
+    try:
+        response = requests.get(f"{API_URL}/clients", timeout=10)
+        if response.status_code == 200:
+            clients = response.json()
+            current_client_count = len(clients)
+            
+            # Check if client count increased
+            if current_client_count == initial_client_count + 1:
+                print_result(True, "GET /api/clients - Persistence verification (count)", 
+                           f"Client count increased from {initial_client_count} to {current_client_count}")
+            else:
+                print_result(False, "GET /api/clients - Persistence verification (count)", 
+                           f"Expected count: {initial_client_count + 1}, Got: {current_client_count}")
+            
+            # Check if created client exists in the list
+            if created_client_id:
+                client_found = any(client.get("id") == created_client_id for client in clients)
+                if client_found:
+                    print_result(True, "GET /api/clients - Persistence verification (client exists)", 
+                               f"Client {created_client_id} found in database after creation")
+                    
+                    # Find the specific client and verify data integrity
+                    created_client = next((client for client in clients if client.get("id") == created_client_id), None)
+                    if created_client:
+                        if (created_client.get("name") == "Cliente Teste Backend" and 
+                            created_client.get("email") == "teste.backend@test.com"):
+                            print_result(True, "GET /api/clients - Data integrity verification", 
+                                       f"Client data persisted correctly: {created_client.get('name')}")
+                        else:
+                            print_result(False, "GET /api/clients - Data integrity verification", 
+                                       f"Client data corrupted or modified")
+                else:
+                    print_result(False, "GET /api/clients - Persistence verification (client exists)", 
+                               f"Client {created_client_id} NOT found in database - PERSISTENCE BUG CONFIRMED!")
+        else:
+            print_result(False, "GET /api/clients - Persistence verification failed", 
+                       f"Could not retrieve clients list: HTTP {response.status_code}")
+    except Exception as e:
+        print_result(False, "GET /api/clients - Persistence verification failed", str(e))
+    
+    # Test 4: Test email validation - Try creating another client with same email
+    try:
+        duplicate_client_data = {
+            "name": "Cliente Duplicado",
+            "email": "teste.backend@test.com",  # Same email as before
+            "phone": "11888888888",
+            "document": "987.654.321-00",
+            "address": "Rua Duplicada, 456",
+            "city": "Rio de Janeiro",
+            "state": "RJ",
+            "zipCode": "20000-000",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/clients", json=duplicate_client_data, timeout=10)
+        if response.status_code == 400:
+            print_result(True, "POST /api/clients - Email validation (duplicate prevention)", 
+                       "Correctly rejected duplicate email with 400 status")
+        else:
+            print_result(False, f"POST /api/clients - Email validation (duplicate prevention)", 
+                       f"Expected 400, got {response.status_code} - Duplicate email not prevented!")
+    except Exception as e:
+        print_result(False, "POST /api/clients - Email validation test failed", str(e))
+    
+    # Test 5: Test client number generation with multiple clients
+    try:
+        # Create another client to test sequential client number generation
+        another_client_data = {
+            "name": "Cliente Sequencial",
+            "email": "sequencial@test.com",
+            "phone": "11777777777",
+            "document": "111.222.333-44",
+            "address": "Rua Sequencial, 789",
+            "city": "Brasília",
+            "state": "DF",
+            "zipCode": "70000-000",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/clients", json=another_client_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "clientNumber" in data:
+                client_number = data["clientNumber"]
+                print_result(True, "POST /api/clients - Sequential client number generation", 
+                           f"New client number generated: {client_number}")
+                
+                # Store this client ID for deletion test
+                second_client_id = data.get("id")
+            else:
+                print_result(False, "POST /api/clients - Sequential client number generation", 
+                           "Client number not generated for second client")
+        else:
+            print_result(False, f"POST /api/clients - Sequential client number generation - HTTP {response.status_code}", 
+                       response.text)
+    except Exception as e:
+        print_result(False, "POST /api/clients - Sequential client number generation failed", str(e))
+    
+    # Test 6: DELETE /api/clients/{id} - Test deletion functionality
+    if created_client_id:
+        try:
+            response = requests.delete(f"{API_URL}/clients/{created_client_id}", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    print_result(True, "DELETE /api/clients/{id} - Client deleted successfully", 
+                               f"Message: {data.get('message')}")
+                else:
+                    print_result(False, "DELETE /api/clients/{id} - Delete failed", data)
+            else:
+                print_result(False, f"DELETE /api/clients/{id} - HTTP {response.status_code}", response.text)
+        except Exception as e:
+            print_result(False, "DELETE /api/clients/{id} - Request failed", str(e))
+    
+    # Test 7: Verify deletion was persisted to database
+    if created_client_id:
+        try:
+            response = requests.get(f"{API_URL}/clients", timeout=10)
+            if response.status_code == 200:
+                clients = response.json()
+                client_found = any(client.get("id") == created_client_id for client in clients)
+                if not client_found:
+                    print_result(True, "DELETE /api/clients/{id} - Deletion persistence check", 
+                               f"Client {created_client_id} successfully removed from database")
+                else:
+                    print_result(False, "DELETE /api/clients/{id} - Deletion persistence check", 
+                               f"Client {created_client_id} still exists in database after deletion - PERSISTENCE BUG!")
+            else:
+                print_result(False, "DELETE /api/clients/{id} - Deletion persistence check failed", 
+                           f"Could not retrieve clients list: HTTP {response.status_code}")
+        except Exception as e:
+            print_result(False, "DELETE /api/clients/{id} - Deletion persistence check failed", str(e))
+    
+    # Test 8: Final client count verification
+    try:
+        response = requests.get(f"{API_URL}/clients", timeout=10)
+        if response.status_code == 200:
+            final_clients = response.json()
+            final_count = len(final_clients)
+            
+            # Should be initial_count + 1 (we created 2, deleted 1)
+            expected_final_count = initial_client_count + 1
+            if final_count == expected_final_count:
+                print_result(True, "Client API - Final count verification", 
+                           f"Final client count correct: {final_count} (expected: {expected_final_count})")
+            else:
+                print_result(False, "Client API - Final count verification", 
+                           f"Final count mismatch: {final_count} (expected: {expected_final_count})")
+        else:
+            print_result(False, "Client API - Final count verification failed", 
+                       f"HTTP {response.status_code}")
+    except Exception as e:
+        print_result(False, "Client API - Final count verification failed", str(e))
+
 def test_jwt_validation():
     """Test JWT token validation"""
     print_test_header("JWT Token Validation")
