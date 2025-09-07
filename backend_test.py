@@ -30,7 +30,7 @@ API_URL = f"{BASE_URL}/api"
 print(f"🔗 Testing API at: {API_URL}")
 
 # Test credentials from the review request
-VALID_EMAIL = "rorigo@risetravel.com.br"
+VALID_EMAIL = "rodrigo@risetravel.com.br"
 VALID_PASSWORD = "Emily2030*"
 INVALID_EMAIL = "invalid@test.com"
 INVALID_PASSWORD = "wrongpassword"
