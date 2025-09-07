@@ -47,6 +47,7 @@ class TransactionCreate(BaseModel):
     paymentMethod: str
     client: Optional[str] = None
     supplier: Optional[str] = None
+    transactionDate: Optional[str] = None  # Date when the sale actually happened
 
 # Helper functions
 def hash_password(password: str) -> str:
