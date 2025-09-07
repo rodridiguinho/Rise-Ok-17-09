@@ -179,6 +179,29 @@ export const clientsAPI = {
   }
 };
 
+// Suppliers API
+export const suppliersAPI = {
+  getSuppliers: async () => {
+    const response = await api.get('/suppliers');
+    return response.data;
+  },
+  
+  createSupplier: async (supplierData) => {
+    const response = await api.post('/suppliers', supplierData);
+    return response.data;
+  },
+  
+  updateSupplier: async (supplierId, supplierData) => {
+    const response = await api.put(`/suppliers/${supplierId}`, supplierData);
+    return response.data;
+  },
+  
+  deleteSupplier: async (supplierId) => {
+    const response = await api.delete(`/suppliers/${supplierId}`);
+    return response.data;
+  }
+};
+
 // Analytics API
 export const analyticsAPI = {
   getSalesAnalytics: async () => {
