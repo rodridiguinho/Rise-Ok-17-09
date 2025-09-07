@@ -10,6 +10,8 @@ import Suppliers from './Dashboard/Suppliers';
 import Users from './Dashboard/Users';
 import Reports from './Dashboard/Reports';
 import Settings from './Dashboard/Settings';
+import SalesAnalytics from './Dashboard/SalesAnalytics';
+import FinancialAnalytics from './Dashboard/FinancialAnalytics';
 
 const Dashboard = () => {
   const { user } = useAuth();
