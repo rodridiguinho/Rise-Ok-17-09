@@ -402,10 +402,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User Management Testing COMPLETED - All functionality working"
-    - "Frontend user management fully functional"
+    - "User Management Delete Function - CRITICAL BUG CONFIRMED"
+    - "Frontend delete button not making API calls to backend"
   stuck_tasks:
     - "Excel Export API - route files not included in main server"
+    - "User Management - Delete User - Frontend only deletes from local state, not backend"
   test_all: true
   test_priority: "high_first"
 
