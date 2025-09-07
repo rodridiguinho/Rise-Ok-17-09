@@ -379,22 +379,23 @@ async def login(login_data: UserLogin):
         logging.error(f"Login error: {str(e)}")
         raise HTTPException(status_code=500, detail="Login error")
 
-@api_router.get("/transactions/summary")
-async def get_transaction_summary():
-    """Obter resumo das transações"""
-    try:
-        # Por enquanto retorna dados mockados
-        return {
-            "totalEntradas": 16030.00,
-            "totalSaidas": 1850.00,
-            "saldoAtual": 14180.00,
-            "transacoesHoje": 3,
-            "clientesAtendidos": 6,
-            "ticketMedio": 2671.67
-        }
-    except Exception as e:
-        logging.error(f"Summary error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error getting summary")
+# Commented out - now using real transaction routes
+# @api_router.get("/transactions/summary")
+# async def get_transaction_summary():
+#     """Obter resumo das transações"""
+#     try:
+#         # Por enquanto retorna dados mockados
+#         return {
+#             "totalEntradas": 16030.00,
+#             "totalSaidas": 1850.00,
+#             "saldoAtual": 14180.00,
+#             "transacoesHoje": 3,
+#             "clientesAtendidos": 6,
+#             "ticketMedio": 2671.67
+#         }
+#     except Exception as e:
+#         logging.error(f"Summary error: {str(e)}")
+#         raise HTTPException(status_code=500, detail="Error getting summary")
 
 @api_router.get("/analytics/sales")
 async def get_sales_analytics():
