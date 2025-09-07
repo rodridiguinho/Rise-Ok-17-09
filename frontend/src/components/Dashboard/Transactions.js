@@ -129,7 +129,8 @@ const Transactions = () => {
         amount: '',
         paymentMethod: '',
         client: '',
-        supplier: ''
+        supplier: '',
+        transactionDate: new Date().toISOString().split('T')[0]
       });
       
       setIsAddModalOpen(false);
