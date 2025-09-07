@@ -508,35 +508,49 @@ async def get_transactions():
         logging.error(f"Transactions error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting transactions")
 
-# Commented out - now using real transaction routes
-# @api_router.post("/transactions")
-# async def create_transaction(transaction: TransactionCreate):
-#     """Criar nova transação"""
-#     try:
-#         # Use the transaction date provided by user, or default to today
-#         transaction_date = transaction.transactionDate if transaction.transactionDate else date.today().strftime("%Y-%m-%d")
-#         
-#         # Por enquanto apenas simula criação
-#         new_transaction = {
-#             "id": str(ObjectId()),
-#             "date": transaction_date,  # Use the actual transaction date, not entry date
-#             "time": datetime.now().strftime("%H:%M"),  # Keep current time for record keeping
-#             "type": transaction.type,
-#             "category": transaction.category,
-#             "description": transaction.description,
-#             "amount": transaction.amount,
-#             "paymentMethod": transaction.paymentMethod,
-#             "client": transaction.client,
-#             "supplier": transaction.supplier,
-#             "status": "Confirmado",
-#             "transactionDate": transaction_date,  # Store the actual transaction date
-#             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
-#             "entryDate": date.today().strftime("%Y-%m-%d")  # When this was entered into system
-#         }
-#         return new_transaction
-#     except Exception as e:
-#         logging.error(f"Create transaction error: {str(e)}")
-#         raise HTTPException(status_code=500, detail="Error creating transaction")
+@api_router.post("/transactions")
+async def create_transaction(transaction: TransactionCreate):
+    """Criar nova transação"""
+    try:
+        # Use the transaction date provided by user, or default to today
+        transaction_date = transaction.transactionDate if transaction.transactionDate else date.today().strftime("%Y-%m-%d")
+        
+        # Prepare transaction data
+        new_transaction = {
+            "date": transaction_date,  # Use the actual transaction date, not entry date
+            "time": datetime.now().strftime("%H:%M"),  # Keep current time for record keeping
+            "type": transaction.type,
+            "category": transaction.category,
+            "description": transaction.description,
+            "amount": transaction.amount,
+            "paymentMethod": transaction.paymentMethod,
+            "client": transaction.client,
+            "supplier": transaction.supplier,
+            "status": "Confirmado",
+            "transactionDate": transaction_date,  # Store the actual transaction date
+            "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
+            "updatedAt": datetime.utcnow(),
+            "entryDate": date.today().strftime("%Y-%m-%d")  # When this was entered into system
+        }
+        
+        # Insert transaction into database
+        result = await db.transactions.insert_one(new_transaction)
+        
+        # Get created transaction
+        created_transaction = await db.transactions.find_one({"_id": result.inserted_id})
+        if created_transaction:
+            created_transaction["id"] = str(created_transaction["_id"])
+            created_transaction["_id"] = str(created_transaction["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in created_transaction:
+                created_transaction["createdAt"] = created_transaction["createdAt"].isoformat()
+            if "updatedAt" in created_transaction:
+                created_transaction["updatedAt"] = created_transaction["updatedAt"].isoformat()
+        
+        return created_transaction
+    except Exception as e:
+        logging.error(f"Create transaction error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error creating transaction")
 
 # Commented out - now using real transaction routes
 # @api_router.get("/transactions/categories")
