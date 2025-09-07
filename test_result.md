@@ -579,6 +579,8 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Client Persistence Bug Investigation - COMPLETED"
+    - "Client Management API Testing - COMPLETED"
     - "Analytics Frontend Dashboards Testing - COMPLETED"
     - "Sales Analytics Frontend Dashboard - COMPLETED"
     - "Financial Analytics Frontend Dashboard - COMPLETED"
