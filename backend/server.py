@@ -183,11 +183,14 @@ async def get_transactions():
 async def create_transaction(transaction: TransactionCreate):
     """Criar nova transação"""
     try:
+        # Use the transaction date provided by user, or default to today
+        transaction_date = transaction.transactionDate if transaction.transactionDate else date.today().strftime("%Y-%m-%d")
+        
         # Por enquanto apenas simula criação
         new_transaction = {
             "id": str(ObjectId()),
-            "date": date.today().strftime("%Y-%m-%d"),
-            "time": datetime.now().strftime("%H:%M"),
+            "date": transaction_date,  # Use the actual transaction date, not entry date
+            "time": datetime.now().strftime("%H:%M"),  # Keep current time for record keeping
             "type": transaction.type,
             "category": transaction.category,
             "description": transaction.description,
@@ -196,7 +199,9 @@ async def create_transaction(transaction: TransactionCreate):
             "client": transaction.client,
             "supplier": transaction.supplier,
             "status": "Confirmado",
-            "createdAt": datetime.utcnow()
+            "transactionDate": transaction_date,  # Store the actual transaction date
+            "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
+            "entryDate": date.today().strftime("%Y-%m-%d")  # When this was entered into system
         }
         return new_transaction
     except Exception as e:
