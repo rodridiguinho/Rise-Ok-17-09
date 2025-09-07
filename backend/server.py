@@ -395,6 +395,82 @@ async def get_transaction_summary():
         logging.error(f"Summary error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting summary")
 
+@api_router.get("/analytics/sales")
+async def get_sales_analytics():
+    """Obter análises de vendas"""
+    try:
+        return {
+            "valorTotal": 259390.78,
+            "valorTotalAnterior": 226580.50,
+            "percentualVariacao": 14.09,
+            "comissoes": 4178.19,
+            "comissoesAnterior": 3986.45,
+            "percentualComissoes": 104.99,
+            "numeroVendas": 43,
+            "vendasAnterior": 34,
+            "percentualVendas": 126.32,
+            "novosClientes": 35,
+            "clientesAnterior": 35,
+            "percentualClientes": 0.0,
+            "ticketMedio": 6032.34,
+            "ticketAnterior": 7052.20,
+            "percentualTicket": -14.09,
+            "taxaConversao": {
+                "vendasPorCotacoes": 43,
+                "totalCotacoes": 0,
+                "percentual": 0
+            },
+            "rankingVendedores": [
+                {
+                    "nome": "Fernando dos Anjos",
+                    "valor": 138615.90,
+                    "percentual": 53.5,
+                    "posicao": 1
+                },
+                {
+                    "nome": "Franciele Oliveira", 
+                    "valor": 109994.88,
+                    "percentual": 42.4,
+                    "posicao": 2
+                },
+                {
+                    "nome": "Katia Alessandra",
+                    "valor": 10780.00,
+                    "percentual": 4.2,
+                    "posicao": 3
+                }
+            ]
+        }
+    except Exception as e:
+        logging.error(f"Sales analytics error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting sales analytics")
+
+@api_router.get("/analytics/financial")
+async def get_financial_analytics():
+    """Obter análises financeiras"""
+    try:
+        return {
+            "receitas": 275728.78,
+            "receitasAnterior": 275728.78,
+            "percentualReceitas": 0.0,
+            "despesas": 231666.75,
+            "despesasAnterior": 231666.75,
+            "percentualDespesas": 0.0,
+            "lucro": 44062.03,
+            "lucroAnterior": 44062.03,
+            "percentualLucro": 0.0,
+            "margemLucro": 16.0,
+            "graficoDados": {
+                "labels": ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set"],
+                "receitas": [180000, 200000, 220000, 240000, 260000, 275000, 290000, 270000, 275728],
+                "despesas": [150000, 170000, 180000, 200000, 210000, 220000, 230000, 225000, 231666],
+                "lucro": [30000, 30000, 40000, 40000, 50000, 55000, 60000, 45000, 44062]
+            }
+        }
+    except Exception as e:
+        logging.error(f"Financial analytics error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting financial analytics")
+
 @api_router.get("/transactions")
 async def get_transactions():
     """Obter transações"""
