@@ -345,15 +345,18 @@ frontend:
 
   - task: "User Management - Delete User"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/components/Dashboard/Users.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
           comment: "✅ DELETE USER FUNCTIONALITY WORKING PERFECTLY: Successfully tested deleting user. DELETE request made to /api/users/{id}, user immediately removed from list (count went from 20 to 17), success toast displayed. No confirmation dialog needed - direct deletion working as expected."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL DELETION PERSISTENCE BUG CONFIRMED: Detailed investigation reveals that while delete button appears to work (user disappears from UI), NO DELETE API calls are made to backend (0 DELETE /api/users/{id} requests detected in network monitoring). After navigation, deleted users REAPPEAR, confirming user reports. Frontend deletion is only updating local state without backend persistence. This explains the reported 'changes not being saved' issue - deletions are purely cosmetic and revert upon page navigation/refresh."
 
   - task: "User Management - List Users"
     implemented: true
