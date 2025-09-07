@@ -101,7 +101,7 @@ const Transactions = () => {
   });
 
   const handleAddTransaction = async () => {
-    if (!newTransaction.category || !newTransaction.description || !newTransaction.amount) {
+    if (!newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.transactionDate) {
       toast({
         variant: "destructive",
         title: "Erro",
