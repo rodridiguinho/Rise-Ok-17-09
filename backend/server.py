@@ -53,78 +53,229 @@ class TransactionCreate(BaseModel):
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-def generate_pdf_report(report_data: dict) -> str:
-    """Generate PDF report content (simplified)"""
+def generate_pdf_report(report_data: dict) -> bytes:
+    """Generate PDF report content using ReportLab"""
+    try:
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        from reportlab.lib.units import inch
+        from datetime import datetime
+        import io
+        
+        # Get report parameters
+        start_date = report_data.get('startDate', 'Início')
+        end_date = report_data.get('endDate', 'Hoje')
+        transactions = report_data.get('transactions', [])
+        
+        # Calculate totals
+        total_entradas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'entrada')
+        total_saidas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'saida')
+        
+        # Create PDF buffer
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1*inch)
+        
+        # Get styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            alignment=TA_CENTER,
+            spaceAfter=30,
+        )
+        
+        # Build content
+        story = []
+        
+        # Title
+        story.append(Paragraph("RELATÓRIO DE CONTROLE DE CAIXA", title_style))
+        story.append(Paragraph("Rise Travel", styles['Heading2']))
+        story.append(Spacer(1, 12))
+        
+        # Period and generation date
+        story.append(Paragraph(f"Período: {start_date} até {end_date}", styles['Normal']))
+        story.append(Paragraph(f"Data de Geração: {datetime.now().strftime('%d/%m/%Y %H:%M')}", styles['Normal']))
+        story.append(Spacer(1, 20))
+        
+        # Financial summary
+        story.append(Paragraph("RESUMO FINANCEIRO", styles['Heading3']))
+        summary_data = [
+            ['Total de Entradas:', f'R$ {total_entradas:,.2f}'],
+            ['Total de Saídas:', f'R$ {total_saidas:,.2f}'],
+            ['Resultado Líquido:', f'R$ {(total_entradas - total_saidas):,.2f}'],
+            ['Total de Transações:', str(len(transactions))]
+        ]
+        
+        summary_table = Table(summary_data, colWidths=[3*inch, 2*inch])
+        summary_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 1, 'black'),
+            ('BACKGROUND', (0, 0), (0, -1), '#f0f0f0'),
+        ]))
+        story.append(summary_table)
+        story.append(Spacer(1, 20))
+        
+        # Transactions detail
+        if transactions:
+            story.append(Paragraph("DETALHAMENTO DAS TRANSAÇÕES", styles['Heading3']))
+            
+            # Create transaction table
+            transaction_data = [['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']]
+            
+            for t in transactions:
+                tipo_symbol = "+" if t.get('type') == 'entrada' else "-"
+                transaction_data.append([
+                    t.get('date', 'N/A'),
+                    t.get('type', '').upper(),
+                    t.get('category', 'N/A'),
+                    t.get('description', 'N/A')[:30] + '...' if len(t.get('description', '')) > 30 else t.get('description', 'N/A'),
+                    f'{tipo_symbol}R$ {t.get("amount", 0):,.2f}'
+                ])
+            
+            transaction_table = Table(transaction_data, colWidths=[1*inch, 1*inch, 1.5*inch, 2*inch, 1.5*inch])
+            transaction_table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('GRID', (0, 0), (-1, -1), 1, 'black'),
+                ('BACKGROUND', (0, 0), (-1, 0), '#d0d0d0'),
+                ('ALIGN', (4, 1), (4, -1), 'RIGHT'),
+            ]))
+            story.append(transaction_table)
+        
+        # Build PDF
+        doc.build(story)
+        buffer.seek(0)
+        return buffer.getvalue()
+        
+    except ImportError:
+        # Fallback to simple text if ReportLab is not available
+        return generate_simple_pdf_fallback(report_data)
+    except Exception as e:
+        logging.error(f"Error generating PDF: {str(e)}")
+        return generate_simple_pdf_fallback(report_data)
+
+def generate_simple_pdf_fallback(report_data: dict) -> bytes:
+    """Simple PDF fallback (text content)"""
     from datetime import datetime
     
-    # Get report parameters
     start_date = report_data.get('startDate', 'Início')
     end_date = report_data.get('endDate', 'Hoje')
     transactions = report_data.get('transactions', [])
     
-    # Calculate totals
     total_entradas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'entrada')
     total_saidas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'saida')
     
-    # Generate report content (HTML format for PDF generation)
-    report_html = f"""
-    <html>
-    <head>
-        <title>Relatório de Controle de Caixa - Rise Travel</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 20px; }}
-            .header {{ text-align: center; margin-bottom: 30px; }}
-            .summary {{ background-color: #f5f5f5; padding: 15px; margin-bottom: 20px; }}
-            .transaction {{ border-bottom: 1px solid #ddd; padding: 10px 0; }}
-            .entrada {{ color: #059669; }}
-            .saida {{ color: #dc2626; }}
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>RELATÓRIO DE CONTROLE DE CAIXA</h1>
-            <h2>Rise Travel</h2>
-            <p>Período: {start_date} até {end_date}</p>
-            <p>Data de Geração: {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
-        </div>
-        
-        <div class="summary">
-            <h3>RESUMO FINANCEIRO</h3>
-            <p>Total de Entradas: R$ {total_entradas:,.2f}</p>
-            <p>Total de Saídas: R$ {total_saidas:,.2f}</p>
-            <p><strong>Resultado Líquido: R$ {(total_entradas - total_saidas):,.2f}</strong></p>
-            <p>Total de Transações: {len(transactions)}</p>
-        </div>
-        
-        <h3>DETALHAMENTO DAS TRANSAÇÕES</h3>
-    """
+    content = f"""
+RELATÓRIO DE CONTROLE DE CAIXA - RISE TRAVEL
+
+Período: {start_date} até {end_date}
+Data de Geração: {datetime.now().strftime('%d/%m/%Y %H:%M')}
+
+RESUMO FINANCEIRO:
+Total de Entradas: R$ {total_entradas:,.2f}
+Total de Saídas: R$ {total_saidas:,.2f}
+Resultado Líquido: R$ {(total_entradas - total_saidas):,.2f}
+Total de Transações: {len(transactions)}
+
+DETALHAMENTO DAS TRANSAÇÕES:
+{'='*60}
+"""
     
     for t in transactions:
-        tipo_class = "entrada" if t.get('type') == 'entrada' else "saida"
         tipo_symbol = "+" if t.get('type') == 'entrada' else "-"
-        
-        report_html += f"""
-        <div class="transaction">
-            <p><strong>Data:</strong> {t.get('date', 'N/A')} | <strong>Hora:</strong> {t.get('time', 'N/A')}</p>
-            <p><strong>Tipo:</strong> <span class="{tipo_class}">{t.get('type', 'N/A').upper()}</span></p>
-            <p><strong>Categoria:</strong> {t.get('category', 'N/A')}</p>
-            <p><strong>Descrição:</strong> {t.get('description', 'N/A')}</p>
-            <p><strong>Valor:</strong> <span class="{tipo_class}">{tipo_symbol}R$ {t.get('amount', 0):,.2f}</span></p>
-            <p><strong>Forma de Pagamento:</strong> {t.get('paymentMethod', 'N/A')}</p>
-            {f"<p><strong>Cliente:</strong> {t.get('client')}</p>" if t.get('client') else ""}
-            {f"<p><strong>Fornecedor:</strong> {t.get('supplier')}</p>" if t.get('supplier') else ""}
-        </div>
-        """
+        content += f"""
+Data: {t.get('date', 'N/A')} {t.get('time', 'N/A')}
+Tipo: {t.get('type', 'N/A').upper()}
+Categoria: {t.get('category', 'N/A')}
+Descrição: {t.get('description', 'N/A')}
+Valor: {tipo_symbol}R$ {t.get('amount', 0):,.2f}
+Pagamento: {t.get('paymentMethod', 'N/A')}
+{'-'*40}
+"""
     
-    report_html += """
-    </body>
-    </html>
-    """
-    
-    return report_html
+    return content.encode('utf-8')
 
-def generate_excel_report(report_data: dict) -> str:
-    """Generate Excel report content (CSV format)"""
+def generate_excel_report(report_data: dict) -> bytes:
+    """Generate Excel report using openpyxl"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from datetime import datetime
+        import io
+        
+        transactions = report_data.get('transactions', [])
+        start_date = report_data.get('startDate', 'Início')
+        end_date = report_data.get('endDate', 'Hoje')
+        
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Controle de Caixa"
+        
+        # Title
+        ws.merge_cells('A1:J1')
+        ws['A1'] = "RELATÓRIO DE CONTROLE DE CAIXA - RISE TRAVEL"
+        ws['A1'].font = Font(bold=True, size=16)
+        ws['A1'].alignment = Alignment(horizontal='center')
+        
+        # Period
+        ws.merge_cells('A2:J2')
+        ws['A2'] = f"Período: {start_date} até {end_date} | Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        ws['A2'].alignment = Alignment(horizontal='center')
+        
+        # Calculate totals
+        total_entradas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'entrada')
+        total_saidas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'saida')
+        
+        # Summary
+        ws['A4'] = "RESUMO FINANCEIRO"
+        ws['A4'].font = Font(bold=True)
+        ws['A5'] = "Total de Entradas:"
+        ws['B5'] = f"R$ {total_entradas:,.2f}"
+        ws['A6'] = "Total de Saídas:"
+        ws['B6'] = f"R$ {total_saidas:,.2f}"
+        ws['A7'] = "Resultado Líquido:"
+        ws['B7'] = f"R$ {(total_entradas - total_saidas):,.2f}"
+        ws['B7'].font = Font(bold=True)
+        
+        # Transaction headers
+        headers = ['Data', 'Hora', 'Tipo', 'Categoria', 'Descrição', 'Valor', 'Forma Pagamento', 'Cliente', 'Fornecedor', 'Status']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=9, column=col, value=header)
+            cell.font = Font(bold=True)
+            cell.fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
+        
+        # Transaction data
+        for row, t in enumerate(transactions, 10):
+            ws.cell(row=row, column=1, value=t.get('date', ''))
+            ws.cell(row=row, column=2, value=t.get('time', ''))
+            ws.cell(row=row, column=3, value=t.get('type', ''))
+            ws.cell(row=row, column=4, value=t.get('category', ''))
+            ws.cell(row=row, column=5, value=t.get('description', ''))
+            ws.cell(row=row, column=6, value=t.get('amount', 0))
+            ws.cell(row=row, column=7, value=t.get('paymentMethod', ''))
+            ws.cell(row=row, column=8, value=t.get('client', ''))
+            ws.cell(row=row, column=9, value=t.get('supplier', ''))
+            ws.cell(row=row, column=10, value=t.get('status', 'Confirmado'))
+        
+        # Save to buffer
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer.getvalue()
+        
+    except ImportError:
+        # Fallback to CSV
+        return generate_csv_fallback(report_data)
+    except Exception as e:
+        logging.error(f"Error generating Excel: {str(e)}")
+        return generate_csv_fallback(report_data)
+
+def generate_csv_fallback(report_data: dict) -> bytes:
+    """CSV fallback for Excel export"""
     import csv
     import io
     
@@ -154,7 +305,7 @@ def generate_excel_report(report_data: dict) -> str:
             t.get('status', 'Confirmado')
         ])
     
-    return output.getvalue()
+    return output.getvalue().encode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
