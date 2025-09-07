@@ -24,6 +24,7 @@ import {
   Hash
 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { clientsAPI } from '../../services/api';
 
 const Clients = () => {
   const [clients, setClients] = useState([
