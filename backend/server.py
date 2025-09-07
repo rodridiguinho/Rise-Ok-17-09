@@ -11,7 +11,7 @@ from datetime import datetime, date
 from bson import ObjectId
 import bcrypt
 import jwt
-from routes import transaction_routes
+# from routes import transaction_routes  # Temporarily disabled due to Pydantic error
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
