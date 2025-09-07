@@ -93,7 +93,7 @@ const Clients = () => {
     client.cpf.includes(searchTerm)
   );
 
-  const handleAddClient = () => {
+  const handleAddClient = async () => {
     if (!newClient.name || !newClient.email) {
       toast({
         variant: "destructive",
@@ -103,31 +103,38 @@ const Clients = () => {
       return;
     }
 
-    const client = {
-      id: Date.now().toString(),
-      clientNumber: newClient.clientNumber || generateClientNumber(),
-      ...newClient,
-      totalPurchases: 0,
-      lastPurchase: '-',
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-
-    setClients([...clients, client]);
-    setNewClient({
-      clientNumber: '',
-      name: '',
-      email: '',
-      phone: '',
-      cpf: '',
-      address: '',
-      status: 'Ativo'
-    });
-    setIsAddModalOpen(false);
-    
-    toast({
-      title: "Cliente adicionado",
-      description: "O cliente foi cadastrado com sucesso.",
-    });
+    try {
+      const createdClient = await clientsAPI.createClient(newClient);
+      setClients([...clients, createdClient]);
+      
+      setNewClient({
+        clientNumber: '',
+        name: '',
+        email: '',
+        phone: '',
+        document: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        status: 'Ativo'
+      });
+      
+      setIsAddModalOpen(false);
+      
+      toast({
+        title: "Cliente adicionado",
+        description: "O cliente foi adicionado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error creating client:', error);
+      const errorMessage = error.response?.data?.detail || "Erro ao criar cliente";
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: errorMessage,
+      });
+    }
   };
 
   const handleEditClient = (client) => {
