@@ -47,6 +47,16 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
       icon: FileText,
     },
     {
+      id: 'sales-analytics',
+      label: 'Analytics Vendas',
+      icon: BarChart3,
+    },
+    {
+      id: 'financial-analytics',
+      label: 'Analytics Financeiro',
+      icon: TrendingUp,
+    },
+    {
       id: 'settings',
       label: 'Configurações',
       icon: Settings,
