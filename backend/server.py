@@ -921,7 +921,7 @@ async def delete_client(client_id: str):
         raise HTTPException(status_code=500, detail="Error deleting client")
 
 # Include transaction routes (real database implementation)
-app.include_router(transaction_routes.router, prefix="/api")
+# app.include_router(transaction_routes.router, prefix="/api")  # Temporarily disabled
 
 # Include the main router in the app  
 app.include_router(api_router)
