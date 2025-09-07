@@ -774,6 +774,146 @@ async def delete_user(user_id: str):
         logging.error(f"Error deleting user: {str(e)}")
         raise HTTPException(status_code=500, detail="Error deleting user")
 
+# Clients API endpoints
+@api_router.get("/clients")
+async def get_clients():
+    """Obter lista de clientes"""
+    try:
+        clients = await db.clients.find({}).to_list(100)
+        for client in clients:
+            client["id"] = str(client["_id"])
+            client["_id"] = str(client["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in client:
+                client["createdAt"] = client["createdAt"].isoformat()
+            if "updatedAt" in client:
+                client["updatedAt"] = client["updatedAt"].isoformat()
+        return clients
+    except Exception as e:
+        logging.error(f"Error getting clients: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting clients")
+
+@api_router.post("/clients")
+async def create_client(client_data: dict):
+    """Criar novo cliente"""
+    try:
+        # Check if email already exists
+        if client_data.get("email"):
+            existing_client = await db.clients.find_one({"email": client_data["email"]})
+            if existing_client:
+                raise HTTPException(status_code=400, detail="Email já existe")
+        
+        # Generate unique client number
+        last_client = await db.clients.find().sort("createdAt", -1).limit(1).to_list(1)
+        client_number = len(await db.clients.find().to_list(None)) + 1
+        
+        # Prepare client data
+        new_client = {
+            "name": client_data["name"],
+            "email": client_data.get("email", ""),
+            "phone": client_data.get("phone", ""),
+            "document": client_data.get("document", ""),
+            "address": client_data.get("address", ""),
+            "city": client_data.get("city", ""),
+            "state": client_data.get("state", ""),
+            "zipCode": client_data.get("zipCode", ""),
+            "clientNumber": f"CLI{client_number:04d}",
+            "status": client_data.get("status", "Ativo"),
+            "createdAt": datetime.utcnow(),
+            "updatedAt": datetime.utcnow()
+        }
+        
+        # Insert client
+        result = await db.clients.insert_one(new_client)
+        
+        # Get created client
+        created_client = await db.clients.find_one({"_id": result.inserted_id})
+        if created_client:
+            created_client["id"] = str(created_client["_id"])
+            created_client["_id"] = str(created_client["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in created_client:
+                created_client["createdAt"] = created_client["createdAt"].isoformat()
+            if "updatedAt" in created_client:
+                created_client["updatedAt"] = created_client["updatedAt"].isoformat()
+        
+        return created_client
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error creating client: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error creating client")
+
+@api_router.put("/clients/{client_id}")
+async def update_client(client_id: str, client_data: dict):
+    """Atualizar cliente"""
+    try:
+        # Prepare update data
+        update_data = {
+            "name": client_data.get("name"),
+            "email": client_data.get("email", ""),
+            "phone": client_data.get("phone", ""),
+            "document": client_data.get("document", ""),
+            "address": client_data.get("address", ""),
+            "city": client_data.get("city", ""),
+            "state": client_data.get("state", ""),
+            "zipCode": client_data.get("zipCode", ""),
+            "status": client_data.get("status", "Ativo"),
+            "updatedAt": datetime.utcnow()
+        }
+        
+        # Check if email already exists for another client
+        if update_data.get("email"):
+            existing_client = await db.clients.find_one({
+                "email": update_data["email"],
+                "_id": {"$ne": ObjectId(client_id)}
+            })
+            if existing_client:
+                raise HTTPException(status_code=400, detail="Email já existe")
+        
+        # Update client
+        result = await db.clients.update_one(
+            {"_id": ObjectId(client_id)},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Client not found")
+        
+        # Get updated client
+        updated_client = await db.clients.find_one({"_id": ObjectId(client_id)})
+        if updated_client:
+            updated_client["id"] = str(updated_client["_id"])
+            updated_client["_id"] = str(updated_client["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in updated_client:
+                updated_client["createdAt"] = updated_client["createdAt"].isoformat()
+            if "updatedAt" in updated_client:
+                updated_client["updatedAt"] = updated_client["updatedAt"].isoformat()
+        
+        return updated_client
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating client: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error updating client")
+
+@api_router.delete("/clients/{client_id}")
+async def delete_client(client_id: str):
+    """Deletar cliente"""
+    try:
+        result = await db.clients.delete_one({"_id": ObjectId(client_id)})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Client not found")
+        
+        return {"success": True, "message": "Client deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting client: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error deleting client")
+
 # Include the main router in the app
 app.include_router(api_router)
 
