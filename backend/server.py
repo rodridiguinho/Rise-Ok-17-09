@@ -512,68 +512,71 @@ async def get_financial_analytics():
 #         logging.error(f"Transactions error: {str(e)}")
 #         raise HTTPException(status_code=500, detail="Error getting transactions")
 
-@api_router.post("/transactions")
-async def create_transaction(transaction: TransactionCreate):
-    """Criar nova transação"""
-    try:
-        # Use the transaction date provided by user, or default to today
-        transaction_date = transaction.transactionDate if transaction.transactionDate else date.today().strftime("%Y-%m-%d")
-        
-        # Por enquanto apenas simula criação
-        new_transaction = {
-            "id": str(ObjectId()),
-            "date": transaction_date,  # Use the actual transaction date, not entry date
-            "time": datetime.now().strftime("%H:%M"),  # Keep current time for record keeping
-            "type": transaction.type,
-            "category": transaction.category,
-            "description": transaction.description,
-            "amount": transaction.amount,
-            "paymentMethod": transaction.paymentMethod,
-            "client": transaction.client,
-            "supplier": transaction.supplier,
-            "status": "Confirmado",
-            "transactionDate": transaction_date,  # Store the actual transaction date
-            "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
-            "entryDate": date.today().strftime("%Y-%m-%d")  # When this was entered into system
-        }
-        return new_transaction
-    except Exception as e:
-        logging.error(f"Create transaction error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error creating transaction")
+# Commented out - now using real transaction routes
+# @api_router.post("/transactions")
+# async def create_transaction(transaction: TransactionCreate):
+#     """Criar nova transação"""
+#     try:
+#         # Use the transaction date provided by user, or default to today
+#         transaction_date = transaction.transactionDate if transaction.transactionDate else date.today().strftime("%Y-%m-%d")
+#         
+#         # Por enquanto apenas simula criação
+#         new_transaction = {
+#             "id": str(ObjectId()),
+#             "date": transaction_date,  # Use the actual transaction date, not entry date
+#             "time": datetime.now().strftime("%H:%M"),  # Keep current time for record keeping
+#             "type": transaction.type,
+#             "category": transaction.category,
+#             "description": transaction.description,
+#             "amount": transaction.amount,
+#             "paymentMethod": transaction.paymentMethod,
+#             "client": transaction.client,
+#             "supplier": transaction.supplier,
+#             "status": "Confirmado",
+#             "transactionDate": transaction_date,  # Store the actual transaction date
+#             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
+#             "entryDate": date.today().strftime("%Y-%m-%d")  # When this was entered into system
+#         }
+#         return new_transaction
+#     except Exception as e:
+#         logging.error(f"Create transaction error: {str(e)}")
+#         raise HTTPException(status_code=500, detail="Error creating transaction")
 
-@api_router.get("/transactions/categories")
-async def get_categories():
-    """Obter categorias"""
-    return {
-        "categories": [
-            "Pacote Turístico",
-            "Passagem Aérea", 
-            "Hotel/Hospedagem",
-            "Seguro Viagem",
-            "Transfer",
-            "Excursão",
-            "Aluguel de Carro",
-            "Cruzeiro",
-            "Ingresso/Atrações",
-            "Fornecedor",
-            "Despesa Operacional",
-            "Comissão"
-        ]
-    }
+# Commented out - now using real transaction routes
+# @api_router.get("/transactions/categories")
+# async def get_categories():
+#     """Obter categorias"""
+#     return {
+#         "categories": [
+#             "Pacote Turístico",
+#             "Passagem Aérea", 
+#             "Hotel/Hospedagem",
+#             "Seguro Viagem",
+#             "Transfer",
+#             "Excursão",
+#             "Aluguel de Carro",
+#             "Cruzeiro",
+#             "Ingresso/Atrações",
+#             "Fornecedor",
+#             "Despesa Operacional",
+#             "Comissão"
+#         ]
+#     }
 
-@api_router.get("/transactions/payment-methods")
-async def get_payment_methods():
-    """Obter métodos de pagamento"""
-    return {
-        "paymentMethods": [
-            "Dinheiro",
-            "PIX",
-            "Cartão de Crédito",
-            "Cartão de Débito",
-            "Transferência",
-            "Cartão Corporativo"
-        ]
-    }
+# Commented out - now using real transaction routes
+# @api_router.get("/transactions/payment-methods")
+# async def get_payment_methods():
+#     """Obter métodos de pagamento"""
+#     return {
+#         "paymentMethods": [
+#             "Dinheiro",
+#             "PIX",
+#             "Cartão de Crédito",
+#             "Cartão de Débito",
+#             "Transferência",
+#             "Cartão Corporativo"
+#         ]
+#     }
 
 @api_router.post("/reports/export/pdf")
 async def export_pdf(report_data: dict = None):
