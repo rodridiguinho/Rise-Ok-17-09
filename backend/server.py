@@ -490,44 +490,23 @@ async def get_financial_analytics():
         logging.error(f"Financial analytics error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting financial analytics")
 
-# Commented out - now using real transaction routes
-# @api_router.get("/transactions")
-# async def get_transactions():
-#     """Obter transações"""
-#     try:
-#         # Por enquanto retorna dados mockados
-#         mock_transactions = [
-#             {
-#                 "id": "1",
-#                 "date": "2025-01-05",
-#                 "time": "09:30",
-#                 "type": "entrada",
-#                 "category": "Pacote Turístico",
-#                 "description": "Pacote Europa 7 dias - Cliente João Silva",
-#                 "amount": 8500.00,
-#                 "paymentMethod": "Cartão de Crédito",
-#                 "client": "João Silva",
-#                 "status": "Confirmado",
-#                 "createdAt": datetime.utcnow()
-#             },
-#             {
-#                 "id": "2",
-#                 "date": "2025-01-05",
-#                 "time": "10:15",
-#                 "type": "saida",
-#                 "category": "Fornecedor",
-#                 "description": "Pagamento Hotel Ibis - Reserva #4523",
-#                 "amount": 1200.00,
-#                 "paymentMethod": "Transferência",
-#                 "supplier": "Hotel Ibis",
-#                 "status": "Pago",
-#                 "createdAt": datetime.utcnow()
-#             }
-#         ]
-#         return mock_transactions
-#     except Exception as e:
-#         logging.error(f"Transactions error: {str(e)}")
-#         raise HTTPException(status_code=500, detail="Error getting transactions")
+@api_router.get("/transactions")
+async def get_transactions():
+    """Obter transações"""
+    try:
+        transactions = await db.transactions.find({}).to_list(None)
+        for transaction in transactions:
+            transaction["id"] = str(transaction["_id"])
+            transaction["_id"] = str(transaction["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in transaction:
+                transaction["createdAt"] = transaction["createdAt"].isoformat()
+            if "updatedAt" in transaction:
+                transaction["updatedAt"] = transaction["updatedAt"].isoformat()
+        return transactions
+    except Exception as e:
+        logging.error(f"Transactions error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting transactions")
 
 # Commented out - now using real transaction routes
 # @api_router.post("/transactions")
