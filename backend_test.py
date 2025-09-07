@@ -1591,7 +1591,10 @@ def run_all_tests():
     print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"🔗 API Base URL: {API_URL}")
     
-    # Run test suites
+    # Run URGENT transaction persistence test first
+    test_urgent_transaction_persistence()
+    
+    # Run other test suites
     test_api_connectivity()
     test_authentication()
     test_transactions()
