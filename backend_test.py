@@ -463,6 +463,150 @@ def test_users_api():
     except Exception as e:
         print_result(False, "POST /api/users - Duplicate email validation failed", str(e))
 
+def test_transaction_date_functionality():
+    """Test transaction date vs entry date functionality - NEW REQUIREMENT"""
+    print_test_header("Transaction Date Functionality - Custom Date Support")
+    
+    # Test 1: POST /api/transactions with custom transaction date (past date)
+    try:
+        transaction_with_custom_date = {
+            "type": "entrada",
+            "category": "Pacote Turístico", 
+            "description": "Sale from September 5th",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "transactionDate": "2025-09-05"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_with_custom_date, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify response structure includes required fields
+            required_fields = ["date", "transactionDate", "entryDate", "createdAt"]
+            missing_fields = [f for f in required_fields if f not in data]
+            
+            if not missing_fields:
+                print_result(True, "POST /api/transactions - Response structure validation", 
+                           f"All required fields present: {required_fields}")
+                
+                # Verify date matches provided transactionDate (not today's date)
+                if data.get("date") == "2025-09-05" and data.get("transactionDate") == "2025-09-05":
+                    print_result(True, "POST /api/transactions - Custom date handling", 
+                               f"Transaction date correctly set to: {data.get('date')}")
+                else:
+                    print_result(False, "POST /api/transactions - Custom date handling", 
+                               f"Expected date: 2025-09-05, Got date: {data.get('date')}, transactionDate: {data.get('transactionDate')}")
+                
+                # Verify entryDate shows today's date for audit purposes
+                from datetime import date
+                today = date.today().strftime("%Y-%m-%d")
+                if data.get("entryDate") == today:
+                    print_result(True, "POST /api/transactions - Entry date audit", 
+                               f"Entry date correctly set to today: {data.get('entryDate')}")
+                else:
+                    print_result(False, "POST /api/transactions - Entry date audit", 
+                               f"Expected entry date: {today}, Got: {data.get('entryDate')}")
+                
+                # Verify createdAt timestamp is present
+                if "createdAt" in data and data["createdAt"]:
+                    print_result(True, "POST /api/transactions - CreatedAt timestamp", 
+                               f"Timestamp present: {data.get('createdAt')}")
+                else:
+                    print_result(False, "POST /api/transactions - CreatedAt timestamp", 
+                               "CreatedAt timestamp missing or empty")
+                
+                # Verify all other transaction data is preserved
+                expected_fields = ["type", "category", "description", "amount", "paymentMethod"]
+                for field in expected_fields:
+                    if data.get(field) == transaction_with_custom_date[field]:
+                        print_result(True, f"POST /api/transactions - Field preservation ({field})", 
+                                   f"Correctly preserved: {data[field]}")
+                    else:
+                        print_result(False, f"POST /api/transactions - Field preservation ({field})", 
+                                   f"Expected: {transaction_with_custom_date[field]}, Got: {data.get(field)}")
+                        
+            else:
+                print_result(False, "POST /api/transactions - Response structure validation", 
+                           f"Missing required fields: {missing_fields}")
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/transactions - Custom date test failed", str(e))
+    
+    # Test 2: POST /api/transactions without transactionDate (should default to today)
+    try:
+        transaction_without_date = {
+            "type": "entrada",
+            "category": "Pacote Turístico", 
+            "description": "Sale without specific date",
+            "amount": 2000.00,
+            "paymentMethod": "Cartão de Crédito"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_without_date, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify it defaults to today's date
+            from datetime import date
+            today = date.today().strftime("%Y-%m-%d")
+            
+            if data.get("date") == today and data.get("transactionDate") == today:
+                print_result(True, "POST /api/transactions - Default date handling", 
+                           f"Transaction date correctly defaulted to today: {data.get('date')}")
+            else:
+                print_result(False, "POST /api/transactions - Default date handling", 
+                           f"Expected date: {today}, Got date: {data.get('date')}, transactionDate: {data.get('transactionDate')}")
+            
+            # Verify entryDate also shows today
+            if data.get("entryDate") == today:
+                print_result(True, "POST /api/transactions - Default entry date", 
+                           f"Entry date correctly set to today: {data.get('entryDate')}")
+            else:
+                print_result(False, "POST /api/transactions - Default entry date", 
+                           f"Expected entry date: {today}, Got: {data.get('entryDate')}")
+                           
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/transactions - Default date test failed", str(e))
+    
+    # Test 3: Verify date validation and serialization work correctly
+    try:
+        # Test with different date formats to ensure proper handling
+        test_cases = [
+            {"date": "2025-12-25", "description": "Christmas sale"},
+            {"date": "2025-01-01", "description": "New Year sale"},
+            {"date": "2025-06-15", "description": "Mid-year sale"}
+        ]
+        
+        for i, test_case in enumerate(test_cases):
+            transaction_test = {
+                "type": "entrada",
+                "category": "Pacote Turístico", 
+                "description": test_case["description"],
+                "amount": 1000.00 + (i * 100),
+                "paymentMethod": "PIX",
+                "transactionDate": test_case["date"]
+            }
+            
+            response = requests.post(f"{API_URL}/transactions", json=transaction_test, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("date") == test_case["date"] and data.get("transactionDate") == test_case["date"]:
+                    print_result(True, f"POST /api/transactions - Date validation ({test_case['date']})", 
+                               f"Date correctly processed and serialized")
+                else:
+                    print_result(False, f"POST /api/transactions - Date validation ({test_case['date']})", 
+                               f"Date processing failed. Expected: {test_case['date']}, Got: {data.get('date')}")
+            else:
+                print_result(False, f"POST /api/transactions - Date validation ({test_case['date']})", 
+                           f"HTTP {response.status_code}: {response.text}")
+                           
+    except Exception as e:
+        print_result(False, "POST /api/transactions - Date validation tests failed", str(e))
+
 def test_jwt_validation():
     """Test JWT token validation"""
     print_test_header("JWT Token Validation")
