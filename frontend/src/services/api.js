@@ -156,4 +156,17 @@ export const usersAPI = {
   }
 };
 
+// Analytics API
+export const analyticsAPI = {
+  getSalesAnalytics: async () => {
+    const response = await api.get('/analytics/sales');
+    return response.data;
+  },
+  
+  getFinancialAnalytics: async () => {
+    const response = await api.get('/analytics/financial');
+    return response.data;
+  }
+};
+
 export default api;
