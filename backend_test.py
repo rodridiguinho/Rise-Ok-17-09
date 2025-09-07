@@ -1405,6 +1405,7 @@ def run_all_tests():
     test_analytics_integration()  # NEW: Test integration with existing endpoints
     test_reports()
     test_users_api()  # Added comprehensive user API testing
+    test_client_api()  # CRITICAL: Test client API endpoints for persistence bug
     test_jwt_validation()
     
     print(f"\n{'='*60}")
