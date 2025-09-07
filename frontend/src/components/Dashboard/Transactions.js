@@ -258,6 +258,15 @@ const Transactions = () => {
               </div>
 
               <div className="space-y-2">
+                <Label>Data da Transação *</Label>
+                <Input
+                  type="date"
+                  value={newTransaction.transactionDate}
+                  onChange={(e) => setNewTransaction({...newTransaction, transactionDate: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label>Forma de Pagamento</Label>
                 <Select value={newTransaction.paymentMethod} onValueChange={(value) => setNewTransaction({...newTransaction, paymentMethod: value})}>
                   <SelectTrigger>
