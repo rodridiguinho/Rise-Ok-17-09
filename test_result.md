@@ -270,6 +270,18 @@ backend:
           agent: "testing"
           comment: "MongoDB connection working correctly. Default user created successfully during startup. Database operations functional."
 
+  - task: "Transaction Date vs Entry Date Functionality"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TRANSACTION DATE FUNCTIONALITY FULLY IMPLEMENTED AND WORKING: Comprehensive testing confirms the new transaction date vs entry date requirement is properly implemented. ✅ Custom Date Support: POST /api/transactions with transactionDate field correctly sets transaction date to specified past/future date (tested with 2025-09-05). ✅ Response Structure: All required fields present - date, transactionDate, entryDate, createdAt. ✅ Date Logic: 'date' field matches provided transactionDate (not today's date), entryDate shows today for audit purposes. ✅ Default Behavior: When no transactionDate provided, correctly defaults to today's date. ✅ Date Validation: Multiple date formats (2025-12-25, 2025-01-01, 2025-06-15) processed and serialized correctly. ✅ Field Preservation: All transaction data (type, category, description, amount, paymentMethod) correctly preserved. The system now properly recognizes sales by their transaction date, not entry date, as requested."
+
   - task: "User List API"
     implemented: true
     working: true
