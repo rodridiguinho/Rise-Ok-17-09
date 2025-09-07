@@ -417,6 +417,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Transaction Date vs Entry Date Functionality - COMPLETED"
     - "All critical user management functionality now working"
   stuck_tasks:
     - "Excel Export API - route files not included in main server"
