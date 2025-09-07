@@ -631,6 +631,7 @@ def run_all_tests():
     test_api_connectivity()
     test_authentication()
     test_transactions()
+    test_transaction_date_functionality()  # NEW: Test transaction date vs entry date functionality
     test_reports()
     test_users_api()  # Added comprehensive user API testing
     test_jwt_validation()
