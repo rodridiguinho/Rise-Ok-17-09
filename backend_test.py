@@ -1010,6 +1010,129 @@ def test_analytics_endpoints():
     except Exception as e:
         print_result(False, "Analytics endpoints - Authentication test failed", str(e))
 
+def test_analytics_integration():
+    """Test integration with existing endpoints - Verify no conflicts"""
+    print_test_header("Analytics Integration - Verify No Conflicts with Existing Endpoints")
+    
+    # Test 1: Verify existing transaction summary still works after analytics implementation
+    try:
+        response = requests.get(f"{API_URL}/transactions/summary", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            required_fields = ["totalEntradas", "totalSaidas", "saldoAtual", "transacoesHoje", "clientesAtendidos", "ticketMedio"]
+            if all(field in data for field in required_fields):
+                print_result(True, "Integration test - Transaction summary still works", 
+                           f"All required fields present after analytics implementation")
+            else:
+                print_result(False, "Integration test - Transaction summary broken", 
+                           f"Missing fields: {[f for f in required_fields if f not in data]}")
+        else:
+            print_result(False, f"Integration test - Transaction summary - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Integration test - Transaction summary failed", str(e))
+    
+    # Test 2: Verify existing authentication still works
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success") and "token" in data:
+                print_result(True, "Integration test - Authentication still works", 
+                           "Login functionality unaffected by analytics implementation")
+            else:
+                print_result(False, "Integration test - Authentication broken", 
+                           "Login response format changed")
+        else:
+            print_result(False, f"Integration test - Authentication - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Integration test - Authentication failed", str(e))
+    
+    # Test 3: Verify existing transaction endpoints still work
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                print_result(True, "Integration test - Transaction list still works", 
+                           f"Transaction list endpoint unaffected by analytics")
+            else:
+                print_result(False, "Integration test - Transaction list broken", 
+                           "Transaction list response format changed")
+        else:
+            print_result(False, f"Integration test - Transaction list - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Integration test - Transaction list failed", str(e))
+    
+    # Test 4: Verify existing user endpoints still work
+    try:
+        response = requests.get(f"{API_URL}/users", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                print_result(True, "Integration test - User list still works", 
+                           f"User management endpoints unaffected by analytics")
+            else:
+                print_result(False, "Integration test - User list broken", 
+                           "User list response format changed")
+        else:
+            print_result(False, f"Integration test - User list - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Integration test - User list failed", str(e))
+    
+    # Test 5: Verify existing report endpoints still work
+    try:
+        sample_data = {"startDate": "2025-01-01", "endDate": "2025-01-07", "transactions": []}
+        response = requests.post(f"{API_URL}/reports/export/pdf", json=sample_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success"):
+                print_result(True, "Integration test - PDF export still works", 
+                           "Report export endpoints unaffected by analytics")
+            else:
+                print_result(False, "Integration test - PDF export broken", 
+                           "PDF export functionality changed")
+        else:
+            print_result(False, f"Integration test - PDF export - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Integration test - PDF export failed", str(e))
+    
+    # Test 6: Test all endpoints are accessible and don't conflict
+    endpoints_to_test = [
+        ("/", "GET"),
+        ("/health", "GET"),
+        ("/transactions/summary", "GET"),
+        ("/transactions", "GET"),
+        ("/transactions/categories", "GET"),
+        ("/transactions/payment-methods", "GET"),
+        ("/analytics/sales", "GET"),
+        ("/analytics/financial", "GET"),
+        ("/users", "GET")
+    ]
+    
+    successful_endpoints = 0
+    total_endpoints = len(endpoints_to_test)
+    
+    for endpoint, method in endpoints_to_test:
+        try:
+            if method == "GET":
+                response = requests.get(f"{API_URL}{endpoint}", timeout=5)
+                if response.status_code in [200, 404]:  # 404 is acceptable for some endpoints
+                    successful_endpoints += 1
+        except:
+            pass  # Count as failed
+    
+    success_rate = (successful_endpoints / total_endpoints) * 100
+    if success_rate >= 80:
+        print_result(True, "Integration test - Overall endpoint accessibility", 
+                   f"{successful_endpoints}/{total_endpoints} endpoints accessible ({success_rate:.1f}%)")
+    else:
+        print_result(False, "Integration test - Overall endpoint accessibility", 
+                   f"Only {successful_endpoints}/{total_endpoints} endpoints accessible ({success_rate:.1f}%)")
+
 def test_jwt_validation():
     """Test JWT token validation"""
     print_test_header("JWT Token Validation")
