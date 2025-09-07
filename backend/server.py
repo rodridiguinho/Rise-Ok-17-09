@@ -552,26 +552,25 @@ async def create_transaction(transaction: TransactionCreate):
         logging.error(f"Create transaction error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error creating transaction")
 
-# Commented out - now using real transaction routes
-# @api_router.get("/transactions/categories")
-# async def get_categories():
-#     """Obter categorias"""
-#     return {
-#         "categories": [
-#             "Pacote Turístico",
-#             "Passagem Aérea", 
-#             "Hotel/Hospedagem",
-#             "Seguro Viagem",
-#             "Transfer",
-#             "Excursão",
-#             "Aluguel de Carro",
-#             "Cruzeiro",
-#             "Ingresso/Atrações",
-#             "Fornecedor",
-#             "Despesa Operacional",
-#             "Comissão"
-#         ]
-#     }
+@api_router.get("/transactions/categories")
+async def get_categories():
+    """Obter categorias"""
+    return {
+        "categories": [
+            "Pacote Turístico",
+            "Passagem Aérea", 
+            "Hotel/Hospedagem",
+            "Seguro Viagem",
+            "Transfer",
+            "Excursão",
+            "Aluguel de Carro",
+            "Cruzeiro",
+            "Ingresso/Atrações",
+            "Fornecedor",
+            "Despesa Operacional",
+            "Comissão"
+        ]
+    }
 
 # Commented out - now using real transaction routes
 # @api_router.get("/transactions/payment-methods")
