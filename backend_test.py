@@ -1376,6 +1376,201 @@ def test_client_api():
     except Exception as e:
         print_result(False, "Client API - Final count verification failed", str(e))
 
+def test_urgent_transaction_persistence():
+    """URGENT: Test transaction persistence as requested by user"""
+    print_test_header("🚨 URGENT TRANSACTION PERSISTENCE TEST - USER WAITING")
+    
+    global auth_token
+    
+    # Step 1: Login with provided credentials
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success") and "token" in data:
+                auth_token = data["token"]
+                print_result(True, "Authentication for persistence test", 
+                           f"Logged in as: {data['user'].get('name')} ({data['user'].get('email')})")
+            else:
+                print_result(False, "Authentication failed", "Cannot proceed with persistence test")
+                return
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication failed", str(e))
+        return
+    
+    # Step 2: Get initial transaction count
+    initial_count = 0
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                initial_count = len(data)
+                print_result(True, "Initial transaction count", f"Found {initial_count} existing transactions")
+            else:
+                print_result(False, "Invalid transaction list format", "Cannot determine initial count")
+        else:
+            print_result(False, f"Failed to get initial transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Failed to get initial transactions", str(e))
+    
+    # Step 3: Create transaction with EXACT data from review request
+    created_transaction_id = None
+    try:
+        transaction_data = {
+            "type": "entrada",
+            "category": "Pacote Turístico",
+            "description": "Teste Persistencia Transacao",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "transactionDate": "2025-09-07"
+        }
+        
+        print(f"🔄 Creating transaction with data: {transaction_data}")
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                created_transaction_id = data["id"]
+                print_result(True, "✅ POST /api/transactions - Transaction created", 
+                           f"ID: {created_transaction_id}, Amount: R$ {data.get('amount')}, Description: {data.get('description')}")
+                
+                # Verify all fields were saved correctly
+                for field, expected_value in transaction_data.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"Field validation ({field})", f"✅ {field}: {actual_value}")
+                    else:
+                        print_result(False, f"Field validation ({field})", f"❌ Expected: {expected_value}, Got: {actual_value}")
+            else:
+                print_result(False, "❌ Transaction creation failed", "No ID returned in response")
+                return
+        else:
+            print_result(False, f"❌ POST /api/transactions failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "❌ Transaction creation failed", str(e))
+        return
+    
+    # Step 4: Immediately verify transaction appears in list (persistence check 1)
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                new_count = len(data)
+                count_increased = new_count > initial_count
+                
+                # Find our transaction in the list
+                our_transaction = None
+                for transaction in data:
+                    if transaction.get("id") == created_transaction_id:
+                        our_transaction = transaction
+                        break
+                
+                if our_transaction:
+                    print_result(True, "✅ GET /api/transactions - Transaction found immediately", 
+                               f"Transaction count: {initial_count} → {new_count}, Found transaction: {our_transaction.get('description')}")
+                    
+                    # Verify transaction data persisted correctly
+                    if (our_transaction.get("description") == "Teste Persistencia Transacao" and
+                        our_transaction.get("amount") == 1500.00 and
+                        our_transaction.get("paymentMethod") == "PIX"):
+                        print_result(True, "✅ Transaction data persistence", 
+                                   "All transaction data correctly persisted to database")
+                    else:
+                        print_result(False, "❌ Transaction data corruption", 
+                                   f"Data mismatch: {our_transaction}")
+                else:
+                    print_result(False, "❌ Transaction NOT found in list", 
+                               f"Created transaction ID {created_transaction_id} not found in transaction list")
+            else:
+                print_result(False, "❌ Invalid transaction list format", "Cannot verify persistence")
+        else:
+            print_result(False, f"❌ GET /api/transactions failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "❌ Transaction persistence check failed", str(e))
+    
+    # Step 5: Wait a moment and check again (persistence check 2)
+    import time
+    time.sleep(2)
+    
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                # Find our transaction again
+                our_transaction = None
+                for transaction in data:
+                    if transaction.get("id") == created_transaction_id:
+                        our_transaction = transaction
+                        break
+                
+                if our_transaction:
+                    print_result(True, "✅ Transaction persistence after delay", 
+                               "Transaction still exists after 2-second delay - persistence confirmed")
+                else:
+                    print_result(False, "❌ Transaction disappeared", 
+                               "Transaction no longer exists after delay - PERSISTENCE FAILURE")
+            else:
+                print_result(False, "❌ Invalid response format", "Cannot verify delayed persistence")
+        else:
+            print_result(False, f"❌ Delayed persistence check failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "❌ Delayed persistence check failed", str(e))
+    
+    # Step 6: Final database persistence confirmation
+    print("\n🔍 FINAL PERSISTENCE CONFIRMATION:")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                final_count = len(data)
+                
+                # Look for our specific transaction one more time
+                persistence_confirmed = False
+                for transaction in data:
+                    if (transaction.get("description") == "Teste Persistencia Transacao" and
+                        transaction.get("amount") == 1500.00 and
+                        transaction.get("paymentMethod") == "PIX"):
+                        persistence_confirmed = True
+                        print_result(True, "🎯 FINAL RESULT: TRANSACTION PERSISTENCE", 
+                                   f"✅ YES - Transaction exists in MongoDB database")
+                        print(f"   📊 Transaction Details:")
+                        print(f"   📝 ID: {transaction.get('id')}")
+                        print(f"   📝 Description: {transaction.get('description')}")
+                        print(f"   💰 Amount: R$ {transaction.get('amount')}")
+                        print(f"   💳 Payment: {transaction.get('paymentMethod')}")
+                        print(f"   📅 Date: {transaction.get('transactionDate')}")
+                        break
+                
+                if not persistence_confirmed:
+                    print_result(False, "🎯 FINAL RESULT: TRANSACTION PERSISTENCE", 
+                               f"❌ NO - Transaction NOT found in database")
+                    print(f"   📊 Total transactions in database: {final_count}")
+                    print(f"   🔍 Searched for: 'Teste Persistencia Transacao', R$ 1500.00, PIX")
+                
+            else:
+                print_result(False, "🎯 FINAL RESULT: TRANSACTION PERSISTENCE", 
+                           "❌ UNKNOWN - Cannot verify due to invalid response format")
+        else:
+            print_result(False, "🎯 FINAL RESULT: TRANSACTION PERSISTENCE", 
+                       f"❌ UNKNOWN - Cannot verify due to API error: HTTP {response.status_code}")
+    except Exception as e:
+        print_result(False, "🎯 FINAL RESULT: TRANSACTION PERSISTENCE", 
+                   f"❌ UNKNOWN - Cannot verify due to error: {str(e)}")
+
 def test_jwt_validation():
     """Test JWT token validation"""
     print_test_header("JWT Token Validation")
