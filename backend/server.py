@@ -915,7 +915,10 @@ async def delete_client(client_id: str):
         logging.error(f"Error deleting client: {str(e)}")
         raise HTTPException(status_code=500, detail="Error deleting client")
 
-# Include the main router in the app
+# Include transaction routes (real database implementation)
+app.include_router(transaction_routes.router, prefix="/api")
+
+# Include the main router in the app  
 app.include_router(api_router)
 
 app.add_middleware(
