@@ -53,6 +53,109 @@ class TransactionCreate(BaseModel):
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
+def generate_pdf_report(report_data: dict) -> str:
+    """Generate PDF report content (simplified)"""
+    from datetime import datetime
+    
+    # Get report parameters
+    start_date = report_data.get('startDate', 'Início')
+    end_date = report_data.get('endDate', 'Hoje')
+    transactions = report_data.get('transactions', [])
+    
+    # Calculate totals
+    total_entradas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'entrada')
+    total_saidas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'saida')
+    
+    # Generate report content (HTML format for PDF generation)
+    report_html = f"""
+    <html>
+    <head>
+        <title>Relatório de Controle de Caixa - Rise Travel</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 20px; }}
+            .header {{ text-align: center; margin-bottom: 30px; }}
+            .summary {{ background-color: #f5f5f5; padding: 15px; margin-bottom: 20px; }}
+            .transaction {{ border-bottom: 1px solid #ddd; padding: 10px 0; }}
+            .entrada {{ color: #059669; }}
+            .saida {{ color: #dc2626; }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>RELATÓRIO DE CONTROLE DE CAIXA</h1>
+            <h2>Rise Travel</h2>
+            <p>Período: {start_date} até {end_date}</p>
+            <p>Data de Geração: {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
+        </div>
+        
+        <div class="summary">
+            <h3>RESUMO FINANCEIRO</h3>
+            <p>Total de Entradas: R$ {total_entradas:,.2f}</p>
+            <p>Total de Saídas: R$ {total_saidas:,.2f}</p>
+            <p><strong>Resultado Líquido: R$ {(total_entradas - total_saidas):,.2f}</strong></p>
+            <p>Total de Transações: {len(transactions)}</p>
+        </div>
+        
+        <h3>DETALHAMENTO DAS TRANSAÇÕES</h3>
+    """
+    
+    for t in transactions:
+        tipo_class = "entrada" if t.get('type') == 'entrada' else "saida"
+        tipo_symbol = "+" if t.get('type') == 'entrada' else "-"
+        
+        report_html += f"""
+        <div class="transaction">
+            <p><strong>Data:</strong> {t.get('date', 'N/A')} | <strong>Hora:</strong> {t.get('time', 'N/A')}</p>
+            <p><strong>Tipo:</strong> <span class="{tipo_class}">{t.get('type', 'N/A').upper()}</span></p>
+            <p><strong>Categoria:</strong> {t.get('category', 'N/A')}</p>
+            <p><strong>Descrição:</strong> {t.get('description', 'N/A')}</p>
+            <p><strong>Valor:</strong> <span class="{tipo_class}">{tipo_symbol}R$ {t.get('amount', 0):,.2f}</span></p>
+            <p><strong>Forma de Pagamento:</strong> {t.get('paymentMethod', 'N/A')}</p>
+            {f"<p><strong>Cliente:</strong> {t.get('client')}</p>" if t.get('client') else ""}
+            {f"<p><strong>Fornecedor:</strong> {t.get('supplier')}</p>" if t.get('supplier') else ""}
+        </div>
+        """
+    
+    report_html += """
+    </body>
+    </html>
+    """
+    
+    return report_html
+
+def generate_excel_report(report_data: dict) -> str:
+    """Generate Excel report content (CSV format)"""
+    import csv
+    import io
+    
+    transactions = report_data.get('transactions', [])
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow([
+        'Data', 'Hora', 'Tipo', 'Categoria', 'Descrição', 
+        'Valor', 'Forma Pagamento', 'Cliente', 'Fornecedor', 'Status'
+    ])
+    
+    # Data
+    for t in transactions:
+        writer.writerow([
+            t.get('date', ''),
+            t.get('time', ''),
+            t.get('type', ''),
+            t.get('category', ''),
+            t.get('description', ''),
+            f"{t.get('amount', 0):.2f}",
+            t.get('paymentMethod', ''),
+            t.get('client', ''),
+            t.get('supplier', ''),
+            t.get('status', 'Confirmado')
+        ])
+    
+    return output.getvalue()
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
