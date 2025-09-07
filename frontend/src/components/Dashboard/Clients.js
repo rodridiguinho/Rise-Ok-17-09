@@ -143,35 +143,68 @@ const Clients = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateClient = () => {
-    setClients(clients.map(client => 
-      client.id === selectedClient.id ? { ...client, ...newClient } : client
-    ));
-    
-    setIsEditModalOpen(false);
-    setSelectedClient(null);
-    setNewClient({
-      clientNumber: '',
-      name: '',
-      email: '',
-      phone: '',
-      cpf: '',
-      address: '',
-      status: 'Ativo'
-    });
-    
-    toast({
-      title: "Cliente atualizado",
-      description: "As informações foram atualizadas com sucesso.",
-    });
+  const handleUpdateClient = async () => {
+    if (!newClient.name || !newClient.email) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+      });
+      return;
+    }
+
+    try {
+      const updatedClient = await clientsAPI.updateClient(selectedClient.id, newClient);
+      setClients(clients.map(client => 
+        client.id === selectedClient.id ? updatedClient : client
+      ));
+      
+      setIsEditModalOpen(false);
+      setSelectedClient(null);
+      setNewClient({
+        clientNumber: '',
+        name: '',
+        email: '',
+        phone: '',
+        document: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        status: 'Ativo'
+      });
+      
+      toast({
+        title: "Cliente atualizado",
+        description: "As informações foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error updating client:', error);
+      const errorMessage = error.response?.data?.detail || "Erro ao atualizar cliente";
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: errorMessage,
+      });
+    }
   };
 
-  const handleDeleteClient = (id) => {
-    setClients(clients.filter(client => client.id !== id));
-    toast({
-      title: "Cliente removido",
-      description: "O cliente foi removido com sucesso.",
-    });
+  const handleDeleteClient = async (id) => {
+    try {
+      await clientsAPI.deleteClient(id);
+      setClients(clients.filter(client => client.id !== id));
+      toast({
+        title: "Cliente removido",
+        description: "O cliente foi removido com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao remover cliente",
+      });
+    }
   };
 
   const getStatusBadgeColor = (status) => {
