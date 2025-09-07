@@ -66,6 +66,10 @@ const Dashboard = () => {
         return <Reports />;
       case 'settings':
         return <Settings />;
+      case 'sales-analytics':
+        return <SalesAnalytics />;
+      case 'financial-analytics':
+        return <FinancialAnalytics />;
       default:
         return <Overview />;
     }
