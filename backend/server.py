@@ -379,23 +379,40 @@ async def login(login_data: UserLogin):
         logging.error(f"Login error: {str(e)}")
         raise HTTPException(status_code=500, detail="Login error")
 
-# Commented out - now using real transaction routes
-# @api_router.get("/transactions/summary")
-# async def get_transaction_summary():
-#     """Obter resumo das transações"""
-#     try:
-#         # Por enquanto retorna dados mockados
-#         return {
-#             "totalEntradas": 16030.00,
-#             "totalSaidas": 1850.00,
-#             "saldoAtual": 14180.00,
-#             "transacoesHoje": 3,
-#             "clientesAtendidos": 6,
-#             "ticketMedio": 2671.67
-#         }
-#     except Exception as e:
-#         logging.error(f"Summary error: {str(e)}")
-#         raise HTTPException(status_code=500, detail="Error getting summary")
+@api_router.get("/transactions/summary")
+async def get_transaction_summary():
+    """Obter resumo das transações"""
+    try:
+        # Get transactions from database
+        transactions = await db.transactions.find({}).to_list(None)
+        
+        total_entradas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'entrada')
+        total_saidas = sum(t.get('amount', 0) for t in transactions if t.get('type') == 'saida')
+        saldo_atual = total_entradas - total_saidas
+        
+        # Count today's transactions
+        from datetime import date
+        today = date.today().strftime("%Y-%m-%d")
+        transacoes_hoje = len([t for t in transactions if t.get('date') == today or t.get('transactionDate') == today])
+        
+        # Count unique clients
+        clientes_atendidos = len(set(t.get('client', '') for t in transactions if t.get('client')))
+        
+        # Calculate average ticket
+        entrada_transactions = [t for t in transactions if t.get('type') == 'entrada']
+        ticket_medio = total_entradas / len(entrada_transactions) if entrada_transactions else 0
+        
+        return {
+            "totalEntradas": total_entradas,
+            "totalSaidas": total_saidas,
+            "saldoAtual": saldo_atual,
+            "transacoesHoje": transacoes_hoje,
+            "clientesAtendidos": clientes_atendidos,
+            "ticketMedio": ticket_medio
+        }
+    except Exception as e:
+        logging.error(f"Summary error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting summary")
 
 @api_router.get("/analytics/sales")
 async def get_sales_analytics():
