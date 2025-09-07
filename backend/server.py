@@ -572,20 +572,19 @@ async def get_categories():
         ]
     }
 
-# Commented out - now using real transaction routes
-# @api_router.get("/transactions/payment-methods")
-# async def get_payment_methods():
-#     """Obter métodos de pagamento"""
-#     return {
-#         "paymentMethods": [
-#             "Dinheiro",
-#             "PIX",
-#             "Cartão de Crédito",
-#             "Cartão de Débito",
-#             "Transferência",
-#             "Cartão Corporativo"
-#         ]
-#     }
+@api_router.get("/transactions/payment-methods")
+async def get_payment_methods():
+    """Obter métodos de pagamento"""
+    return {
+        "paymentMethods": [
+            "Dinheiro",
+            "PIX",
+            "Cartão de Crédito",
+            "Cartão de Débito",
+            "Transferência",
+            "Cartão Corporativo"
+        ]
+    }
 
 @api_router.post("/reports/export/pdf")
 async def export_pdf(report_data: dict = None):
