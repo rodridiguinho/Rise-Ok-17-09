@@ -35,15 +35,40 @@ const Clients = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const { toast } = useToast();
 
+  const [loading, setLoading] = useState(true);
   const [newClient, setNewClient] = useState({
     clientNumber: '',
     name: '',
     email: '',
     phone: '',
-    cpf: '',
+    document: '',
     address: '',
+    city: '',
+    state: '',
+    zipCode: '',
     status: 'Ativo'
   });
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const fetchClients = async () => {
+    try {
+      setLoading(true);
+      const clientsData = await clientsAPI.getClients();
+      setClients(clientsData);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao carregar clientes",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
