@@ -771,6 +771,245 @@ def test_transaction_date_functionality():
     except Exception as e:
         print_result(False, "POST /api/transactions - Date validation tests failed", str(e))
 
+def test_analytics_endpoints():
+    """Test analytics endpoints - NEW REQUIREMENT"""
+    print_test_header("Analytics Endpoints - Sales and Financial Analytics")
+    
+    # Test 1: GET /api/analytics/sales - Sales Analytics API
+    try:
+        response = requests.get(f"{API_URL}/analytics/sales", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify all required fields are present
+            required_fields = [
+                "valorTotal", "percentualVariacao", "comissoes", "numeroVendas",
+                "novosClientes", "ticketMedio", "taxaConversao", "rankingVendedores"
+            ]
+            missing_fields = [f for f in required_fields if f not in data]
+            
+            if not missing_fields:
+                print_result(True, "GET /api/analytics/sales - Response structure validation", 
+                           f"All required fields present: {required_fields}")
+                
+                # Validate numeric values are properly formatted
+                numeric_fields = ["valorTotal", "percentualVariacao", "comissoes", "numeroVendas", 
+                                "novosClientes", "ticketMedio"]
+                for field in numeric_fields:
+                    value = data.get(field)
+                    if isinstance(value, (int, float)) and value >= 0:
+                        print_result(True, f"GET /api/analytics/sales - Numeric validation ({field})", 
+                                   f"Valid numeric value: {value}")
+                    else:
+                        print_result(False, f"GET /api/analytics/sales - Numeric validation ({field})", 
+                                   f"Invalid numeric value: {value} (type: {type(value)})")
+                
+                # Validate taxaConversao object structure
+                taxa_conversao = data.get("taxaConversao", {})
+                if isinstance(taxa_conversao, dict):
+                    taxa_fields = ["vendasPorCotacoes", "totalCotacoes", "percentual"]
+                    taxa_missing = [f for f in taxa_fields if f not in taxa_conversao]
+                    if not taxa_missing:
+                        print_result(True, "GET /api/analytics/sales - taxaConversao structure", 
+                                   f"All conversion rate fields present: {taxa_fields}")
+                    else:
+                        print_result(False, "GET /api/analytics/sales - taxaConversao structure", 
+                                   f"Missing fields: {taxa_missing}")
+                else:
+                    print_result(False, "GET /api/analytics/sales - taxaConversao structure", 
+                               f"Expected object, got: {type(taxa_conversao)}")
+                
+                # Validate rankingVendedores array structure
+                ranking = data.get("rankingVendedores", [])
+                if isinstance(ranking, list) and len(ranking) > 0:
+                    print_result(True, "GET /api/analytics/sales - rankingVendedores array", 
+                               f"Found {len(ranking)} sellers in ranking")
+                    
+                    # Check first seller structure
+                    seller = ranking[0]
+                    seller_fields = ["nome", "valor", "percentual", "posicao"]
+                    seller_missing = [f for f in seller_fields if f not in seller]
+                    if not seller_missing:
+                        print_result(True, "GET /api/analytics/sales - Seller structure validation", 
+                                   f"All seller fields present: {seller_fields}")
+                        
+                        # Validate seller data types
+                        if (isinstance(seller.get("nome"), str) and 
+                            isinstance(seller.get("valor"), (int, float)) and
+                            isinstance(seller.get("percentual"), (int, float)) and
+                            isinstance(seller.get("posicao"), int)):
+                            print_result(True, "GET /api/analytics/sales - Seller data types", 
+                                       f"All seller data types valid")
+                        else:
+                            print_result(False, "GET /api/analytics/sales - Seller data types", 
+                                       f"Invalid data types in seller object")
+                    else:
+                        print_result(False, "GET /api/analytics/sales - Seller structure validation", 
+                                   f"Missing seller fields: {seller_missing}")
+                else:
+                    print_result(False, "GET /api/analytics/sales - rankingVendedores array", 
+                               f"Expected non-empty array, got: {type(ranking)} with length {len(ranking) if isinstance(ranking, list) else 'N/A'}")
+                
+                # Validate percentual calculations are reasonable (between -100 and 1000)
+                percentual_fields = ["percentualVariacao", "percentualComissoes", "percentualVendas", "percentualClientes", "percentualTicket"]
+                for field in percentual_fields:
+                    if field in data:
+                        value = data[field]
+                        if isinstance(value, (int, float)) and -100 <= value <= 1000:
+                            print_result(True, f"GET /api/analytics/sales - Percentual validation ({field})", 
+                                       f"Reasonable percentage: {value}%")
+                        else:
+                            print_result(False, f"GET /api/analytics/sales - Percentual validation ({field})", 
+                                       f"Unreasonable percentage: {value}% (should be between -100% and 1000%)")
+                
+            else:
+                print_result(False, "GET /api/analytics/sales - Response structure validation", 
+                           f"Missing required fields: {missing_fields}")
+        else:
+            print_result(False, f"GET /api/analytics/sales - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/analytics/sales - Request failed", str(e))
+    
+    # Test 2: GET /api/analytics/financial - Financial Analytics API
+    try:
+        response = requests.get(f"{API_URL}/analytics/financial", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify all required fields are present
+            required_fields = [
+                "receitas", "despesas", "lucro", "margemLucro", "graficoDados"
+            ]
+            missing_fields = [f for f in required_fields if f not in data]
+            
+            if not missing_fields:
+                print_result(True, "GET /api/analytics/financial - Response structure validation", 
+                           f"All required fields present: {required_fields}")
+                
+                # Validate numeric values are properly formatted
+                numeric_fields = ["receitas", "despesas", "lucro", "margemLucro"]
+                for field in numeric_fields:
+                    value = data.get(field)
+                    if isinstance(value, (int, float)):
+                        print_result(True, f"GET /api/analytics/financial - Numeric validation ({field})", 
+                                   f"Valid numeric value: {value}")
+                    else:
+                        print_result(False, f"GET /api/analytics/financial - Numeric validation ({field})", 
+                                   f"Invalid numeric value: {value} (type: {type(value)})")
+                
+                # Validate percentual fields if present
+                percentual_fields = ["percentualReceitas", "percentualDespesas", "percentualLucro"]
+                for field in percentual_fields:
+                    if field in data:
+                        value = data[field]
+                        if isinstance(value, (int, float)) and -100 <= value <= 1000:
+                            print_result(True, f"GET /api/analytics/financial - Percentual validation ({field})", 
+                                       f"Reasonable percentage: {value}%")
+                        else:
+                            print_result(False, f"GET /api/analytics/financial - Percentual validation ({field})", 
+                                       f"Unreasonable percentage: {value}% (should be between -100% and 1000%)")
+                
+                # Validate margemLucro calculation is reasonable
+                margem = data.get("margemLucro")
+                if isinstance(margem, (int, float)) and 0 <= margem <= 100:
+                    print_result(True, "GET /api/analytics/financial - Margin calculation", 
+                               f"Reasonable profit margin: {margem}%")
+                else:
+                    print_result(False, "GET /api/analytics/financial - Margin calculation", 
+                               f"Unreasonable profit margin: {margem}% (should be between 0% and 100%)")
+                
+                # Validate graficoDados object structure
+                grafico = data.get("graficoDados", {})
+                if isinstance(grafico, dict):
+                    grafico_fields = ["labels", "receitas", "despesas", "lucro"]
+                    grafico_missing = [f for f in grafico_fields if f not in grafico]
+                    if not grafico_missing:
+                        print_result(True, "GET /api/analytics/financial - graficoDados structure", 
+                                   f"All chart data fields present: {grafico_fields}")
+                        
+                        # Validate arrays contain expected data structure
+                        for field in grafico_fields:
+                            array_data = grafico.get(field, [])
+                            if isinstance(array_data, list) and len(array_data) > 0:
+                                print_result(True, f"GET /api/analytics/financial - Chart array ({field})", 
+                                           f"Valid array with {len(array_data)} elements")
+                                
+                                # For numeric arrays, validate data types
+                                if field != "labels":
+                                    if all(isinstance(x, (int, float)) for x in array_data):
+                                        print_result(True, f"GET /api/analytics/financial - Chart data types ({field})", 
+                                                   f"All elements are numeric")
+                                    else:
+                                        print_result(False, f"GET /api/analytics/financial - Chart data types ({field})", 
+                                                   f"Non-numeric elements found in array")
+                            else:
+                                print_result(False, f"GET /api/analytics/financial - Chart array ({field})", 
+                                           f"Expected non-empty array, got: {type(array_data)} with length {len(array_data) if isinstance(array_data, list) else 'N/A'}")
+                    else:
+                        print_result(False, "GET /api/analytics/financial - graficoDados structure", 
+                                   f"Missing chart fields: {grafico_missing}")
+                else:
+                    print_result(False, "GET /api/analytics/financial - graficoDados structure", 
+                               f"Expected object, got: {type(grafico)}")
+                
+            else:
+                print_result(False, "GET /api/analytics/financial - Response structure validation", 
+                           f"Missing required fields: {missing_fields}")
+        else:
+            print_result(False, f"GET /api/analytics/financial - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/analytics/financial - Request failed", str(e))
+    
+    # Test 3: Verify consistent data structure between endpoints
+    try:
+        sales_response = requests.get(f"{API_URL}/analytics/sales", timeout=10)
+        financial_response = requests.get(f"{API_URL}/analytics/financial", timeout=10)
+        
+        if sales_response.status_code == 200 and financial_response.status_code == 200:
+            sales_data = sales_response.json()
+            financial_data = financial_response.json()
+            
+            # Both should return JSON objects
+            if isinstance(sales_data, dict) and isinstance(financial_data, dict):
+                print_result(True, "Analytics endpoints - Data structure consistency", 
+                           "Both endpoints return consistent JSON object structure")
+            else:
+                print_result(False, "Analytics endpoints - Data structure consistency", 
+                           f"Inconsistent data types: sales={type(sales_data)}, financial={type(financial_data)}")
+        else:
+            print_result(False, "Analytics endpoints - Data structure consistency", 
+                       f"Could not retrieve both endpoints for comparison")
+    except Exception as e:
+        print_result(False, "Analytics endpoints - Data structure consistency", str(e))
+    
+    # Test 4: Test authentication requirements (if any)
+    try:
+        # Test sales analytics without authentication
+        response = requests.get(f"{API_URL}/analytics/sales", timeout=10)
+        if response.status_code == 200:
+            print_result(True, "GET /api/analytics/sales - No authentication required", 
+                       "Sales analytics accessible without authentication")
+        elif response.status_code == 401:
+            print_result(True, "GET /api/analytics/sales - Authentication required", 
+                       "Sales analytics correctly requires authentication")
+        else:
+            print_result(False, f"GET /api/analytics/sales - Unexpected response - HTTP {response.status_code}", 
+                        response.text)
+        
+        # Test financial analytics without authentication
+        response = requests.get(f"{API_URL}/analytics/financial", timeout=10)
+        if response.status_code == 200:
+            print_result(True, "GET /api/analytics/financial - No authentication required", 
+                       "Financial analytics accessible without authentication")
+        elif response.status_code == 401:
+            print_result(True, "GET /api/analytics/financial - Authentication required", 
+                       "Financial analytics correctly requires authentication")
+        else:
+            print_result(False, f"GET /api/analytics/financial - Unexpected response - HTTP {response.status_code}", 
+                        response.text)
+    except Exception as e:
+        print_result(False, "Analytics endpoints - Authentication test failed", str(e))
+
 def test_jwt_validation():
     """Test JWT token validation"""
     print_test_header("JWT Token Validation")
