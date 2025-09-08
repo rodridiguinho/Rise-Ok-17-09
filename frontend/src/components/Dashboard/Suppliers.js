@@ -49,13 +49,35 @@ const Suppliers = () => {
     name: '',
     email: '',
     phone: '',
-    cnpj: '',
-    website: '',
+    document: '',
     address: '',
+    city: '',
+    state: '',
+    zipCode: '',
     category: 'Hotel',
-    contact: '',
     status: 'Ativo'
   });
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
+
+  const fetchSuppliers = async () => {
+    try {
+      setLoading(true);
+      const suppliersData = await suppliersAPI.getSuppliers();
+      setSuppliers(suppliersData);
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao carregar fornecedores",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const supplierCategories = [
     'Hotel',
