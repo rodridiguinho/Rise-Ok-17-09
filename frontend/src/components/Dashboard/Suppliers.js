@@ -32,6 +32,7 @@ import {
   Globe
 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { suppliersAPI } from '../../services/api';
 
 const Suppliers = () => {
   const [suppliers, setSuppliers] = useState([
