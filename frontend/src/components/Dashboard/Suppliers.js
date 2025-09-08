@@ -35,56 +35,8 @@ import { useToast } from '../../hooks/use-toast';
 import { suppliersAPI } from '../../services/api';
 
 const Suppliers = () => {
-  const [suppliers, setSuppliers] = useState([
-    {
-      id: '1',
-      supplierNumber: 'FOR001',
-      name: 'Hotel Ibis São Paulo',
-      email: 'reservas@ibis.com.br',
-      phone: '+55 11 3333-4444',
-      cnpj: '12.345.678/0001-90',
-      website: 'www.ibis.com.br',
-      address: 'Av. Paulista, 1000 - São Paulo, SP',
-      category: 'Hotel',
-      contact: 'Ana Silva',
-      totalPayments: 25000.00,
-      lastPayment: '2025-01-05',
-      status: 'Ativo',
-      createdAt: '2024-01-10'
-    },
-    {
-      id: '2',
-      supplierNumber: 'FOR002',
-      name: 'LATAM Airlines',
-      email: 'corporativo@latam.com',
-      phone: '+55 11 4004-2121',
-      cnpj: '02.012.862/0001-60',
-      website: 'www.latam.com',
-      address: 'Rua Boa Vista, 254 - São Paulo, SP',
-      category: 'Companhia Aérea',
-      contact: 'Carlos Santos',
-      totalPayments: 89500.00,
-      lastPayment: '2025-01-04',
-      status: 'Ativo',
-      createdAt: '2024-01-05'
-    },
-    {
-      id: '3',
-      supplierNumber: 'FOR003',
-      name: 'Turismo ABC Ltda',
-      email: 'contato@turismoabc.com.br',
-      phone: '+55 11 5555-6666',
-      cnpj: '98.765.432/0001-10',
-      website: 'www.turismoabc.com.br',
-      address: 'Rua Augusta, 500 - São Paulo, SP',
-      category: 'Operadora',
-      contact: 'Maria Oliveira',
-      totalPayments: 15750.00,
-      lastPayment: '2024-12-30',
-      status: 'Inativo',
-      createdAt: '2024-02-15'
-    }
-  ]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
