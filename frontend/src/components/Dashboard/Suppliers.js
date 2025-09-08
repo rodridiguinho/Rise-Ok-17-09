@@ -116,7 +116,7 @@ const Suppliers = () => {
     (supplier.cnpj && supplier.cnpj.includes(searchTerm))
   );
 
-  const handleAddSupplier = () => {
+  const handleAddSupplier = async () => {
     if (!newSupplier.name || !newSupplier.email) {
       toast({
         variant: "destructive",
@@ -126,34 +126,39 @@ const Suppliers = () => {
       return;
     }
 
-    const supplier = {
-      id: Date.now().toString(),
-      supplierNumber: newSupplier.supplierNumber || generateSupplierNumber(),
-      ...newSupplier,
-      totalPayments: 0,
-      lastPayment: '-',
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-
-    setSuppliers([...suppliers, supplier]);
-    setNewSupplier({
-      supplierNumber: '',
-      name: '',
-      email: '',
-      phone: '',
-      cnpj: '',
-      website: '',
-      address: '',
-      category: 'Hotel',
-      contact: '',
-      status: 'Ativo'
-    });
-    setIsAddModalOpen(false);
-    
-    toast({
-      title: "Fornecedor adicionado",
-      description: "O fornecedor foi cadastrado com sucesso.",
-    });
+    try {
+      const createdSupplier = await suppliersAPI.createSupplier(newSupplier);
+      setSuppliers([...suppliers, createdSupplier]);
+      
+      setNewSupplier({
+        supplierNumber: '',
+        name: '',
+        email: '',
+        phone: '',
+        document: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        category: 'Hotel',
+        status: 'Ativo'
+      });
+      
+      setIsAddModalOpen(false);
+      
+      toast({
+        title: "Fornecedor adicionado",
+        description: "O fornecedor foi adicionado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error creating supplier:', error);
+      const errorMessage = error.response?.data?.detail || "Erro ao criar fornecedor";
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: errorMessage,
+      });
+    }
   };
 
   const handleEditSupplier = (supplier) => {
