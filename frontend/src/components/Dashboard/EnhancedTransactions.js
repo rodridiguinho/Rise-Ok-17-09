@@ -393,16 +393,56 @@ const EnhancedTransactions = () => {
                   <Plane className="mr-2 h-5 w-5" />
                   Detalhes da Viagem
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                
+                {/* Primeira linha - Informações do cliente e produto */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   <div className="space-y-2">
-                    <Label>Número do Cliente</Label>
+                    <Label>Tipo de Produto *</Label>
+                    <Select value={newTransaction.productType} onValueChange={(value) => setNewTransaction({...newTransaction, productType: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Passagem">✈️ Passagem Aérea</SelectItem>
+                        <SelectItem value="Hotel">🏨 Hotel/Hospedagem</SelectItem>
+                        <SelectItem value="Pacote">📦 Pacote Turístico</SelectItem>
+                        <SelectItem value="Seguro">🛡️ Seguro Viagem</SelectItem>
+                        <SelectItem value="Transfer">🚗 Transfer</SelectItem>
+                        <SelectItem value="Outros">📋 Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Código da Reserva do Cliente</Label>
                     <Input
-                      placeholder="CLI0001"
-                      value={newTransaction.clientNumber}
-                      onChange={(e) => setNewTransaction({...newTransaction, clientNumber: e.target.value})}
+                      placeholder="Ex: BR123456"
+                      value={newTransaction.clientReservationCode}
+                      onChange={(e) => setNewTransaction({...newTransaction, clientReservationCode: e.target.value})}
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label>Cidade de Saída</Label>
+                    <Input
+                      placeholder="Ex: São Paulo"
+                      value={newTransaction.departureCity}
+                      onChange={(e) => setNewTransaction({...newTransaction, departureCity: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Cidade de Chegada</Label>
+                    <Input
+                      placeholder="Ex: Rio de Janeiro"
+                      value={newTransaction.arrivalCity}
+                      onChange={(e) => setNewTransaction({...newTransaction, arrivalCity: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                {/* Segunda linha - Datas e tipo de viagem */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Tipo de Viagem</Label>
                     <Select value={newTransaction.tripType} onValueChange={(value) => setNewTransaction({...newTransaction, tripType: value})}>
@@ -436,15 +476,6 @@ const EnhancedTransactions = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Data de Partida</Label>
-                    <Input
-                      type="date"
-                      value={newTransaction.departureDate}
-                      onChange={(e) => setNewTransaction({...newTransaction, departureDate: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
                     <Label>Data de Retorno</Label>
                     <Input
                       type="date"
@@ -454,111 +485,17 @@ const EnhancedTransactions = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Tipo de Produto</Label>
-                    <Select value={newTransaction.productType} onValueChange={(value) => setNewTransaction({...newTransaction, productType: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Passagem">✈️ Passagem Aérea</SelectItem>
-                        <SelectItem value="Hotel">🏨 Hotel/Hospedagem</SelectItem>
-                        <SelectItem value="Pacote">📦 Pacote Turístico</SelectItem>
-                        <SelectItem value="Seguro">🛡️ Seguro Viagem</SelectItem>
-                        <SelectItem value="Transfer">🚗 Transfer</SelectItem>
-                        <SelectItem value="Outros">📋 Outros</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center space-x-2 mt-6">
+                      <input
+                        type="checkbox"
+                        id="hasStops"
+                        checked={newTransaction.hasStops}
+                        onChange={(e) => setNewTransaction({...newTransaction, hasStops: e.target.checked})}
+                        className="rounded border-gray-300"
+                      />
+                      <Label htmlFor="hasStops">Possui escalas</Label>
+                    </div>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>Código da Reserva do Cliente</Label>
-                    <Input
-                      placeholder="Ex: BR123456"
-                      value={newTransaction.clientReservationCode}
-                      onChange={(e) => setNewTransaction({...newTransaction, clientReservationCode: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <Label>Cidade de Saída</Label>
-                    <Input
-                      placeholder="Ex: São Paulo"
-                      value={newTransaction.departureCity}
-                      onChange={(e) => setNewTransaction({...newTransaction, departureCity: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Cidade de Chegada</Label>
-                    <Input
-                      placeholder="Ex: Rio de Janeiro"
-                      value={newTransaction.arrivalCity}
-                      onChange={(e) => setNewTransaction({...newTransaction, arrivalCity: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <Label>Horário de Saída</Label>
-                    <Input
-                      type="time"
-                      value={newTransaction.departureTime}
-                      onChange={(e) => setNewTransaction({...newTransaction, departureTime: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Horário de Chegada</Label>
-                    <Input
-                      type="time"
-                      value={newTransaction.arrivalTime}
-                      onChange={(e) => setNewTransaction({...newTransaction, arrivalTime: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Origem</Label>
-                    <Select value={newTransaction.originAirport} onValueChange={(value) => setNewTransaction({...newTransaction, originAirport: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Aeroporto origem" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {airports.map(airport => (
-                          <SelectItem key={airport.code} value={airport.code}>
-                            {airport.code} - {airport.city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Destino</Label>
-                    <Select value={newTransaction.destinationAirport} onValueChange={(value) => setNewTransaction({...newTransaction, destinationAirport: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Aeroporto destino" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {airports.map(airport => (
-                          <SelectItem key={airport.code} value={airport.code}>
-                            {airport.code} - {airport.city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2 mt-4">
-                  <Checkbox
-                    id="hasStops"
-                    checked={newTransaction.hasStops}
-                    onCheckedChange={(checked) => setNewTransaction({...newTransaction, hasStops: checked})}
-                  />
-                  <Label htmlFor="hasStops">Possui escalas</Label>
                 </div>
               </div>
 
