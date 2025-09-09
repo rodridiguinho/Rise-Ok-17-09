@@ -685,6 +685,18 @@ async def create_transaction(transaction: TransactionCreate):
             "commissionPaymentStatus": transaction.commissionPaymentStatus or "Pendente",
             "commissionPercentage": commission_percentage,
             "customCategory": transaction.customCategory,
+            # Travel-specific fields
+            "clientNumber": transaction.clientNumber,
+            "reservationLocator": transaction.reservationLocator,
+            "departureDate": transaction.departureDate,
+            "returnDate": transaction.returnDate,
+            "departureTime": transaction.departureTime,
+            "arrivalTime": transaction.arrivalTime,
+            "hasStops": transaction.hasStops,
+            "originAirport": transaction.originAirport,
+            "destinationAirport": transaction.destinationAirport,
+            "tripType": transaction.tripType or "Lazer",
+            "products": transaction.products or [],
             "status": "Confirmado",
             "transactionDate": transaction_date,  # Store the actual transaction date
             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
