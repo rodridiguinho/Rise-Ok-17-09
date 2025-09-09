@@ -924,10 +924,23 @@ const EnhancedTransactions = () => {
                       {transaction.seller && <span>Vendedor: {transaction.seller}</span>}
                       {transaction.supplier && <span>Fornecedor: {transaction.supplier}</span>}
                       <span>Pagamento: {transaction.paymentMethod}</span>
+                      {transaction.productType && <span>Produto: {transaction.productType}</span>}
+                      {transaction.clientReservationCode && <span>Reserva Cliente: {transaction.clientReservationCode}</span>}
+                      {transaction.departureCity && transaction.arrivalCity && (
+                        <span>{transaction.departureCity} → {transaction.arrivalCity}</span>
+                      )}
                       {transaction.saleValue && <span>Venda: {formatCurrency(transaction.saleValue)}</span>}
                       {transaction.supplierValue && <span>Fornecedor: {formatCurrency(transaction.supplierValue)}</span>}
                       {transaction.commissionValue && (
                         <span>Comissão: {formatCurrency(transaction.commissionValue)} ({transaction.commissionPercentage?.toFixed(2)}%)</span>
+                      )}
+                      {transaction.supplierUsedMiles && transaction.supplierMilesQuantity && (
+                        <span className="text-blue-600 font-medium">
+                          ✈️ Milhas: {parseInt(transaction.supplierMilesQuantity).toLocaleString('pt-BR')} ({transaction.supplierMilesProgram})
+                        </span>
+                      )}
+                      {transaction.airportTaxes && (
+                        <span>Taxas: {formatCurrency(transaction.airportTaxes)}</span>
                       )}
                       {transaction.tripType && (
                         <span className="flex items-center">
