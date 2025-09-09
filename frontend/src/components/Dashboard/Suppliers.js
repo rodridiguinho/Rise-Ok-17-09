@@ -692,6 +692,100 @@ const Suppliers = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label>Tipo de Fornecedor</Label>
+              <Select value={newSupplier.supplierType} onValueChange={(value) => setNewSupplier({...newSupplier, supplierType: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {supplierTypes.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tipo de Compra</Label>
+              <Select value={newSupplier.purchaseType} onValueChange={(value) => setNewSupplier({...newSupplier, purchaseType: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                  <SelectItem value="Milhas">Milhas</SelectItem>
+                  <SelectItem value="Voucher">Voucher</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Campos específicos para Milhas */}
+            {newSupplier.purchaseType === 'Milhas' && (
+              <>
+                <div className="space-y-2">
+                  <Label>Quantidade de Milhas</Label>
+                  <Input
+                    type="number"
+                    placeholder="Ex: 5000"
+                    value={newSupplier.milesQuantity}
+                    onChange={(e) => setNewSupplier({...newSupplier, milesQuantity: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Valor por 1.000 milhas (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Ex: 26,00"
+                    value={newSupplier.milesValuePer1000}
+                    onChange={(e) => setNewSupplier({...newSupplier, milesValuePer1000: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Programa/Companhia</Label>
+                  <Input
+                    placeholder="Ex: LATAM Pass, Smiles"
+                    value={newSupplier.milesProgram}
+                    onChange={(e) => setNewSupplier({...newSupplier, milesProgram: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Conta do Fornecedor (Email/Usuário)</Label>
+                  <Input
+                    placeholder="Ex: fornecedor@email.com"
+                    value={newSupplier.milesAccount}
+                    onChange={(e) => setNewSupplier({...newSupplier, milesAccount: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Desconto Aplicado</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Valor do desconto"
+                      value={newSupplier.discountApplied}
+                      onChange={(e) => setNewSupplier({...newSupplier, discountApplied: e.target.value})}
+                    />
+                    <Select value={newSupplier.discountType} onValueChange={(value) => setNewSupplier({...newSupplier, discountType: value})}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="reais">R$</SelectItem>
+                        <SelectItem value="percentual">%</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </>
+            )}
             
             <div className="space-y-2">
               <Label>Pessoa de Contato</Label>
