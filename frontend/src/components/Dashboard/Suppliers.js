@@ -159,6 +159,14 @@ const Suppliers = () => {
         state: '',
         zipCode: '',
         category: 'Hotel',
+        supplierType: 'Operadora',
+        purchaseType: 'Dinheiro',
+        milesQuantity: '',
+        milesValuePer1000: '',
+        milesProgram: '',
+        milesAccount: '',
+        discountApplied: '',
+        discountType: 'reais',
         status: 'Ativo'
       });
       
