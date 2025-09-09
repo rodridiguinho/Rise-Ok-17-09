@@ -612,6 +612,9 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Enhanced Supplier Management - Travel-specific Fields"
+    - "Enhanced Transactions - Complex Travel Fields"
+    - "Supplier API Integration Testing"
     - "URGENT Transaction Persistence Test - COMPLETED ✅"
     - "Client Persistence Bug Investigation - COMPLETED"
     - "Client Management API Testing - COMPLETED"
@@ -623,7 +626,7 @@ test_plan:
     - "Analytics Error Investigation and Fix - COMPLETED ✅"
   stuck_tasks: []
   test_all: false
-  test_priority: "review_request_first"
+  test_priority: "new_features_first"
 
 agent_communication:
     - agent: "testing"
