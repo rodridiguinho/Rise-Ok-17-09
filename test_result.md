@@ -106,15 +106,18 @@ user_problem_statement: "Testar especificamente as APIs de usuários que acabamo
 
   - task: "Supplier Travel-Specific Fields API"
     implemented: true
-    working: "NA"
+    working: false
     file: "backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Backend supplier API endpoints already include travel-specific fields (purchaseType: Milhas/Dinheiro/Voucher, milesQuantity, milesValuePer1000, milesProgram, milesAccount, discountApplied, discountType). All CRUD operations (GET, POST, PUT, DELETE) support these fields. API ready for frontend integration testing."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL SUPPLIER API ISSUES IDENTIFIED: ✅ CREATION WORKS: Successfully created supplier with purchaseType='Milhas' and all travel fields (milesQuantity: 50000, milesValuePer1000: 35.50, milesProgram: 'LATAM Pass', milesAccount: 'LP123456789', discountApplied: 5.0, discountType: 'percentual'). All fields correctly saved and persisted to MongoDB. ❌ UPDATE FUNCTIONALITY BROKEN: PUT /api/suppliers/{id} does NOT update travel-specific fields. When attempting to change purchaseType from 'Milhas' to 'Dinheiro', the fields remain unchanged (purchaseType still 'Milhas', milesQuantity still 50000, discountType still 'percentual'). This is a critical bug preventing supplier management workflow. ❌ EMAIL VALIDATION MISSING: Duplicate email validation not working - should return 400 for duplicate emails but returns 200 instead. ✅ DELETE WORKS: Supplier deletion and persistence working correctly. ✅ VOUCHER TYPE WORKS: Successfully created supplier with purchaseType='Voucher'. AUTHENTICATION: Used rodrigo@risetravel.com.br / Emily2030* as specified. ROOT CAUSE: The PUT endpoint is not updating travel-specific fields in the update_data dictionary."
 
 backend:
   - task: "API Health Check Endpoint"
