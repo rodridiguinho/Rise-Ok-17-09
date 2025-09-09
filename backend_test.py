@@ -1860,6 +1860,7 @@ def run_all_tests():
     test_authentication()
     test_transactions()
     test_transaction_date_functionality()  # NEW: Test transaction date vs entry date functionality
+    test_sales_analysis_endpoints()  # NEW: Test newly implemented sales analysis and reporting endpoints
     test_analytics_endpoints()  # NEW: Test analytics endpoints as requested
     test_analytics_integration()  # NEW: Test integration with existing endpoints
     test_reports()
