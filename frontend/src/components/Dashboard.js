@@ -13,6 +13,8 @@ import Settings from './Dashboard/Settings';
 import SalesAnalytics from './Dashboard/SalesAnalytics';
 import FinancialAnalytics from './Dashboard/FinancialAnalytics';
 import SalesReports from './Dashboard/SalesReports';
+import AdminSettings from './Dashboard/AdminSettings';
+import SalesRanking from './Dashboard/SalesRanking';
 
 const Dashboard = () => {
   const { user } = useAuth();
