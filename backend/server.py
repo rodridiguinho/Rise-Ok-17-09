@@ -97,7 +97,19 @@ class TransactionCreate(BaseModel):
     commissionPaymentStatus: Optional[str] = "Pendente"
     commissionPercentage: Optional[float] = None
     transactionDate: Optional[str] = None
-    customCategory: Optional[str] = None  # Para despesas customizadas
+    customCategory: Optional[str] = None
+    # Travel-specific fields
+    clientNumber: Optional[str] = None
+    reservationLocator: Optional[str] = None
+    departureDate: Optional[str] = None
+    returnDate: Optional[str] = None
+    departureTime: Optional[str] = None
+    arrivalTime: Optional[str] = None
+    hasStops: Optional[bool] = False
+    originAirport: Optional[str] = None
+    destinationAirport: Optional[str] = None
+    tripType: Optional[str] = "Lazer"  # Lazer/Negócios
+    products: Optional[list] = []  # Multiple products
 
 # Create API router
 from fastapi import APIRouter
