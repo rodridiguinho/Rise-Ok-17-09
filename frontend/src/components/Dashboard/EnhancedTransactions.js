@@ -432,6 +432,24 @@ const EnhancedTransactions = () => {
                   </div>
 
                   <div className="space-y-2">
+                    <Label>Data de Partida</Label>
+                    <Input
+                      type="date"
+                      value={newTransaction.departureDate}
+                      onChange={(e) => setNewTransaction({...newTransaction, departureDate: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Data de Retorno</Label>
+                    <Input
+                      type="date"
+                      value={newTransaction.returnDate}
+                      onChange={(e) => setNewTransaction({...newTransaction, returnDate: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label>Tipo de Produto</Label>
                     <Select value={newTransaction.productType} onValueChange={(value) => setNewTransaction({...newTransaction, productType: value})}>
                       <SelectTrigger>
