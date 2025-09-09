@@ -54,7 +54,12 @@ const Transactions = () => {
     seller: '',
     saleValue: '',
     supplierValue: '',
+    supplierPaymentDate: '',
+    supplierPaymentStatus: 'Pendente',
     commissionValue: '',
+    commissionPaymentDate: '',
+    commissionPaymentStatus: 'Pendente',
+    customCategory: '',
     transactionDate: new Date().toISOString().split('T')[0]
   });
 
