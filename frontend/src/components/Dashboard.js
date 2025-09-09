@@ -71,6 +71,8 @@ const Dashboard = () => {
         return <SalesAnalytics />;
       case 'financial-analytics':
         return <FinancialAnalytics />;
+      case 'sales-reports':
+        return <SalesReports />;
       default:
         return <Overview />;
     }
