@@ -75,6 +75,10 @@ const Dashboard = () => {
         return <FinancialAnalytics />;
       case 'sales-reports':
         return <SalesReports />;
+      case 'admin-settings':
+        return <AdminSettings />;
+      case 'sales-ranking':
+        return <SalesRanking />;
       default:
         return <Overview />;
     }
