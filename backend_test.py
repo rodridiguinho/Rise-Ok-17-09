@@ -1133,6 +1133,303 @@ def test_analytics_integration():
         print_result(False, "Integration test - Overall endpoint accessibility", 
                    f"Only {successful_endpoints}/{total_endpoints} endpoints accessible ({success_rate:.1f}%)")
 
+def test_supplier_travel_fields_update():
+    """Test supplier update functionality with travel-specific fields - CRITICAL REVIEW REQUEST"""
+    print_test_header("Supplier Travel Fields Update - CRITICAL BUG TESTING")
+    
+    created_supplier_id = None
+    
+    # Test 1: Authenticate first
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "access_token" in data:
+                print_result(True, "Authentication for supplier testing", 
+                           f"Successfully logged in as {VALID_EMAIL}")
+            else:
+                print_result(False, "Authentication for supplier testing", 
+                           "Login response missing access_token")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Authentication for supplier testing failed", str(e))
+    
+    # Test 2: Create supplier with purchaseType="Milhas" and complete travel fields
+    try:
+        supplier_data = {
+            "name": "Fornecedor Teste Milhas",
+            "email": "fornecedor.milhas@test.com",
+            "phone": "+55 11 99999-1111",
+            "document": "12.345.678/0001-90",
+            "address": "Rua das Milhas, 123",
+            "city": "São Paulo",
+            "state": "SP",
+            "zipCode": "01234-567",
+            "category": "Companhia Aérea",
+            "supplierType": "Nacional",
+            # Travel-specific fields - CRITICAL TEST DATA
+            "purchaseType": "Milhas",
+            "milesQuantity": 50000,
+            "milesValuePer1000": 35.50,
+            "milesProgram": "LATAM Pass",
+            "milesAccount": "LP123456789",
+            "discountApplied": 5.0,
+            "discountType": "percentual",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/suppliers", json=supplier_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data and data.get("purchaseType") == "Milhas":
+                created_supplier_id = data["id"]
+                print_result(True, "POST /api/suppliers - Create supplier with Milhas", 
+                           f"ID: {created_supplier_id}, purchaseType: {data.get('purchaseType')}")
+                
+                # Verify all travel fields were saved correctly
+                travel_fields = {
+                    "purchaseType": "Milhas",
+                    "milesQuantity": 50000,
+                    "milesValuePer1000": 35.50,
+                    "milesProgram": "LATAM Pass",
+                    "milesAccount": "LP123456789",
+                    "discountApplied": 5.0,
+                    "discountType": "percentual"
+                }
+                
+                all_fields_correct = True
+                for field, expected_value in travel_fields.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"POST /api/suppliers - Travel field validation ({field})", 
+                                   f"Correctly saved: {actual_value}")
+                    else:
+                        print_result(False, f"POST /api/suppliers - Travel field validation ({field})", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                        all_fields_correct = False
+                
+                if all_fields_correct:
+                    print_result(True, "POST /api/suppliers - All travel fields validation", 
+                               "All travel-specific fields correctly saved during creation")
+                else:
+                    print_result(False, "POST /api/suppliers - Travel fields validation", 
+                               "Some travel fields were not saved correctly during creation")
+                    
+            else:
+                print_result(False, "POST /api/suppliers - Create supplier failed", 
+                           f"Missing ID or incorrect purchaseType: {data}")
+        else:
+            print_result(False, f"POST /api/suppliers - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/suppliers - Create supplier failed", str(e))
+    
+    # Test 3: Verify supplier was persisted to database
+    if created_supplier_id:
+        try:
+            response = requests.get(f"{API_URL}/suppliers", timeout=10)
+            if response.status_code == 200:
+                suppliers = response.json()
+                created_supplier = next((s for s in suppliers if s.get("id") == created_supplier_id), None)
+                if created_supplier and created_supplier.get("purchaseType") == "Milhas":
+                    print_result(True, "POST /api/suppliers - Database persistence check", 
+                               f"Supplier {created_supplier_id} found in database with purchaseType=Milhas")
+                else:
+                    print_result(False, "POST /api/suppliers - Database persistence check", 
+                               f"Supplier {created_supplier_id} not found or incorrect data in database")
+            else:
+                print_result(False, "POST /api/suppliers - Database persistence check failed", 
+                           f"Could not retrieve suppliers list: HTTP {response.status_code}")
+        except Exception as e:
+            print_result(False, "POST /api/suppliers - Database persistence check failed", str(e))
+    
+    # Test 4: CRITICAL TEST - Update supplier changing purchaseType to "Dinheiro"
+    if created_supplier_id:
+        try:
+            update_data = {
+                "name": "Fornecedor Teste Dinheiro",
+                "email": "fornecedor.milhas@test.com",
+                "phone": "+55 11 99999-1111",
+                "document": "12.345.678/0001-90",
+                "address": "Rua das Milhas, 123",
+                "city": "São Paulo",
+                "state": "SP",
+                "zipCode": "01234-567",
+                "category": "Companhia Aérea",
+                "supplierType": "Nacional",
+                # CRITICAL: Change purchaseType from "Milhas" to "Dinheiro"
+                "purchaseType": "Dinheiro",
+                "milesQuantity": 0,  # Should be updated to 0
+                "milesValuePer1000": 0,  # Should be updated to 0
+                "milesProgram": "",  # Should be cleared
+                "milesAccount": "",  # Should be cleared
+                "discountApplied": 10.0,  # Should be updated
+                "discountType": "reais",  # Should be updated
+                "status": "Ativo"
+            }
+            
+            response = requests.put(f"{API_URL}/suppliers/{created_supplier_id}", json=update_data, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                print_result(True, "PUT /api/suppliers/{id} - Update request successful", 
+                           f"HTTP 200 response received for supplier {created_supplier_id}")
+                
+                # CRITICAL VALIDATION: Check if travel fields were actually updated
+                expected_updates = {
+                    "purchaseType": "Dinheiro",
+                    "milesQuantity": 0,
+                    "milesValuePer1000": 0,
+                    "milesProgram": "",
+                    "milesAccount": "",
+                    "discountApplied": 10.0,
+                    "discountType": "reais"
+                }
+                
+                update_failures = []
+                for field, expected_value in expected_updates.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"PUT /api/suppliers/{id} - Travel field update ({field})", 
+                                   f"Correctly updated to: {actual_value}")
+                    else:
+                        print_result(False, f"PUT /api/suppliers/{id} - Travel field update ({field})", 
+                                   f"❌ CRITICAL BUG: Expected: {expected_value}, Got: {actual_value}")
+                        update_failures.append(f"{field}: expected {expected_value}, got {actual_value}")
+                
+                if update_failures:
+                    print_result(False, "PUT /api/suppliers/{id} - CRITICAL UPDATE BUG CONFIRMED", 
+                               f"❌ Travel fields NOT updated: {', '.join(update_failures)}")
+                else:
+                    print_result(True, "PUT /api/suppliers/{id} - All travel fields updated correctly", 
+                               "✅ All travel-specific fields successfully updated")
+                    
+            else:
+                print_result(False, f"PUT /api/suppliers/{id} - HTTP {response.status_code}", response.text)
+        except Exception as e:
+            print_result(False, "PUT /api/suppliers/{id} - Update request failed", str(e))
+    
+    # Test 5: Verify update persistence in database
+    if created_supplier_id:
+        try:
+            response = requests.get(f"{API_URL}/suppliers", timeout=10)
+            if response.status_code == 200:
+                suppliers = response.json()
+                updated_supplier = next((s for s in suppliers if s.get("id") == created_supplier_id), None)
+                if updated_supplier:
+                    # Check if the update persisted to database
+                    if updated_supplier.get("purchaseType") == "Dinheiro":
+                        print_result(True, "PUT /api/suppliers/{id} - Database persistence check", 
+                                   f"✅ Updated purchaseType=Dinheiro persisted to database")
+                        
+                        # Check other travel fields persistence
+                        persistence_checks = {
+                            "milesQuantity": 0,
+                            "milesValuePer1000": 0,
+                            "milesProgram": "",
+                            "milesAccount": "",
+                            "discountApplied": 10.0,
+                            "discountType": "reais"
+                        }
+                        
+                        persistence_failures = []
+                        for field, expected_value in persistence_checks.items():
+                            actual_value = updated_supplier.get(field)
+                            if actual_value == expected_value:
+                                print_result(True, f"PUT /api/suppliers/{id} - Database persistence ({field})", 
+                                           f"Correctly persisted: {actual_value}")
+                            else:
+                                print_result(False, f"PUT /api/suppliers/{id} - Database persistence ({field})", 
+                                           f"❌ PERSISTENCE BUG: Expected: {expected_value}, Got: {actual_value}")
+                                persistence_failures.append(f"{field}: expected {expected_value}, got {actual_value}")
+                        
+                        if persistence_failures:
+                            print_result(False, "PUT /api/suppliers/{id} - CRITICAL PERSISTENCE BUG", 
+                                       f"❌ Travel fields NOT persisted: {', '.join(persistence_failures)}")
+                        else:
+                            print_result(True, "PUT /api/suppliers/{id} - All fields persisted correctly", 
+                                       "✅ All travel field updates correctly persisted to database")
+                            
+                    else:
+                        print_result(False, "PUT /api/suppliers/{id} - Database persistence check", 
+                                   f"❌ CRITICAL BUG: purchaseType still {updated_supplier.get('purchaseType')} in database, should be 'Dinheiro'")
+                else:
+                    print_result(False, "PUT /api/suppliers/{id} - Database persistence check", 
+                               f"Supplier {created_supplier_id} not found in database after update")
+            else:
+                print_result(False, "PUT /api/suppliers/{id} - Database persistence check failed", 
+                           f"Could not retrieve suppliers list: HTTP {response.status_code}")
+        except Exception as e:
+            print_result(False, "PUT /api/suppliers/{id} - Database persistence check failed", str(e))
+    
+    # Test 6: Test email validation (should prevent duplicates)
+    try:
+        duplicate_supplier_data = {
+            "name": "Fornecedor Duplicado",
+            "email": "fornecedor.milhas@test.com",  # Same email as created supplier
+            "purchaseType": "Voucher",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/suppliers", json=duplicate_supplier_data, timeout=10)
+        if response.status_code == 400:
+            print_result(True, "POST /api/suppliers - Duplicate email validation", 
+                       "Correctly rejected duplicate email with 400 status")
+        else:
+            print_result(False, f"POST /api/suppliers - Duplicate email validation", 
+                       f"❌ BUG: Expected 400, got {response.status_code} - duplicate emails should be rejected")
+    except Exception as e:
+        print_result(False, "POST /api/suppliers - Duplicate email validation failed", str(e))
+    
+    # Test 7: Test Voucher purchase type creation
+    try:
+        voucher_supplier_data = {
+            "name": "Fornecedor Voucher",
+            "email": "fornecedor.voucher@test.com",
+            "purchaseType": "Voucher",
+            "discountApplied": 15.0,
+            "discountType": "percentual",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/suppliers", json=voucher_supplier_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("purchaseType") == "Voucher":
+                print_result(True, "POST /api/suppliers - Voucher type creation", 
+                           f"Successfully created supplier with purchaseType=Voucher")
+                
+                # Clean up voucher supplier
+                voucher_id = data.get("id")
+                if voucher_id:
+                    requests.delete(f"{API_URL}/suppliers/{voucher_id}", timeout=5)
+            else:
+                print_result(False, "POST /api/suppliers - Voucher type creation", 
+                           f"purchaseType not set correctly: {data.get('purchaseType')}")
+        else:
+            print_result(False, f"POST /api/suppliers - Voucher type creation - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/suppliers - Voucher type creation failed", str(e))
+    
+    # Test 8: Clean up - Delete created supplier
+    if created_supplier_id:
+        try:
+            response = requests.delete(f"{API_URL}/suppliers/{created_supplier_id}", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    print_result(True, "DELETE /api/suppliers/{id} - Cleanup successful", 
+                               f"Test supplier {created_supplier_id} deleted successfully")
+                else:
+                    print_result(False, "DELETE /api/suppliers/{id} - Cleanup failed", data)
+            else:
+                print_result(False, f"DELETE /api/suppliers/{id} - Cleanup - HTTP {response.status_code}", response.text)
+        except Exception as e:
+            print_result(False, "DELETE /api/suppliers/{id} - Cleanup failed", str(e))
+
 def test_sales_analysis_endpoints():
     """Test newly implemented sales analysis and reporting endpoints - REVIEW REQUEST"""
     print_test_header("Sales Analysis and Reporting Endpoints - NEW IMPLEMENTATION")
