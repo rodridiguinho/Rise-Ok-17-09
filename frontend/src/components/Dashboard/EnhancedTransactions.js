@@ -501,7 +501,7 @@ const EnhancedTransactions = () => {
 
               {/* Financial Details */}
               <div className="lg:col-span-3 border-b pb-4 mb-4">
-                <h3 className="text-lg font-semibold mb-4">Detalhes Financeiros</h3>
+                <h3 className="text-lg font-semibold mb-4">💰 Detalhes Financeiros</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Cliente</Label>
@@ -553,17 +553,6 @@ const EnhancedTransactions = () => {
                       placeholder="0,00"
                       value={newTransaction.saleValue}
                       onChange={(e) => setNewTransaction({...newTransaction, saleValue: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Valor do Fornecedor</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0,00"
-                      value={newTransaction.supplierValue}
-                      onChange={(e) => setNewTransaction({...newTransaction, supplierValue: e.target.value})}
                     />
                   </div>
 
