@@ -240,12 +240,22 @@ const Suppliers = () => {
     }
   };
 
-  const handleDeleteSupplier = (id) => {
-    setSuppliers(suppliers.filter(supplier => supplier.id !== id));
-    toast({
-      title: "Fornecedor removido",
-      description: "O fornecedor foi removido com sucesso.",
-    });
+  const handleDeleteSupplier = async (id) => {
+    try {
+      await suppliersAPI.deleteSupplier(id);
+      setSuppliers(suppliers.filter(supplier => supplier.id !== id));
+      toast({
+        title: "Fornecedor removido",
+        description: "O fornecedor foi removido com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao deletar fornecedor",
+      });
+    }
   };
 
   const getStatusBadgeColor = (status) => {
