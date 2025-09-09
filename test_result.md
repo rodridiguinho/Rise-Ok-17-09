@@ -106,7 +106,7 @@ user_problem_statement: "Testar especificamente as APIs de usuários que acabamo
 
   - task: "Supplier Travel-Specific Fields API"
     implemented: true
-    working: false
+    working: true
     file: "backend/server.py"
     stuck_count: 1
     priority: "high"
@@ -118,6 +118,9 @@ user_problem_statement: "Testar especificamente as APIs de usuários que acabamo
         - working: false
           agent: "testing"
           comment: "🚨 CRITICAL SUPPLIER API ISSUES IDENTIFIED: ✅ CREATION WORKS: Successfully created supplier with purchaseType='Milhas' and all travel fields (milesQuantity: 50000, milesValuePer1000: 35.50, milesProgram: 'LATAM Pass', milesAccount: 'LP123456789', discountApplied: 5.0, discountType: 'percentual'). All fields correctly saved and persisted to MongoDB. ❌ UPDATE FUNCTIONALITY BROKEN: PUT /api/suppliers/{id} does NOT update travel-specific fields. When attempting to change purchaseType from 'Milhas' to 'Dinheiro', the fields remain unchanged (purchaseType still 'Milhas', milesQuantity still 50000, discountType still 'percentual'). This is a critical bug preventing supplier management workflow. ❌ EMAIL VALIDATION MISSING: Duplicate email validation not working - should return 400 for duplicate emails but returns 200 instead. ✅ DELETE WORKS: Supplier deletion and persistence working correctly. ✅ VOUCHER TYPE WORKS: Successfully created supplier with purchaseType='Voucher'. AUTHENTICATION: Used rodrigo@risetravel.com.br / Emily2030* as specified. ROOT CAUSE: The PUT endpoint is not updating travel-specific fields in the update_data dictionary."
+        - working: true
+          agent: "testing"
+          comment: "✅ CRITICAL SUPPLIER UPDATE BUG COMPLETELY FIXED - COMPREHENSIVE TESTING COMPLETED: Successfully tested the exact scenario from review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ CREATION WITH MILHAS: Successfully created supplier with purchaseType='Milhas' and complete travel fields (milesQuantity: 50000, milesValuePer1000: 35.50, milesProgram: 'LATAM Pass', milesAccount: 'LP123456789', discountApplied: 5.0, discountType: 'percentual'). All fields correctly saved and persisted to MongoDB. ✅ UPDATE TO DINHEIRO: PUT /api/suppliers/{id} now CORRECTLY updates all travel-specific fields. Successfully changed purchaseType from 'Milhas' to 'Dinheiro' and updated all related fields (milesQuantity: 50000→0, milesValuePer1000: 35.5→0, milesProgram: 'LATAM Pass'→'', milesAccount: 'LP123456789'→'', discountApplied: 5.0→10.0, discountType: 'percentual'→'reais'). ✅ DATABASE PERSISTENCE: All travel field updates correctly persisted to MongoDB database and retrievable via GET requests. ✅ EMAIL VALIDATION FIXED: Duplicate email validation now working correctly - returns 400 status for duplicate emails. ✅ VOUCHER TYPE SUPPORT: Successfully tested purchaseType='Voucher' creation and functionality. ✅ COMPREHENSIVE CRUD: All supplier operations (CREATE, READ, UPDATE, DELETE) working perfectly with travel-specific fields. The critical supplier update functionality is now fully operational and meets all review requirements."
 
 backend:
   - task: "API Health Check Endpoint"
