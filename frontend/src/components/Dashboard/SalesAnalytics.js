@@ -43,7 +43,12 @@ const SalesAnalytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/analytics/sales');
+      // Get current month data by default
+      const now = new Date();
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      
+      const response = await api.get(`/reports/sales-analysis?start_date=${startDate}&end_date=${endDate}`);
       setAnalytics(response.data);
     } catch (error) {
       console.error('Error fetching sales analytics:', error);
