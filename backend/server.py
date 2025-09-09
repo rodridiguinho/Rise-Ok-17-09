@@ -790,6 +790,16 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
         # Get transactions in period
         transactions = await db.transactions.find(date_filter).to_list(None)
         
+        # Convert ObjectIds to strings for JSON serialization
+        for transaction in transactions:
+            transaction["id"] = str(transaction["_id"])
+            transaction["_id"] = str(transaction["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in transaction:
+                transaction["createdAt"] = transaction["createdAt"].isoformat()
+            if "updatedAt" in transaction:
+                transaction["updatedAt"] = transaction["updatedAt"].isoformat()
+        
         # Filter sales transactions (entradas)
         sales_transactions = [t for t in transactions if t.get('type') == 'entrada']
         
