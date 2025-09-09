@@ -432,11 +432,48 @@ const EnhancedTransactions = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Data de Retorno</Label>
+                    <Label>Tipo de Produto</Label>
+                    <Select value={newTransaction.productType} onValueChange={(value) => setNewTransaction({...newTransaction, productType: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Passagem">✈️ Passagem Aérea</SelectItem>
+                        <SelectItem value="Hotel">🏨 Hotel/Hospedagem</SelectItem>
+                        <SelectItem value="Pacote">📦 Pacote Turístico</SelectItem>
+                        <SelectItem value="Seguro">🛡️ Seguro Viagem</SelectItem>
+                        <SelectItem value="Transfer">🚗 Transfer</SelectItem>
+                        <SelectItem value="Outros">📋 Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Código da Reserva do Cliente</Label>
                     <Input
-                      type="date"
-                      value={newTransaction.returnDate}
-                      onChange={(e) => setNewTransaction({...newTransaction, returnDate: e.target.value})}
+                      placeholder="Ex: BR123456"
+                      value={newTransaction.clientReservationCode}
+                      onChange={(e) => setNewTransaction({...newTransaction, clientReservationCode: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Cidade de Saída</Label>
+                    <Input
+                      placeholder="Ex: São Paulo"
+                      value={newTransaction.departureCity}
+                      onChange={(e) => setNewTransaction({...newTransaction, departureCity: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Cidade de Chegada</Label>
+                    <Input
+                      placeholder="Ex: Rio de Janeiro"
+                      value={newTransaction.arrivalCity}
+                      onChange={(e) => setNewTransaction({...newTransaction, arrivalCity: e.target.value})}
                     />
                   </div>
                 </div>
