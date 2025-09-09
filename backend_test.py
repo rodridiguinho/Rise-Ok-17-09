@@ -1133,6 +1133,267 @@ def test_analytics_integration():
         print_result(False, "Integration test - Overall endpoint accessibility", 
                    f"Only {successful_endpoints}/{total_endpoints} endpoints accessible ({success_rate:.1f}%)")
 
+def test_sales_analysis_endpoints():
+    """Test newly implemented sales analysis and reporting endpoints - REVIEW REQUEST"""
+    print_test_header("Sales Analysis and Reporting Endpoints - NEW IMPLEMENTATION")
+    
+    # Test 1: GET /api/reports/sales-analysis with date range
+    try:
+        params = {
+            "start_date": "2025-09-01",
+            "end_date": "2025-09-09"
+        }
+        response = requests.get(f"{API_URL}/reports/sales-analysis", params=params, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify response structure includes required fields
+            required_fields = ["period", "sales"]
+            missing_fields = [f for f in required_fields if f not in data]
+            
+            if not missing_fields:
+                print_result(True, "GET /api/reports/sales-analysis - Response structure validation", 
+                           f"All required top-level fields present: {required_fields}")
+                
+                # Verify sales metrics structure
+                sales = data.get("sales", {})
+                sales_fields = ["total_sales", "total_supplier_costs", "total_commissions", "net_profit", "sales_count", "average_sale"]
+                sales_missing = [f for f in sales_fields if f not in sales]
+                
+                if not sales_missing:
+                    print_result(True, "GET /api/reports/sales-analysis - Sales metrics validation", 
+                               f"All sales metrics present: {sales_fields}")
+                    
+                    # Verify numeric values are properly formatted
+                    for field in sales_fields:
+                        value = sales.get(field)
+                        if isinstance(value, (int, float)) and value >= 0:
+                            print_result(True, f"GET /api/reports/sales-analysis - Metric validation ({field})", 
+                                       f"Valid metric value: R$ {value:.2f}" if "total" in field or "net" in field or "average" in field else f"Valid count: {value}")
+                        else:
+                            print_result(False, f"GET /api/reports/sales-analysis - Metric validation ({field})", 
+                                       f"Invalid metric value: {value} (type: {type(value)})")
+                    
+                    # Verify period information
+                    period = data.get("period", {})
+                    if period.get("start_date") == "2025-09-01" and period.get("end_date") == "2025-09-09":
+                        print_result(True, "GET /api/reports/sales-analysis - Period validation", 
+                                   f"Correct period: {period.get('start_date')} to {period.get('end_date')}")
+                    else:
+                        print_result(False, "GET /api/reports/sales-analysis - Period validation", 
+                                   f"Incorrect period: {period}")
+                    
+                    # Verify only 'entrada' transactions are included in analysis
+                    transactions = data.get("transactions", [])
+                    entrada_only = all(t.get("type") == "entrada" for t in transactions)
+                    if entrada_only or len(transactions) == 0:
+                        print_result(True, "GET /api/reports/sales-analysis - Transaction type filter", 
+                                   f"Only 'entrada' transactions included in sales analysis ({len(transactions)} transactions)")
+                    else:
+                        non_entrada = [t for t in transactions if t.get("type") != "entrada"]
+                        print_result(False, "GET /api/reports/sales-analysis - Transaction type filter", 
+                                   f"Found {len(non_entrada)} non-entrada transactions in sales analysis")
+                        
+                else:
+                    print_result(False, "GET /api/reports/sales-analysis - Sales metrics validation", 
+                               f"Missing sales metrics: {sales_missing}")
+            else:
+                print_result(False, "GET /api/reports/sales-analysis - Response structure validation", 
+                           f"Missing required fields: {missing_fields}")
+        else:
+            print_result(False, f"GET /api/reports/sales-analysis - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/reports/sales-analysis - Request failed", str(e))
+    
+    # Test 2: GET /api/reports/complete-analysis with date range
+    try:
+        params = {
+            "start_date": "2025-09-01", 
+            "end_date": "2025-09-09"
+        }
+        response = requests.get(f"{API_URL}/reports/complete-analysis", params=params, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify response structure includes required fields
+            required_fields = ["period", "summary", "entradas", "saidas", "all_transactions"]
+            missing_fields = [f for f in required_fields if f not in data]
+            
+            if not missing_fields:
+                print_result(True, "GET /api/reports/complete-analysis - Response structure validation", 
+                           f"All required fields present: {required_fields}")
+                
+                # Verify summary calculations
+                summary = data.get("summary", {})
+                summary_fields = ["total_entradas", "total_saidas", "balance", "entradas_count", "saidas_count"]
+                summary_missing = [f for f in summary_fields if f not in summary]
+                
+                if not summary_missing:
+                    print_result(True, "GET /api/reports/complete-analysis - Summary structure validation", 
+                               f"All summary fields present: {summary_fields}")
+                    
+                    # Verify balance calculation is correct
+                    total_entradas = summary.get("total_entradas", 0)
+                    total_saidas = summary.get("total_saidas", 0)
+                    balance = summary.get("balance", 0)
+                    expected_balance = total_entradas - total_saidas
+                    
+                    if abs(balance - expected_balance) < 0.01:  # Allow for floating point precision
+                        print_result(True, "GET /api/reports/complete-analysis - Balance calculation", 
+                                   f"Correct balance calculation: R$ {total_entradas:.2f} - R$ {total_saidas:.2f} = R$ {balance:.2f}")
+                    else:
+                        print_result(False, "GET /api/reports/complete-analysis - Balance calculation", 
+                                   f"Incorrect balance: Expected R$ {expected_balance:.2f}, Got R$ {balance:.2f}")
+                    
+                    # Verify both entradas and saidas are included
+                    entradas = data.get("entradas", [])
+                    saidas = data.get("saidas", [])
+                    all_transactions = data.get("all_transactions", [])
+                    
+                    if len(entradas) + len(saidas) == len(all_transactions):
+                        print_result(True, "GET /api/reports/complete-analysis - Transaction segregation", 
+                                   f"Correct transaction segregation: {len(entradas)} entradas + {len(saidas)} saidas = {len(all_transactions)} total")
+                    else:
+                        print_result(False, "GET /api/reports/complete-analysis - Transaction segregation", 
+                                   f"Incorrect segregation: {len(entradas)} + {len(saidas)} ≠ {len(all_transactions)}")
+                        
+                else:
+                    print_result(False, "GET /api/reports/complete-analysis - Summary structure validation", 
+                               f"Missing summary fields: {summary_missing}")
+            else:
+                print_result(False, "GET /api/reports/complete-analysis - Response structure validation", 
+                           f"Missing required fields: {missing_fields}")
+        else:
+            print_result(False, f"GET /api/reports/complete-analysis - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/reports/complete-analysis - Request failed", str(e))
+    
+    # Test 3: GET /api/transactions/categories - Enhanced categories with expense categories
+    try:
+        response = requests.get(f"{API_URL}/transactions/categories", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify both regular categories and expense categories are present
+            if "categories" in data and "expenseCategories" in data:
+                print_result(True, "GET /api/transactions/categories - Enhanced structure validation", 
+                           "Both 'categories' and 'expenseCategories' fields present")
+                
+                categories = data.get("categories", [])
+                expense_categories = data.get("expenseCategories", [])
+                
+                # Verify regular categories include expected items
+                expected_categories = ["Pacote Turístico", "Passagem Aérea", "Hotel/Hospedagem"]
+                found_categories = [cat for cat in expected_categories if cat in categories]
+                if len(found_categories) == len(expected_categories):
+                    print_result(True, "GET /api/transactions/categories - Regular categories validation", 
+                               f"All expected categories found: {found_categories}")
+                else:
+                    missing_categories = [cat for cat in expected_categories if cat not in categories]
+                    print_result(False, "GET /api/transactions/categories - Regular categories validation", 
+                               f"Missing categories: {missing_categories}")
+                
+                # Verify expense categories include new items
+                expected_expense_categories = ["Salários", "Aluguel", "Conta de Água", "Conta de Luz", "Internet", "Telefone"]
+                found_expense_categories = [cat for cat in expected_expense_categories if cat in expense_categories]
+                if len(found_expense_categories) == len(expected_expense_categories):
+                    print_result(True, "GET /api/transactions/categories - Expense categories validation", 
+                               f"All expected expense categories found: {found_expense_categories}")
+                else:
+                    missing_expense_categories = [cat for cat in expected_expense_categories if cat not in expense_categories]
+                    print_result(False, "GET /api/transactions/categories - Expense categories validation", 
+                               f"Missing expense categories: {missing_expense_categories}")
+                
+                print_result(True, "GET /api/transactions/categories - Category counts", 
+                           f"Found {len(categories)} regular categories and {len(expense_categories)} expense categories")
+                
+            else:
+                print_result(False, "GET /api/transactions/categories - Enhanced structure validation", 
+                           f"Missing enhanced structure. Found keys: {list(data.keys())}")
+        else:
+            print_result(False, f"GET /api/transactions/categories - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/transactions/categories - Request failed", str(e))
+    
+    # Test 4: POST /api/transactions - Enhanced transaction creation with new fields
+    try:
+        # Using the exact transaction data from the review request
+        enhanced_transaction = {
+            "type": "entrada",
+            "category": "Pacote Turístico",
+            "description": "Venda com comissão e fornecedor",
+            "amount": 5000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Test",
+            "seller": "Vendedor Test",
+            "saleValue": 5000.00,
+            "supplierValue": 2000.00,
+            "supplierPaymentDate": "2025-09-15",
+            "supplierPaymentStatus": "Pendente",
+            "commissionValue": 500.00,
+            "commissionPaymentDate": "2025-09-10",
+            "commissionPaymentStatus": "Pago",
+            "transactionDate": "2025-09-07"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=enhanced_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            if "id" in data:
+                print_result(True, "POST /api/transactions - Enhanced transaction created successfully", 
+                           f"Transaction ID: {data.get('id')}")
+                
+                # Verify all new fields are properly stored and returned
+                new_fields = [
+                    "saleValue", "supplierValue", "supplierPaymentDate", "supplierPaymentStatus",
+                    "commissionValue", "commissionPaymentDate", "commissionPaymentStatus", "seller"
+                ]
+                
+                for field in new_fields:
+                    if field in data and data.get(field) == enhanced_transaction.get(field):
+                        print_result(True, f"POST /api/transactions - Enhanced field validation ({field})", 
+                                   f"Correctly stored: {data[field]}")
+                    else:
+                        print_result(False, f"POST /api/transactions - Enhanced field validation ({field})", 
+                                   f"Expected: {enhanced_transaction.get(field)}, Got: {data.get(field)}")
+                
+                # Verify commission percentage calculation
+                if "commissionPercentage" in data:
+                    expected_percentage = (500.00 / 5000.00) * 100  # 10%
+                    actual_percentage = data.get("commissionPercentage")
+                    if abs(actual_percentage - expected_percentage) < 0.01:
+                        print_result(True, "POST /api/transactions - Commission percentage calculation", 
+                                   f"Correct calculation: {actual_percentage:.2f}%")
+                    else:
+                        print_result(False, "POST /api/transactions - Commission percentage calculation", 
+                                   f"Expected: {expected_percentage:.2f}%, Got: {actual_percentage}")
+                
+                # Verify transaction date handling
+                if data.get("transactionDate") == "2025-09-07" and data.get("date") == "2025-09-07":
+                    print_result(True, "POST /api/transactions - Enhanced date handling", 
+                               f"Transaction date correctly set to: {data.get('transactionDate')}")
+                else:
+                    print_result(False, "POST /api/transactions - Enhanced date handling", 
+                               f"Date mismatch. transactionDate: {data.get('transactionDate')}, date: {data.get('date')}")
+                
+                # Verify R$ currency formatting in response (if applicable)
+                amount_field = data.get("amount")
+                if isinstance(amount_field, (int, float)) and amount_field == 5000.00:
+                    print_result(True, "POST /api/transactions - Amount validation", 
+                               f"Amount correctly stored: R$ {amount_field:.2f}")
+                else:
+                    print_result(False, "POST /api/transactions - Amount validation", 
+                               f"Amount validation failed: {amount_field}")
+                
+            else:
+                print_result(False, "POST /api/transactions - Enhanced transaction creation failed", 
+                           f"No ID returned in response: {data}")
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/transactions - Enhanced transaction creation failed", str(e))
+
 def test_client_api():
     """Test client management endpoints - CRITICAL USER REPORTED PERSISTENCE BUG TESTING"""
     print_test_header("Client Management APIs - CRITICAL PERSISTENCE BUG INVESTIGATION")
