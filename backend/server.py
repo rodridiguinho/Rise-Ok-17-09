@@ -715,6 +715,16 @@ async def create_transaction(transaction: TransactionCreate):
             "destinationAirport": transaction.destinationAirport,
             "tripType": transaction.tripType or "Lazer",
             "products": transaction.products or [],
+            # Enhanced fields for client reservation and supplier miles
+            "clientReservationCode": transaction.clientReservationCode,
+            "departureCity": transaction.departureCity,
+            "arrivalCity": transaction.arrivalCity,
+            "productType": transaction.productType or "Passagem",
+            "supplierUsedMiles": transaction.supplierUsedMiles or False,
+            "supplierMilesQuantity": transaction.supplierMilesQuantity,
+            "supplierMilesValue": transaction.supplierMilesValue,
+            "supplierMilesProgram": transaction.supplierMilesProgram,
+            "airportTaxes": transaction.airportTaxes,
             "status": "Confirmado",
             "transactionDate": transaction_date,  # Store the actual transaction date
             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
