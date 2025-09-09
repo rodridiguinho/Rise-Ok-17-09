@@ -39,8 +39,19 @@ api.interceptors.response.use(
 // Auth API
 export const authAPI = {
   login: async (email, password) => {
-    const response = await api.post('/auth/login', { email, password });
-    return response.data;
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      return {
+        success: true,
+        token: response.data.access_token,
+        user: response.data.user
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.detail || 'Erro no login'
+      };
+    }
   },
   
   logout: () => {
