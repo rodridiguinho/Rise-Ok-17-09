@@ -109,7 +109,7 @@ def create_jwt_token(user_id: str, email: str) -> str:
     payload = {
         "user_id": user_id,
         "email": email,
-        "exp": datetime.utcnow().timestamp() + 86400  # 24 hours
+        "exp": datetime.utcnow().timestamp() + 2592000  # 30 days
     }
     return jwt.encode(payload, "your-secret-key", algorithm="HS256")
 
