@@ -916,6 +916,71 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
         logging.error(f"Complete analysis error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting complete analysis")
 
+@api_router.get("/travel/airlines")
+async def get_airlines():
+    """Obter lista de companhias aéreas"""
+    airlines = [
+        {"code": "LA", "name": "LATAM Airlines", "country": "BR"},
+        {"code": "G3", "name": "GOL Linhas Aéreas", "country": "BR"},
+        {"code": "AD", "name": "Azul Linhas Aéreas", "country": "BR"},
+        {"code": "AA", "name": "American Airlines", "country": "US"},
+        {"code": "UA", "name": "United Airlines", "country": "US"},
+        {"code": "DL", "name": "Delta Air Lines", "country": "US"},
+        {"code": "AF", "name": "Air France", "country": "FR"},
+        {"code": "LH", "name": "Lufthansa", "country": "DE"},
+        {"code": "KL", "name": "KLM Royal Dutch Airlines", "country": "NL"},
+        {"code": "BA", "name": "British Airways", "country": "GB"},
+        {"code": "IB", "name": "Iberia", "country": "ES"},
+        {"code": "TP", "name": "TAP Air Portugal", "country": "PT"},
+        {"code": "AZ", "name": "Alitalia", "country": "IT"},
+        {"code": "EK", "name": "Emirates", "country": "AE"},
+        {"code": "QR", "name": "Qatar Airways", "country": "QA"},
+        {"code": "TK", "name": "Turkish Airlines", "country": "TR"},
+        {"code": "JJ", "name": "TAM Linhas Aéreas", "country": "BR"},
+        {"code": "AR", "name": "Aerolíneas Argentinas", "country": "AR"},
+        {"code": "CM", "name": "Copa Airlines", "country": "PA"},
+        {"code": "AC", "name": "Air Canada", "country": "CA"}
+    ]
+    return {"airlines": airlines}
+
+@api_router.get("/travel/airports")
+async def get_airports(search: str = ""):
+    """Buscar aeroportos"""
+    airports = [
+        {"code": "GRU", "name": "Aeroporto Internacional de São Paulo/Guarulhos", "city": "São Paulo", "country": "BR"},
+        {"code": "CGH", "name": "Aeroporto de São Paulo/Congonhas", "city": "São Paulo", "country": "BR"},
+        {"code": "SDU", "name": "Aeroporto Santos Dumont", "city": "Rio de Janeiro", "country": "BR"},
+        {"code": "GIG", "name": "Aeroporto Internacional Tom Jobim", "city": "Rio de Janeiro", "country": "BR"},
+        {"code": "BSB", "name": "Aeroporto Internacional de Brasília", "city": "Brasília", "country": "BR"},
+        {"code": "CNF", "name": "Aeroporto Internacional Tancredo Neves", "city": "Belo Horizonte", "country": "BR"},
+        {"code": "SSA", "name": "Aeroporto Internacional de Salvador", "city": "Salvador", "country": "BR"},
+        {"code": "FOR", "name": "Aeroporto Internacional Pinto Martins", "city": "Fortaleza", "country": "BR"},
+        {"code": "REC", "name": "Aeroporto Internacional do Recife", "city": "Recife", "country": "BR"},
+        {"code": "POA", "name": "Aeroporto Internacional Salgado Filho", "city": "Porto Alegre", "country": "BR"},
+        {"code": "CWB", "name": "Aeroporto Internacional Afonso Pena", "city": "Curitiba", "country": "BR"},
+        {"code": "FLN", "name": "Aeroporto Internacional Hercílio Luz", "city": "Florianópolis", "country": "BR"},
+        {"code": "JFK", "name": "John F. Kennedy International Airport", "city": "New York", "country": "US"},
+        {"code": "LAX", "name": "Los Angeles International Airport", "city": "Los Angeles", "country": "US"},
+        {"code": "MIA", "name": "Miami International Airport", "city": "Miami", "country": "US"},
+        {"code": "CDG", "name": "Charles de Gaulle Airport", "city": "Paris", "country": "FR"},
+        {"code": "LHR", "name": "Heathrow Airport", "city": "London", "country": "GB"},
+        {"code": "FCO", "name": "Leonardo da Vinci Airport", "city": "Rome", "country": "IT"},
+        {"code": "MAD", "name": "Madrid-Barajas Airport", "city": "Madrid", "country": "ES"},
+        {"code": "LIS", "name": "Lisbon Airport", "city": "Lisbon", "country": "PT"}
+    ]
+    
+    if search:
+        filtered_airports = []
+        search_lower = search.lower()
+        for airport in airports:
+            if (search_lower in airport["code"].lower() or 
+                search_lower in airport["name"].lower() or 
+                search_lower in airport["city"].lower()):
+                filtered_airports.append(airport)
+        return {"airports": filtered_airports}
+    
+    return {"airports": airports}
+
 # Include the main router in the app  
 app.include_router(api_router)
 
