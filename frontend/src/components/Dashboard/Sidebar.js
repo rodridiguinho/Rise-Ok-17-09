@@ -64,6 +64,16 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
       icon: Calendar,
     },
     {
+      id: 'sales-ranking',
+      label: 'Ranking Vendedores',
+      icon: Crown,
+    },
+    {
+      id: 'admin-settings',
+      label: 'Administração',
+      icon: Settings,
+    },
+    {
       id: 'settings',
       label: 'Configurações',
       icon: Settings,
