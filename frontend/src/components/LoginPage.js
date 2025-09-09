@@ -50,17 +50,12 @@ const LoginPage = () => {
         <div className="w-full max-w-md space-y-6">
           {/* Desktop Logo - Hidden on mobile */}
           <div className="hidden lg:flex items-center space-x-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-orange-400 rounded-xl flex items-center justify-center relative">
-              <div className="w-8 h-6 bg-white rounded-sm relative">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 absolute top-1 left-2 text-pink-500 fill-current">
-                  <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-                </svg>
-              </div>
-              <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-2 border-2 border-white rounded-t-lg"></div>
+            <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-orange-400 rounded-xl flex items-center justify-center">
+              <img src="/rise-logo.svg" alt="Rise Travel" className="w-8 h-8" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Rise Travel</h1>
-              <p className="text-xs text-gray-500">Controle de Caixa</p>
+              <p className="text-xs text-gray-500">Fluxo de Caixa</p>
             </div>
           </div>
 
