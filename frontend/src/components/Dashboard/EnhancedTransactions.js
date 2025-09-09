@@ -84,7 +84,17 @@ const EnhancedTransactions = () => {
     originAirport: '',
     destinationAirport: '',
     tripType: 'Lazer',
-    products: [{ name: '', value: '' }]
+    products: [{ name: '', value: '' }],
+    // Enhanced fields for client reservation and supplier miles
+    clientReservationCode: '',
+    departureCity: '',
+    arrivalCity: '',
+    productType: 'Passagem',
+    supplierUsedMiles: false,
+    supplierMilesQuantity: '',
+    supplierMilesValue: '',
+    supplierMilesProgram: '',
+    airportTaxes: ''
   });
 
   const formatCurrency = (value) => {
