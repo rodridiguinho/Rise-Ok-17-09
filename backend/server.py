@@ -803,10 +803,10 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
         # Filter sales transactions (entradas)
         sales_transactions = [t for t in transactions if t.get('type') == 'entrada']
         
-        # Calculate sales metrics
-        total_sales = sum(t.get('saleValue', 0) or t.get('amount', 0) for t in sales_transactions)
-        total_supplier_costs = sum(t.get('supplierValue', 0) for t in sales_transactions)
-        total_commissions = sum(t.get('commissionValue', 0) for t in sales_transactions)
+        # Calculate sales metrics (handle None values)
+        total_sales = sum((t.get('saleValue') or 0) if t.get('saleValue') is not None else (t.get('amount') or 0) for t in sales_transactions)
+        total_supplier_costs = sum((t.get('supplierValue') or 0) for t in sales_transactions)
+        total_commissions = sum((t.get('commissionValue') or 0) for t in sales_transactions)
         net_profit = total_sales - total_supplier_costs - total_commissions
         
         # Count transactions
