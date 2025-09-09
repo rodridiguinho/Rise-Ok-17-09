@@ -604,9 +604,10 @@ test_plan:
     - "Sales Analytics Frontend Dashboard - COMPLETED"
     - "Financial Analytics Frontend Dashboard - COMPLETED"
     - "Analytics Navigation and Integration - COMPLETED"
+    - "Sales Analysis and Reporting Endpoints - COMPLETED ✅"
   stuck_tasks: []
   test_all: false
-  test_priority: "urgent_first"
+  test_priority: "review_request_first"
 
 agent_communication:
     - agent: "testing"
