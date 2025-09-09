@@ -93,6 +93,16 @@ const Suppliers = () => {
     'Outros'
   ];
 
+  const supplierTypes = [
+    'Operadora',
+    'Consolidadora',
+    'Milhas',
+    'Receptivo',
+    'Representante',
+    'Direto',
+    'Outros'
+  ];
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
