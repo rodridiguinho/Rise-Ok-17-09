@@ -39,14 +39,10 @@ const LoginPage = () => {
       {/* Mobile Header - Only visible on mobile */}
       <div className="lg:hidden bg-gradient-to-r from-pink-500 to-orange-400 p-6 text-center text-white">
         <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <div className="w-10 h-8 bg-white rounded-lg relative">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 absolute top-1.5 left-2.5 text-pink-500 fill-current">
-              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-            </svg>
-          </div>
+          <img src="/rise-logo.svg" alt="Rise Travel" className="w-12 h-12" />
         </div>
         <h1 className="text-2xl font-bold mb-1">RISE TRAVEL</h1>
-        <p className="text-sm opacity-90">Sistema de Controle de Caixa</p>
+        <p className="text-sm opacity-90">Fluxo de Caixa</p>
       </div>
 
       {/* Left side - Login Form */}
