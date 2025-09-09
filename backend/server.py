@@ -90,9 +90,14 @@ class TransactionCreate(BaseModel):
     seller: Optional[str] = None
     saleValue: Optional[float] = None
     supplierValue: Optional[float] = None
+    supplierPaymentDate: Optional[str] = None
+    supplierPaymentStatus: Optional[str] = "Pendente"
     commissionValue: Optional[float] = None
+    commissionPaymentDate: Optional[str] = None
+    commissionPaymentStatus: Optional[str] = "Pendente"
     commissionPercentage: Optional[float] = None
     transactionDate: Optional[str] = None
+    customCategory: Optional[str] = None  # Para despesas customizadas
 
 # Create API router
 from fastapi import APIRouter
