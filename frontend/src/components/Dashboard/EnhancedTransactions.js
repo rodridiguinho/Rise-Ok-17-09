@@ -273,7 +273,11 @@ const EnhancedTransactions = () => {
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (transaction.client && transaction.client.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                         (transaction.reservationLocator && transaction.reservationLocator.toLowerCase().includes(searchTerm.toLowerCase()));
+                         (transaction.reservationLocator && transaction.reservationLocator.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (transaction.clientReservationCode && transaction.clientReservationCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (transaction.departureCity && transaction.departureCity.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (transaction.arrivalCity && transaction.arrivalCity.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (transaction.productType && transaction.productType.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesFilter = filterType === 'all' || transaction.type === filterType;
     
