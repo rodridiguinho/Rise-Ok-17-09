@@ -104,6 +104,18 @@
 
 user_problem_statement: "Testar especificamente as APIs de usuários que acabamos de corrigir: GET /api/users, POST /api/users, PUT /api/users/{id}, DELETE /api/users/{id}. Verificar se os dados estão sendo salvos corretamente no MongoDB, se as respostas estão no formato JSON correto, se não há erros de serialização e se as operações CRUD funcionam completamente."
 
+  - task: "Supplier Travel-Specific Fields API"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Backend supplier API endpoints already include travel-specific fields (purchaseType: Milhas/Dinheiro/Voucher, milesQuantity, milesValuePer1000, milesProgram, milesAccount, discountApplied, discountType). All CRUD operations (GET, POST, PUT, DELETE) support these fields. API ready for frontend integration testing."
+
 backend:
   - task: "API Health Check Endpoint"
     implemented: true
