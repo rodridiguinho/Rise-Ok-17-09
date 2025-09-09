@@ -574,6 +574,14 @@ async def update_supplier(supplier_id: str, supplier_data: dict):
             "zipCode": supplier_data.get("zipCode", ""),
             "category": supplier_data.get("category", ""),
             "supplierType": supplier_data.get("supplierType", ""),
+            # Travel-specific purchase fields
+            "purchaseType": supplier_data.get("purchaseType", "Dinheiro"),
+            "milesQuantity": supplier_data.get("milesQuantity", 0),
+            "milesValuePer1000": supplier_data.get("milesValuePer1000", 0),
+            "milesProgram": supplier_data.get("milesProgram", ""),
+            "milesAccount": supplier_data.get("milesAccount", ""),
+            "discountApplied": supplier_data.get("discountApplied", 0),
+            "discountType": supplier_data.get("discountType", "reais"),
             "status": supplier_data.get("status", "Ativo"),
             "updatedAt": datetime.utcnow()
         }
