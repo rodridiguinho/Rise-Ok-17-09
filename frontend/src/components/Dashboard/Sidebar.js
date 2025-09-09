@@ -58,6 +58,11 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
       icon: TrendingUp,
     },
     {
+      id: 'sales-reports',
+      label: 'Relatórios Vendas',
+      icon: Calendar,
+    },
+    {
       id: 'settings',
       label: 'Configurações',
       icon: Settings,
