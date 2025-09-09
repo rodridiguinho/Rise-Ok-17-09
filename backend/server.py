@@ -510,6 +510,7 @@ async def create_supplier(supplier_data: dict):
             "state": supplier_data.get("state", ""),
             "zipCode": supplier_data.get("zipCode", ""),
             "category": supplier_data.get("category", ""),
+            "supplierType": supplier_data.get("supplierType", ""),
             "supplierNumber": f"FOR{supplier_number:04d}",
             "status": supplier_data.get("status", "Ativo"),
             "createdAt": datetime.utcnow(),
