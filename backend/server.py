@@ -773,6 +773,95 @@ async def get_transaction_summary():
         logging.error(f"Summary error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting summary")
 
+@api_router.get("/reports/sales-analysis")
+async def get_sales_analysis(start_date: str = None, end_date: str = None):
+    """Obter análise de vendas por período"""
+    try:
+        # Build date filter
+        date_filter = {}
+        if start_date and end_date:
+            date_filter = {
+                "$or": [
+                    {"date": {"$gte": start_date, "$lte": end_date}},
+                    {"transactionDate": {"$gte": start_date, "$lte": end_date}}
+                ]
+            }
+        
+        # Get transactions in period
+        transactions = await db.transactions.find(date_filter).to_list(None)
+        
+        # Filter sales transactions (entradas)
+        sales_transactions = [t for t in transactions if t.get('type') == 'entrada']
+        
+        # Calculate sales metrics
+        total_sales = sum(t.get('saleValue', 0) or t.get('amount', 0) for t in sales_transactions)
+        total_supplier_costs = sum(t.get('supplierValue', 0) for t in sales_transactions)
+        total_commissions = sum(t.get('commissionValue', 0) for t in sales_transactions)
+        net_profit = total_sales - total_supplier_costs - total_commissions
+        
+        # Count transactions
+        sales_count = len(sales_transactions)
+        average_sale = total_sales / sales_count if sales_count > 0 else 0
+        
+        return {
+            "period": {"start_date": start_date, "end_date": end_date},
+            "sales": {
+                "total_sales": total_sales,
+                "total_supplier_costs": total_supplier_costs,
+                "total_commissions": total_commissions,
+                "net_profit": net_profit,
+                "sales_count": sales_count,
+                "average_sale": average_sale
+            },
+            "transactions": sales_transactions
+        }
+    except Exception as e:
+        logging.error(f"Sales analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting sales analysis")
+
+@api_router.get("/reports/complete-analysis")
+async def get_complete_analysis(start_date: str = None, end_date: str = None):
+    """Obter análise completa por período"""
+    try:
+        # Build date filter
+        date_filter = {}
+        if start_date and end_date:
+            date_filter = {
+                "$or": [
+                    {"date": {"$gte": start_date, "$lte": end_date}},
+                    {"transactionDate": {"$gte": start_date, "$lte": end_date}}
+                ]
+            }
+        
+        # Get all transactions in period
+        transactions = await db.transactions.find(date_filter).to_list(None)
+        
+        # Separate by type
+        entradas = [t for t in transactions if t.get('type') == 'entrada']
+        saidas = [t for t in transactions if t.get('type') == 'saida']
+        
+        # Calculate totals
+        total_entradas = sum(t.get('amount', 0) for t in entradas)
+        total_saidas = sum(t.get('amount', 0) for t in saidas)
+        balance = total_entradas - total_saidas
+        
+        return {
+            "period": {"start_date": start_date, "end_date": end_date},
+            "summary": {
+                "total_entradas": total_entradas,
+                "total_saidas": total_saidas,
+                "balance": balance,
+                "entradas_count": len(entradas),
+                "saidas_count": len(saidas)
+            },
+            "entradas": entradas,
+            "saidas": saidas,
+            "all_transactions": transactions
+        }
+    except Exception as e:
+        logging.error(f"Complete analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting complete analysis")
+
 # Include the main router in the app  
 app.include_router(api_router)
 
