@@ -2592,8 +2592,8 @@ def run_all_tests():
     print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"🔗 API Base URL: {API_URL}")
     
-    # PRIORITY TESTS FROM REVIEW REQUEST - Test supplier management first
-    test_supplier_management_travel_fields()
+    # PRIORITY TESTS FROM REVIEW REQUEST - Test supplier update functionality
+    test_supplier_travel_fields_update()  # CRITICAL: Test supplier update with travel fields
     test_enhanced_transactions_travel_fields()
     
     # Run URGENT transaction persistence test
