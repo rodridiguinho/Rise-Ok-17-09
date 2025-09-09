@@ -553,6 +553,7 @@ async def update_supplier(supplier_id: str, supplier_data: dict):
             "state": supplier_data.get("state", ""),
             "zipCode": supplier_data.get("zipCode", ""),
             "category": supplier_data.get("category", ""),
+            "supplierType": supplier_data.get("supplierType", ""),
             "status": supplier_data.get("status", "Ativo"),
             "updatedAt": datetime.utcnow()
         }
