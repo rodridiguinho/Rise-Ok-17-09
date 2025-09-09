@@ -185,30 +185,59 @@ const Suppliers = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateSupplier = () => {
-    setSuppliers(suppliers.map(supplier => 
-      supplier.id === selectedSupplier.id ? { ...supplier, ...newSupplier } : supplier
-    ));
-    
-    setIsEditModalOpen(false);
-    setSelectedSupplier(null);
-    setNewSupplier({
-      supplierNumber: '',
-      name: '',
-      email: '',
-      phone: '',
-      cnpj: '',
-      website: '',
-      address: '',
-      category: 'Hotel',
-      contact: '',
-      status: 'Ativo'
-    });
-    
-    toast({
-      title: "Fornecedor atualizado",
-      description: "As informações foram atualizadas com sucesso.",
-    });
+  const handleUpdateSupplier = async () => {
+    if (!newSupplier.name || !newSupplier.email) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+      });
+      return;
+    }
+
+    try {
+      const updatedSupplier = await suppliersAPI.updateSupplier(selectedSupplier.id, newSupplier);
+      setSuppliers(suppliers.map(supplier => 
+        supplier.id === selectedSupplier.id ? updatedSupplier : supplier
+      ));
+      
+      setIsEditModalOpen(false);
+      setSelectedSupplier(null);
+      setNewSupplier({
+        supplierNumber: '',
+        name: '',
+        email: '',
+        phone: '',
+        document: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        category: 'Hotel',
+        supplierType: 'Operadora',
+        purchaseType: 'Dinheiro',
+        milesQuantity: '',
+        milesValuePer1000: '',
+        milesProgram: '',
+        milesAccount: '',
+        discountApplied: '',
+        discountType: 'reais',
+        status: 'Ativo'
+      });
+      
+      toast({
+        title: "Fornecedor atualizado",
+        description: "As informações foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error updating supplier:', error);
+      const errorMessage = error.response?.data?.detail || "Erro ao atualizar fornecedor";
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: errorMessage,
+      });
+    }
   };
 
   const handleDeleteSupplier = (id) => {
