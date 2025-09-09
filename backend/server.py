@@ -110,6 +110,16 @@ class TransactionCreate(BaseModel):
     destinationAirport: Optional[str] = None
     tripType: Optional[str] = "Lazer"  # Lazer/Negócios
     products: Optional[list] = []  # Multiple products
+    # Enhanced fields for client reservation and supplier miles
+    clientReservationCode: Optional[str] = None
+    departureCity: Optional[str] = None
+    arrivalCity: Optional[str] = None
+    productType: Optional[str] = "Passagem"  # Passagem/Hotel/Pacote/Outros
+    supplierUsedMiles: Optional[bool] = False  # If supplier used miles
+    supplierMilesQuantity: Optional[int] = None
+    supplierMilesValue: Optional[float] = None
+    supplierMilesProgram: Optional[str] = None
+    airportTaxes: Optional[float] = None
 
 # Create API router
 from fastapi import APIRouter
