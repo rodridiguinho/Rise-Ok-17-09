@@ -511,6 +511,14 @@ async def create_supplier(supplier_data: dict):
             "zipCode": supplier_data.get("zipCode", ""),
             "category": supplier_data.get("category", ""),
             "supplierType": supplier_data.get("supplierType", ""),
+            # Purchase type fields
+            "purchaseType": supplier_data.get("purchaseType", "Dinheiro"),  # Milhas/Dinheiro/Voucher
+            "milesQuantity": supplier_data.get("milesQuantity", 0),
+            "milesValuePer1000": supplier_data.get("milesValuePer1000", 0),
+            "milesProgram": supplier_data.get("milesProgram", ""),
+            "milesAccount": supplier_data.get("milesAccount", ""),
+            "discountApplied": supplier_data.get("discountApplied", 0),
+            "discountType": supplier_data.get("discountType", "reais"),  # reais/percentual
             "supplierNumber": f"FOR{supplier_number:04d}",
             "status": supplier_data.get("status", "Ativo"),
             "createdAt": datetime.utcnow(),
