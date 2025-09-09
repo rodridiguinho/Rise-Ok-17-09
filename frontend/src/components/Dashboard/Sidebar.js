@@ -11,7 +11,8 @@ import {
   UserCog,
   X,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  Calendar
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
