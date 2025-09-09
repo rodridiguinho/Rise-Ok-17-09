@@ -241,7 +241,17 @@ const EnhancedTransactions = () => {
         originAirport: '',
         destinationAirport: '',
         tripType: 'Lazer',
-        products: [{ name: '', value: '' }]
+        products: [{ name: '', value: '' }],
+        // Enhanced fields
+        clientReservationCode: '',
+        departureCity: '',
+        arrivalCity: '',
+        productType: 'Passagem',
+        supplierUsedMiles: false,
+        supplierMilesQuantity: '',
+        supplierMilesValue: '',
+        supplierMilesProgram: '',
+        airportTaxes: ''
       });
       
       setIsAddModalOpen(false);
