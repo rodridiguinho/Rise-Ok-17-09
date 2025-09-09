@@ -706,6 +706,22 @@ async def get_categories():
             "Fornecedor",
             "Despesa Operacional",
             "Comissão"
+        ],
+        "expenseCategories": [
+            "Salários",
+            "Aluguel",
+            "Conta de Água",
+            "Conta de Luz",
+            "Internet",
+            "Telefone",
+            "Condomínio",
+            "Marketing",
+            "Material de Escritório",
+            "Combustível",
+            "Manutenção",
+            "Impostos",
+            "Outras Despesas",
+            "Personalizada"
         ]
     }
 
