@@ -39,8 +39,26 @@ const FinancialAnalytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/analytics/financial');
-      setAnalytics(response.data);
+      // Get current month data
+      const now = new Date();
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      
+      const response = await api.get(`/reports/complete-analysis?start_date=${startDate}&end_date=${endDate}`);
+      
+      // Transform data to match expected format
+      const transformedData = {
+        receitas: response.data.summary.total_entradas,
+        despesas: response.data.summary.total_saidas,
+        lucro: response.data.summary.balance,
+        percentualReceitas: 0,
+        percentualDespesas: 0,
+        percentualLucro: 0,
+        margemLucro: response.data.summary.total_entradas > 0 ? 
+          (response.data.summary.balance / response.data.summary.total_entradas) * 100 : 0
+      };
+      
+      setAnalytics(transformedData);
     } catch (error) {
       console.error('Error fetching financial analytics:', error);
       toast({
