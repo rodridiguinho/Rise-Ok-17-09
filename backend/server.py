@@ -639,12 +639,15 @@ async def create_transaction(transaction: TransactionCreate):
         if transaction.saleValue and transaction.commissionValue:
             commission_percentage = (transaction.commissionValue / transaction.saleValue) * 100
         
+        # Use custom category if provided, otherwise use predefined category
+        final_category = transaction.customCategory if transaction.customCategory else transaction.category
+        
         # Prepare transaction data
         new_transaction = {
             "date": transaction_date,  # Use the actual transaction date, not entry date
             "time": datetime.now().strftime("%H:%M"),  # Keep current time for record keeping
             "type": transaction.type,
-            "category": transaction.category,
+            "category": final_category,
             "description": transaction.description,
             "amount": transaction.amount,
             "paymentMethod": transaction.paymentMethod,
@@ -653,8 +656,13 @@ async def create_transaction(transaction: TransactionCreate):
             "seller": transaction.seller,
             "saleValue": transaction.saleValue,
             "supplierValue": transaction.supplierValue,
+            "supplierPaymentDate": transaction.supplierPaymentDate,
+            "supplierPaymentStatus": transaction.supplierPaymentStatus or "Pendente",
             "commissionValue": transaction.commissionValue,
+            "commissionPaymentDate": transaction.commissionPaymentDate,
+            "commissionPaymentStatus": transaction.commissionPaymentStatus or "Pendente",
             "commissionPercentage": commission_percentage,
+            "customCategory": transaction.customCategory,
             "status": "Confirmado",
             "transactionDate": transaction_date,  # Store the actual transaction date
             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
