@@ -55,6 +55,7 @@ const Suppliers = () => {
     state: '',
     zipCode: '',
     category: 'Hotel',
+    supplierType: 'Operadora',
     status: 'Ativo'
   });
 
