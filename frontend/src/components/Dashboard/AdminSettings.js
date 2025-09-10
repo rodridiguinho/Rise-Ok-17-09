@@ -105,10 +105,6 @@ const AdminSettings = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
   const fetchCategories = async () => {
     try {
       const response = await api.get('/transactions/categories');
