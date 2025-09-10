@@ -304,7 +304,9 @@ const EnhancedTransactions = () => {
       };
 
       const createdTransaction = await transactionsAPI.createTransaction(transactionData);
-      setTransactions([createdTransaction, ...transactions]);
+      
+      // Atualizar a lista imediatamente com a nova transação
+      setTransactions(prevTransactions => [createdTransaction, ...prevTransactions]);
       
       setIsAddModalOpen(false);
       
