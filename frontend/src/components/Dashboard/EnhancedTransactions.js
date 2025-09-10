@@ -1548,9 +1548,9 @@ const EnhancedTransactions = () => {
                             />
                             <span className="text-sm text-gray-600">automático</span>
                           </div>
-                          {(calculateMilesTotal() > 0 || newTransaction.airportTaxes) && (
+                          {(calculateMilesTotal() > 0 || newTransaction.milesTaxes) && (
                             <p className="text-xs text-blue-600 mt-1">
-                              {formatCurrency(calculateMilesTotal())} + R$ {parseFloat(newTransaction.airportTaxes || 0).toFixed(2)} = {formatCurrency(calculateMilesTotalWithTaxes())}
+                              {formatCurrency(calculateMilesTotal())} + R$ {parseFloat(newTransaction.milesTaxes || 0).toFixed(2)} = {formatCurrency(calculateMilesTotalWithTaxes())}
                             </p>
                           )}
                         </div>
