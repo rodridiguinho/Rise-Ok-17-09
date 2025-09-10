@@ -75,13 +75,16 @@ def test_critical_transaction_creation_bug():
         print_result(False, "Authentication for critical transaction creation testing failed", str(e))
         return
     
-    # Test 2: Simple Transaction Creation with MINIMAL required fields
-    print("\n🎯 TEST 1: SIMPLE TRANSACTION CREATION WITH MINIMAL FIELDS")
+    # Test 2: Simple Transaction Creation with MINIMAL required fields (corrected)
+    print("\n🎯 TEST 1: SIMPLE TRANSACTION CREATION WITH MINIMAL REQUIRED FIELDS")
     try:
+        # Based on the error, we need category and paymentMethod as well
         simple_transaction = {
             "description": "Teste salvamento simples",
             "amount": 500.00,
-            "type": "entrada"
+            "type": "entrada",
+            "category": "Pacote Turístico",  # Required field
+            "paymentMethod": "PIX"  # Required field
         }
         
         response = requests.post(f"{API_URL}/transactions", json=simple_transaction, timeout=10)
@@ -128,6 +131,31 @@ def test_critical_transaction_creation_bug():
     except Exception as e:
         print_result(False, "Simple Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during simple transaction creation!")
+    
+    # Test 2.5: Test the EXACT user scenario - minimal fields that user expected to work
+    print("\n🎯 TEST 1.5: USER'S EXACT SCENARIO - MINIMAL FIELDS THAT SHOULD WORK")
+    try:
+        user_minimal_transaction = {
+            "description": "Teste salvamento simples",
+            "amount": 500.00,
+            "type": "entrada"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=user_minimal_transaction, timeout=10)
+        print(f"User Scenario Response Status: {response.status_code}")
+        print(f"User Scenario Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            print_result(True, "User's Exact Scenario - WORKS", 
+                       "User's minimal transaction scenario works as expected")
+        else:
+            print_result(False, f"User's Exact Scenario - FAILS - HTTP {response.status_code}", 
+                       f"This is the CRITICAL BUG: User cannot create simple transactions")
+            print("🚨 ROOT CAUSE IDENTIFIED: API requires 'category' and 'paymentMethod' fields")
+            print("🚨 USER IMPACT: User cannot create transactions with just description, amount, and type")
+            
+    except Exception as e:
+        print_result(False, "User's Exact Scenario - Exception occurred", str(e))
     
     # Test 3: Complex Transaction Creation with ALL fields
     print("\n🎯 TEST 2: COMPLEX TRANSACTION CREATION WITH ALL FIELDS")
