@@ -992,7 +992,7 @@ async def get_company_settings():
 async def update_transaction(transaction_id: str, transaction: TransactionCreate):
     try:
         # Find the transaction to update
-        existing_transaction = await db.transactions.find_one({"id": transaction_id})
+        existing_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
         if not existing_transaction:
             raise HTTPException(status_code=404, detail="Transação não encontrada")
         
