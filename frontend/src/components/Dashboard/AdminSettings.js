@@ -93,18 +93,6 @@ const AdminSettings = () => {
     fetchCategories();
   }, []);
 
-  const loadCompanySettings = async () => {
-    try {
-      const response = await api.get('/api/company/settings');
-      if (response.data) {
-        setCompanySettings(response.data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar configurações da empresa:', error);
-      // Manter as configurações padrão se houver erro
-    }
-  };
-
   const fetchCategories = async () => {
     try {
       const response = await api.get('/transactions/categories');
