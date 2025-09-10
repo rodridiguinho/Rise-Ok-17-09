@@ -4275,21 +4275,22 @@ def test_transaction_creation_enhanced_fields():
 
 def run_review_request_tests():
     """Run tests focused on review request requirements"""
-    print("🚀 Starting Backend API Test Suite - REVIEW REQUEST FOCUS")
+    print("🚀 Starting Backend API Test Suite - SUPPLIER MILES BUG FIX TESTING")
     print(f"📍 Backend URL: {BASE_URL}")
     print(f"🔗 API URL: {API_URL}")
     print(f"🔑 Test Credentials: {VALID_EMAIL}")
     print("="*80)
     
-    # Run review request specific tests
-    test_clear_test_data_endpoint()
-    test_enhanced_transaction_management()
-    test_complete_system_status()
-    test_review_request_company_settings()
-    test_transaction_creation_enhanced_fields()
+    # Run the specific supplier miles bug fix test as requested in the review
+    test_supplier_miles_bug_fix()
+    
+    # Run other essential tests
+    test_api_connectivity()
+    test_authentication()
+    test_transactions()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Completed - REVIEW REQUEST FOCUS")
+    print("🏁 Backend API Test Suite Completed - SUPPLIER MILES BUG FIX TESTING")
     print("="*80)
 
 if __name__ == "__main__":
