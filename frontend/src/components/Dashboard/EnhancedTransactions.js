@@ -711,15 +711,33 @@ const EnhancedTransactions = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="font-medium">Valor das Milhas (R$) *</Label>
+                        <Label className="font-medium">Valor por 1.000 milhas (R$) *</Label>
                         <Input
                           type="number"
                           step="0.01"
-                          placeholder="Ex: 850,00"
+                          placeholder="Ex: 26,00"
                           value={newTransaction.supplierMilesValue}
                           onChange={(e) => setNewTransaction({...newTransaction, supplierMilesValue: e.target.value})}
                           className="bg-white"
                         />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="font-medium">Valor Total das Milhas</Label>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="text"
+                            readOnly
+                            value={formatCurrency(calculateMilesTotal())}
+                            className={`bg-gray-100 font-semibold ${calculateMilesTotal() > 0 ? 'text-green-600' : 'text-gray-500'}`}
+                          />
+                          <span className="text-sm text-gray-600">automático</span>
+                        </div>
+                        {newTransaction.supplierMilesQuantity && newTransaction.supplierMilesValue && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            {parseInt(newTransaction.supplierMilesQuantity).toLocaleString('pt-BR')} milhas × R$ {parseFloat(newTransaction.supplierMilesValue).toFixed(2)} = {formatCurrency(calculateMilesTotal())}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
