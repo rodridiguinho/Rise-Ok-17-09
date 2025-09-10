@@ -532,24 +532,25 @@ const EnhancedTransactions = () => {
             <DialogHeader>
               <DialogTitle>Nova Transação - Agência de Viagens</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
-              
-              {/* Basic Transaction Info */}
-              <div className="lg:col-span-3 border-b pb-4 mb-4">
-                <h3 className="text-lg font-semibold mb-4">Informações Básicas</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Tipo *</Label>
-                    <Select value={newTransaction.type} onValueChange={(value) => setNewTransaction({...newTransaction, type: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="entrada">Entrada</SelectItem>
-                        <SelectItem value="saida">Saída</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            <form onSubmit={handleAddTransaction}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
+                
+                {/* Basic Transaction Info */}
+                <div className="lg:col-span-3 border-b pb-4 mb-4">
+                  <h3 className="text-lg font-semibold mb-4">Informações Básicas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Tipo *</Label>
+                      <Select value={newTransaction.type} onValueChange={(value) => setNewTransaction({...newTransaction, type: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="entrada">Entrada</SelectItem>
+                          <SelectItem value="saida">Saída</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
                   <div className="space-y-2">
                     <Label>Categoria *</Label>
