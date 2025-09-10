@@ -547,7 +547,7 @@ const EnhancedTransactions = () => {
               <div className="lg:col-span-3 border-b pb-4 mb-4">
                 <h3 className="text-lg font-semibold mb-4">📦 Produtos/Serviços da Venda</h3>
                 {newTransaction.products.map((product, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 border rounded-lg bg-gray-50">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border rounded-lg bg-gray-50">
                     <div className="space-y-2">
                       <Label>Produto/Serviço</Label>
                       <Input
@@ -557,13 +557,23 @@ const EnhancedTransactions = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Valor (R$)</Label>
+                      <Label>Custo (R$)</Label>
                       <Input
                         type="number"
                         step="0.01"
                         placeholder="0,00"
-                        value={product.value}
-                        onChange={(e) => updateProduct(index, 'value', e.target.value)}
+                        value={product.cost}
+                        onChange={(e) => updateProduct(index, 'cost', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Valor Cliente (R$)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0,00"
+                        value={product.clientValue}
+                        onChange={(e) => updateProduct(index, 'clientValue', e.target.value)}
                       />
                     </div>
                     <div className="flex items-end">
