@@ -78,6 +78,10 @@ const EnhancedTransactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
