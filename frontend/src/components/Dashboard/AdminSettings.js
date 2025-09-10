@@ -103,7 +103,24 @@ const AdminSettings = () => {
   useEffect(() => {
     loadCompanySettings();
     fetchCategories();
+    loadStoredCategories();
   }, []);
+
+  const loadStoredCategories = () => {
+    try {
+      const storedRevenue = localStorage.getItem('riseTravel_revenueCategories');
+      if (storedRevenue) {
+        setRevenueCategories(JSON.parse(storedRevenue));
+      }
+      
+      const storedExpense = localStorage.getItem('riseTravel_expenseCategories');
+      if (storedExpense) {
+        setExpenseCategories(JSON.parse(storedExpense));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar categorias do localStorage:', error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
