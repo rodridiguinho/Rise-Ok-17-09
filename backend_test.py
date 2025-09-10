@@ -38,6 +38,250 @@ INVALID_PASSWORD = "wrongpassword"
 # Global token storage
 auth_token = None
 
+def test_critical_tax_calculation_fixes():
+    """Test Critical Tax Calculation and Update Issues - REVIEW REQUEST"""
+    print_test_header("Critical Tax Calculation and Update Issues - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            print_result(True, "Authentication for critical tax fixes testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for critical tax fixes testing failed", str(e))
+        return
+    
+    # Test 2: Enhanced Profit Calculation Test
+    print("\n🎯 TEST 1: ENHANCED PROFIT CALCULATION TEST")
+    try:
+        profit_test_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Enhanced Profit Calculation Test",
+            "amount": 2000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Profit Test",
+            "supplier": "Fornecedor Profit Test",
+            "saleValue": 2000.00,
+            "supplierValue": 800.00,
+            "airportTaxes": 150.00,  # THIS should now be included in profit calculation
+            "commissionValue": 100.00,
+            "transactionDate": "2025-01-25"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=profit_test_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "Enhanced Profit Calculation - Transaction created", 
+                           f"ID: {transaction_id}")
+                
+                # Verify profit calculation: 2000 - (800 + 150) - 100 = 950.00
+                sale_value = data.get("saleValue", 0)
+                supplier_value = data.get("supplierValue", 0)
+                airport_taxes = data.get("airportTaxes", 0)
+                commission_value = data.get("commissionValue", 0)
+                
+                # Expected profit calculation: saleValue - (supplierValue + airportTaxes) - commissionValue
+                expected_profit = sale_value - (supplier_value + airport_taxes) - commission_value
+                calculated_profit = 2000.00 - (800.00 + 150.00) - 100.00  # Should be 950.00
+                
+                print_result(True, "Enhanced Profit Calculation - Values retrieved", 
+                           f"Sale: R$ {sale_value}, Supplier: R$ {supplier_value}, Airport Taxes: R$ {airport_taxes}, Commission: R$ {commission_value}")
+                
+                if expected_profit == calculated_profit == 950.00:
+                    print_result(True, "✅ Enhanced Profit Calculation - AIRPORT TAXES INCLUDED", 
+                               f"Profit calculation now includes airport taxes: R$ {sale_value} - (R$ {supplier_value} + R$ {airport_taxes}) - R$ {commission_value} = R$ {expected_profit}")
+                else:
+                    print_result(False, "❌ Enhanced Profit Calculation - AIRPORT TAXES NOT INCLUDED", 
+                               f"Expected profit: R$ 950.00, Calculated: R$ {expected_profit}")
+                
+                # Store transaction ID for update test
+                global profit_test_transaction_id
+                profit_test_transaction_id = transaction_id
+                
+            else:
+                print_result(False, "Enhanced Profit Calculation - Transaction creation failed", data)
+        else:
+            print_result(False, f"Enhanced Profit Calculation - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Enhanced Profit Calculation test failed", str(e))
+    
+    # Test 3: Update Transaction Save Test
+    print("\n🎯 TEST 2: UPDATE TRANSACTION SAVE TEST")
+    try:
+        # Create a transaction with basic data first
+        basic_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Update Transaction Save Test",
+            "amount": 1000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Update Test",
+            "supplier": "Fornecedor Original",
+            "supplierValue": 700.00,
+            "airportTaxes": 100.00,
+            "commissionValue": 100.00,
+            "transactionDate": "2025-01-25"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=basic_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                update_transaction_id = data["id"]
+                print_result(True, "Update Transaction Save - Basic transaction created", 
+                           f"ID: {update_transaction_id}")
+                
+                # Now edit the transaction changing multiple fields including new milesTaxes field
+                updated_transaction = {
+                    "type": "entrada",
+                    "category": "Passagem Aérea",
+                    "description": "Updated transaction test",  # Changed
+                    "amount": 1200.00,  # Changed
+                    "paymentMethod": "PIX",
+                    "client": "Cliente Update Test",
+                    "supplier": "Fornecedor Original",
+                    "supplierValue": 900.00,  # Changed
+                    "airportTaxes": 200.00,  # Changed
+                    "milesTaxes": 75.00,  # NEW FIELD
+                    "commissionValue": 120.00,  # Changed
+                    "transactionDate": "2025-01-25"
+                }
+                
+                # Perform PUT operation
+                response = requests.put(f"{API_URL}/transactions/{update_transaction_id}", json=updated_transaction, timeout=10)
+                if response.status_code == 200:
+                    updated_data = response.json()
+                    print_result(True, "Update Transaction Save - PUT operation successful", 
+                               f"Transaction {update_transaction_id} updated")
+                    
+                    # Verify all changes persist correctly
+                    expected_changes = {
+                        "description": "Updated transaction test",
+                        "amount": 1200.00,
+                        "supplierValue": 900.00,
+                        "airportTaxes": 200.00,
+                        "milesTaxes": 75.00,  # NEW FIELD
+                        "commissionValue": 120.00
+                    }
+                    
+                    all_changes_saved = True
+                    for field, expected_value in expected_changes.items():
+                        actual_value = updated_data.get(field)
+                        if actual_value == expected_value:
+                            print_result(True, f"Update Transaction Save - {field} updated", 
+                                       f"Successfully updated to: {actual_value}")
+                        else:
+                            print_result(False, f"Update Transaction Save - {field} NOT updated", 
+                                       f"Expected: {expected_value}, Got: {actual_value}")
+                            all_changes_saved = False
+                    
+                    if all_changes_saved:
+                        print_result(True, "✅ Update Transaction Save - ALL CHANGES PERSIST", 
+                                   "All changes including new milesTaxes field persist correctly after PUT operation")
+                    else:
+                        print_result(False, "❌ Update Transaction Save - CHANGES NOT PERSISTING", 
+                                   "Some changes did not persist correctly after PUT operation")
+                        
+                else:
+                    print_result(False, f"Update Transaction Save - PUT failed - HTTP {response.status_code}", response.text)
+            else:
+                print_result(False, "Update Transaction Save - Basic transaction creation failed", data)
+        else:
+            print_result(False, f"Update Transaction Save - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Update Transaction Save test failed", str(e))
+    
+    # Test 4: Complete Tax Integration Test
+    print("\n🎯 TEST 3: COMPLETE TAX INTEGRATION TEST")
+    try:
+        # Create transaction with miles enabled and both tax systems
+        tax_integration_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Complete Tax Integration Test",
+            "amount": 1000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Tax Integration",
+            "supplier": "Fornecedor Tax Test",
+            "supplierValue": 500.00,
+            "airportTaxes": 100.00,  # Airport taxes system
+            "supplierUsedMiles": True,
+            "supplierMilesQuantity": 30000,
+            "supplierMilesValue": 30.00,
+            "supplierMilesProgram": "LATAM Pass",
+            "milesTaxes": 80.00,  # Miles taxes system (NEW)
+            "transactionDate": "2025-01-25"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=tax_integration_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                integration_transaction_id = data["id"]
+                print_result(True, "Complete Tax Integration - Transaction created", 
+                           f"ID: {integration_transaction_id}")
+                
+                # Verify both tax systems work independently
+                supplier_value = data.get("supplierValue", 0)
+                airport_taxes = data.get("airportTaxes", 0)
+                miles_quantity = data.get("supplierMilesQuantity", 0)
+                miles_value = data.get("supplierMilesValue", 0)
+                miles_taxes = data.get("milesTaxes", 0)
+                
+                # Calculate supplier total (supplier value + airport taxes)
+                supplier_total = supplier_value + airport_taxes
+                expected_supplier_total = 500.00 + 100.00  # 600.00
+                
+                # Calculate miles total (miles value + miles taxes)
+                miles_value_calculated = (miles_quantity / 1000) * miles_value
+                miles_total = miles_value_calculated + miles_taxes
+                expected_miles_total = (30000 / 1000) * 30.00 + 80.00  # 900.00 + 80.00 = 980.00
+                
+                print_result(True, "Complete Tax Integration - Values retrieved", 
+                           f"Supplier: R$ {supplier_value}, Airport Taxes: R$ {airport_taxes}, Miles: {miles_quantity} @ R$ {miles_value}/1000, Miles Taxes: R$ {miles_taxes}")
+                
+                # Verify supplier tax calculation
+                if supplier_total == expected_supplier_total:
+                    print_result(True, "Complete Tax Integration - Supplier tax system", 
+                               f"Supplier taxes work correctly: R$ {supplier_value} + R$ {airport_taxes} = R$ {supplier_total}")
+                else:
+                    print_result(False, "Complete Tax Integration - Supplier tax system", 
+                               f"Expected: R$ {expected_supplier_total}, Got: R$ {supplier_total}")
+                
+                # Verify miles tax calculation
+                if abs(miles_total - expected_miles_total) < 0.01:
+                    print_result(True, "Complete Tax Integration - Miles tax system", 
+                               f"Miles taxes work correctly: R$ {miles_value_calculated:.2f} + R$ {miles_taxes} = R$ {miles_total:.2f}")
+                else:
+                    print_result(False, "Complete Tax Integration - Miles tax system", 
+                               f"Expected: R$ {expected_miles_total}, Got: R$ {miles_total:.2f}")
+                
+                # Verify both systems work independently
+                if supplier_total == expected_supplier_total and abs(miles_total - expected_miles_total) < 0.01:
+                    print_result(True, "✅ Complete Tax Integration - BOTH TAX SYSTEMS WORK INDEPENDENTLY", 
+                               f"Both tax systems work independently and save correctly: Supplier taxes (R$ {supplier_total}) and Miles taxes (R$ {miles_total:.2f})")
+                else:
+                    print_result(False, "❌ Complete Tax Integration - TAX SYSTEMS NOT WORKING INDEPENDENTLY", 
+                               "Tax systems are not working independently or not saving correctly")
+                
+            else:
+                print_result(False, "Complete Tax Integration - Transaction creation failed", data)
+        else:
+            print_result(False, f"Complete Tax Integration - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Complete Tax Integration test failed", str(e))
+
 def test_review_request_company_settings():
     """Test Company Settings Functionality - REVIEW REQUEST"""
     print_test_header("Company Settings Functionality - Review Request Testing")
