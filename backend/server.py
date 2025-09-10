@@ -1014,8 +1014,9 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
         if transaction.saleValue and transaction.commissionValue:
             commission_percentage = (transaction.commissionValue / transaction.saleValue) * 100
         
-        # Determine final category
-        final_category = transaction.customCategory if transaction.customCategory else transaction.category
+        # Use valores padrão se não fornecidos
+        final_category = transaction.category or "Outros"
+        final_payment_method = transaction.paymentMethod or "Dinheiro"
         
         # Prepare updated transaction data
         updated_transaction_data = {
