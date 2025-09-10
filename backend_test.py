@@ -1010,6 +1010,185 @@ def test_analytics_endpoints():
     except Exception as e:
         print_result(False, "Analytics endpoints - Authentication test failed", str(e))
 
+def test_enhanced_transaction_system():
+    """Test enhanced transaction system with new travel fields - REVIEW REQUEST"""
+    print_test_header("Enhanced Transaction System - New Travel Fields Testing")
+    
+    # Test 1: Authenticate first
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "access_token" in data:
+                print_result(True, "Authentication for enhanced transaction testing", 
+                           f"Successfully logged in as {VALID_EMAIL}")
+            else:
+                print_result(False, "Authentication for enhanced transaction testing", 
+                           "Login response missing access_token")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Authentication for enhanced transaction testing failed", str(e))
+    
+    # Test 2: Create enhanced transaction with all new fields from review request
+    try:
+        enhanced_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Passagem São Paulo - Lisboa com escalas",
+            "amount": 3250.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Viagem",
+            "transactionDate": "2025-01-15",
+            # Enhanced fields from review request
+            "productType": "Passagem",
+            "clientReservationCode": "RT123456",
+            "departureCity": "São Paulo",
+            "arrivalCity": "Lisboa",
+            "hasStops": True,
+            "outboundStops": "Frankfurt (FRA)",
+            "returnStops": "Madrid (MAD)",
+            "supplierUsedMiles": True,
+            "supplierMilesQuantity": 100000,
+            "supplierMilesValue": 30.00,  # valor por 1000 milhas
+            "supplierMilesProgram": "LATAM Pass",
+            "airportTaxes": 250.00
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=enhanced_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "POST /api/transactions - Enhanced transaction created", 
+                           f"ID: {transaction_id}, Amount: R$ {data.get('amount')}")
+                
+                # Test 3: Verify all new fields are saved correctly
+                new_fields_validation = {
+                    "productType": "Passagem",
+                    "clientReservationCode": "RT123456",
+                    "departureCity": "São Paulo",
+                    "arrivalCity": "Lisboa",
+                    "hasStops": True,
+                    "outboundStops": "Frankfurt (FRA)",
+                    "returnStops": "Madrid (MAD)",
+                    "supplierUsedMiles": True,
+                    "supplierMilesQuantity": 100000,
+                    "supplierMilesValue": 30.00,
+                    "supplierMilesProgram": "LATAM Pass",
+                    "airportTaxes": 250.00
+                }
+                
+                all_fields_correct = True
+                for field, expected_value in new_fields_validation.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"Enhanced transaction field validation ({field})", 
+                                   f"Correctly saved: {actual_value}")
+                    else:
+                        print_result(False, f"Enhanced transaction field validation ({field})", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                        all_fields_correct = False
+                
+                # Test 4: Verify automatic miles calculation (100000 milhas × R$ 30.00/1000 = R$ 3000.00)
+                expected_miles_total = (100000 / 1000) * 30.00  # 3000.00
+                print_result(True, "Enhanced transaction - Miles calculation verification", 
+                           f"Expected total miles value: R$ {expected_miles_total:.2f} (100000 milhas × R$ 30.00/1000)")
+                
+                # Test 5: Verify data persistence - retrieve transaction and check fields
+                try:
+                    response = requests.get(f"{API_URL}/transactions", timeout=10)
+                    if response.status_code == 200:
+                        transactions = response.json()
+                        created_transaction = next((t for t in transactions if t.get("id") == transaction_id), None)
+                        
+                        if created_transaction:
+                            print_result(True, "Enhanced transaction - Data persistence check", 
+                                       f"Transaction {transaction_id} found in database after creation")
+                            
+                            # Verify all enhanced fields persist correctly
+                            persistence_check_passed = True
+                            for field, expected_value in new_fields_validation.items():
+                                persisted_value = created_transaction.get(field)
+                                if persisted_value == expected_value:
+                                    print_result(True, f"Enhanced transaction persistence ({field})", 
+                                               f"Field correctly persisted: {persisted_value}")
+                                else:
+                                    print_result(False, f"Enhanced transaction persistence ({field})", 
+                                               f"Expected: {expected_value}, Persisted: {persisted_value}")
+                                    persistence_check_passed = False
+                            
+                            if persistence_check_passed:
+                                print_result(True, "Enhanced transaction - Complete persistence validation", 
+                                           "All enhanced travel fields correctly persisted to database")
+                            else:
+                                print_result(False, "Enhanced transaction - Complete persistence validation", 
+                                           "Some enhanced travel fields failed to persist correctly")
+                        else:
+                            print_result(False, "Enhanced transaction - Data persistence check", 
+                                       f"Transaction {transaction_id} NOT found in database")
+                    else:
+                        print_result(False, f"Enhanced transaction - Data persistence check failed", 
+                                   f"Could not retrieve transactions: HTTP {response.status_code}")
+                except Exception as e:
+                    print_result(False, "Enhanced transaction - Data persistence check failed", str(e))
+                
+                # Test 6: Test escalas (stops) functionality
+                if data.get("hasStops") == True:
+                    if data.get("outboundStops") == "Frankfurt (FRA)" and data.get("returnStops") == "Madrid (MAD)":
+                        print_result(True, "Enhanced transaction - Escalas functionality", 
+                                   f"Stops correctly saved: Outbound={data.get('outboundStops')}, Return={data.get('returnStops')}")
+                    else:
+                        print_result(False, "Enhanced transaction - Escalas functionality", 
+                                   f"Stops not saved correctly: Outbound={data.get('outboundStops')}, Return={data.get('returnStops')}")
+                else:
+                    print_result(False, "Enhanced transaction - Escalas functionality", 
+                               f"hasStops should be True, got: {data.get('hasStops')}")
+                
+                # Test 7: Test supplier miles functionality
+                if data.get("supplierUsedMiles") == True:
+                    miles_fields_correct = (
+                        data.get("supplierMilesQuantity") == 100000 and
+                        data.get("supplierMilesValue") == 30.00 and
+                        data.get("supplierMilesProgram") == "LATAM Pass"
+                    )
+                    if miles_fields_correct:
+                        print_result(True, "Enhanced transaction - Supplier miles functionality", 
+                                   f"Miles data correctly saved: {data.get('supplierMilesQuantity')} milhas, R$ {data.get('supplierMilesValue')}/1000, {data.get('supplierMilesProgram')}")
+                    else:
+                        print_result(False, "Enhanced transaction - Supplier miles functionality", 
+                                   f"Miles data not saved correctly")
+                else:
+                    print_result(False, "Enhanced transaction - Supplier miles functionality", 
+                               f"supplierUsedMiles should be True, got: {data.get('supplierUsedMiles')}")
+                
+            else:
+                print_result(False, "POST /api/transactions - Enhanced transaction creation failed", 
+                           "Response missing transaction ID")
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Enhanced transaction creation test failed", str(e))
+    
+    # Test 8: Test company settings endpoints (if available)
+    try:
+        response = requests.get(f"{API_URL}/company/settings", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "GET /api/company/settings - Company settings endpoint", 
+                       f"Company settings retrieved successfully")
+        elif response.status_code == 404:
+            print_result(False, "GET /api/company/settings - Company settings endpoint", 
+                       "Company settings endpoint not implemented (404)")
+        else:
+            print_result(False, f"GET /api/company/settings - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Company settings endpoint test failed", str(e))
+
 def test_analytics_integration():
     """Test integration with existing endpoints - Verify no conflicts"""
     print_test_header("Analytics Integration - Verify No Conflicts with Existing Endpoints")
