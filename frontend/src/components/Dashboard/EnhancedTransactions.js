@@ -836,53 +836,6 @@ const EnhancedTransactions = () => {
                 )}
               </div>
 
-              {/* Multiple Products */}
-              <div className="lg:col-span-3">
-                <h3 className="text-lg font-semibold mb-4">Produtos/Serviços</h3>
-                {newTransaction.products.map((product, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 border rounded-lg">
-                    <div className="space-y-2">
-                      <Label>Produto/Serviço</Label>
-                      <Input
-                        placeholder="Ex: Passagem, Seguro, Transfer"
-                        value={product.name}
-                        onChange={(e) => updateProduct(index, 'name', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Valor</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0,00"
-                        value={product.value}
-                        onChange={(e) => updateProduct(index, 'value', e.target.value)}
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      {index > 0 && (
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeProduct(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addProduct}
-                  className="w-full"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Adicionar Produto/Serviço
-                </Button>
-              </div>
             </div>
 
             <div className="flex justify-end space-x-2">
