@@ -32,6 +32,19 @@ import { useToast } from '../../hooks/use-toast';
 import api from '../../services/api';
 
 const AdminSettings = () => {
+  // Configurações da empresa
+  const [companySettings, setCompanySettings] = useState({
+    name: 'Rise Travel',
+    email: 'rodrigo@risetravel.com',
+    phone: '(11) 99999-9999',
+    address: 'Rua das Viagens, 123',
+    city: 'São Paulo',
+    state: 'SP',
+    zipCode: '01234-567',
+    cnpj: '12.345.678/0001-90',
+    website: 'www.risetravel.com.br'
+  });
+
   const [supplierTypes, setSupplierTypes] = useState([
     'Operadora',
     'Consolidadora',
