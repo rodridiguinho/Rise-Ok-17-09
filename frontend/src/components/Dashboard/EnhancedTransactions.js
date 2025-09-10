@@ -264,7 +264,10 @@ const EnhancedTransactions = () => {
         supplierMilesQuantity: '',
         supplierMilesValue: '',
         supplierMilesProgram: '',
-        airportTaxes: ''
+        airportTaxes: '',
+        // Escalas
+        outboundStops: '',
+        returnStops: ''
       });
       
       setIsAddModalOpen(false);
