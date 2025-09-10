@@ -1128,6 +1128,63 @@ async def save_company_settings(settings: CompanySettings):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao salvar configurações da empresa: {str(e)}")
 
+# Clear test data endpoint
+@app.post("/api/admin/clear-test-data")
+async def clear_test_data():
+    try:
+        # Count documents before deletion for reporting
+        transactions_count = await db.transactions.count_documents({})
+        clients_count = await db.clients.count_documents({})
+        suppliers_count = await db.suppliers.count_documents({})
+        users_count = await db.users.count_documents({"role": {"$ne": "Admin"}})  # Keep admin users
+        
+        # Clear collections (keeping admin users)
+        await db.transactions.delete_many({})
+        await db.clients.delete_many({})
+        await db.suppliers.delete_many({})
+        
+        # Delete non-admin users (keep at least one admin)
+        admin_users = await db.users.find({"role": "Admin"}).to_list(length=None)
+        if len(admin_users) > 0:
+            # Keep the first admin user, delete others if they are test users
+            await db.users.delete_many({
+                "role": {"$ne": "Admin"},
+                "email": {"$ne": "rodrigo@risetravel.com"}  # Keep the main admin
+            })
+        
+        # Reset company settings to defaults (optional - you might want to keep these)
+        default_company_settings = {
+            "name": "Rise Travel",
+            "email": "rodrigo@risetravel.com",
+            "phone": "(11) 99999-9999",
+            "address": "Rua das Viagens, 123",
+            "city": "São Paulo",
+            "state": "SP",
+            "zipCode": "01234-567",
+            "cnpj": "12.345.678/0001-90",
+            "website": "www.risetravel.com.br",
+            "updatedAt": datetime.utcnow()
+        }
+        
+        await db.company_settings.replace_one(
+            {},
+            default_company_settings,
+            upsert=True
+        )
+        
+        return {
+            "message": "Dados de teste limpos com sucesso",
+            "cleared": {
+                "transactions": transactions_count,
+                "clients": clients_count,
+                "suppliers": suppliers_count,
+                "users": users_count
+            },
+            "status": "Sistema pronto para produção"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao limpar dados de teste: {str(e)}")
+
 @api_router.get("/travel/airlines")
 async def get_airlines():
     """Obter lista de companhias aéreas"""
