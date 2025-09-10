@@ -89,6 +89,24 @@ const AdminSettings = () => {
   
   const { toast } = useToast();
 
+  // Carregar configurações da empresa ao inicializar
+  useEffect(() => {
+    loadCompanySettings();
+    fetchCategories();
+  }, []);
+
+  const loadCompanySettings = async () => {
+    try {
+      const response = await api.get('/api/company/settings');
+      if (response.data) {
+        setCompanySettings(response.data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações da empresa:', error);
+      // Manter as configurações padrão se houver erro
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
   }, []);
