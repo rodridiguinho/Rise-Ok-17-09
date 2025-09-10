@@ -91,6 +91,14 @@ const AdminSettings = () => {
     }
   };
 
+  const handleSaveCompanySettings = () => {
+    // Aqui você salvaria as configurações da empresa
+    toast({
+      title: "Configurações da empresa salvas",
+      description: "As informações da empresa foram atualizadas com sucesso.",
+    });
+  };
+
   const addSupplierType = () => {
     if (!newSupplierType.trim()) {
       toast({
