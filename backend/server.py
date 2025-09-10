@@ -752,10 +752,10 @@ async def create_transaction(transaction: TransactionCreate):
             if "updatedAt" in created_transaction:
                 created_transaction["updatedAt"] = created_transaction["updatedAt"].isoformat()
         
-        return created_transaction
+        return {"message": "Transação criada com sucesso", **created_transaction}
     except Exception as e:
         logging.error(f"Create transaction error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error creating transaction")
+        raise HTTPException(status_code=500, detail=f"Erro ao criar transação: {str(e)}")
 
 @api_router.get("/transactions/categories")
 async def get_categories():
