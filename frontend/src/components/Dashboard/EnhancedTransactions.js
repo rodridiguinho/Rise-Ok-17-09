@@ -49,6 +49,32 @@ const EnhancedTransactions = () => {
   const [airports, setAirports] = useState([]);
   const [categories, setCategories] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
+
+  const [revenueCategories] = useState([
+    'Vendas de Passagens',
+    'Comissões',
+    'Taxas de Serviço',
+    'Seguros',
+    'Pacotes Turísticos',
+    'Transfers',
+    'Hospedagem',
+    'Consultoria',
+    'Vendas Online',
+    'Outros'
+  ]);
+
+  const [expenseCategories] = useState([
+    'Marketing',
+    'Aluguel',
+    'Combustível',
+    'Alimentação',
+    'Material de Escritório',
+    'Telefone/Internet',
+    'Impostos',
+    'Manutenção',
+    'Seguros',
+    'Outros'
+  ]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
