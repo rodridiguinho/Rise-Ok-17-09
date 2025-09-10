@@ -38,6 +38,225 @@ INVALID_PASSWORD = "wrongpassword"
 # Global token storage
 auth_token = None
 
+def test_critical_transaction_creation_bug():
+    """Test Critical Transaction Creation Bug - REVIEW REQUEST"""
+    print_test_header("Critical Transaction Creation Bug - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for critical transaction creation testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for critical transaction creation testing failed", str(e))
+        return
+    
+    # Test 2: Simple Transaction Creation with MINIMAL required fields
+    print("\n🎯 TEST 1: SIMPLE TRANSACTION CREATION WITH MINIMAL FIELDS")
+    try:
+        simple_transaction = {
+            "description": "Teste salvamento simples",
+            "amount": 500.00,
+            "type": "entrada"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=simple_transaction, timeout=10)
+        print(f"Response Status: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
+        print(f"Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "Simple Transaction Creation - SUCCESS", 
+                           f"Transaction created with ID: {transaction_id}")
+                print_result(True, "Simple Transaction Creation - Field validation", 
+                           f"Description: {data.get('description')}, Amount: R$ {data.get('amount')}, Type: {data.get('type')}")
+                
+                # Verify transaction persists in database
+                verify_response = requests.get(f"{API_URL}/transactions", timeout=10)
+                if verify_response.status_code == 200:
+                    transactions = verify_response.json()
+                    found_transaction = None
+                    for t in transactions:
+                        if t.get("id") == transaction_id:
+                            found_transaction = t
+                            break
+                    
+                    if found_transaction:
+                        print_result(True, "Simple Transaction Creation - Database persistence", 
+                                   f"Transaction found in database with correct data")
+                    else:
+                        print_result(False, "Simple Transaction Creation - Database persistence", 
+                                   f"Transaction NOT found in database")
+                else:
+                    print_result(False, "Simple Transaction Creation - Database verification failed", 
+                               f"Could not verify database persistence - HTTP {verify_response.status_code}")
+                
+            else:
+                print_result(False, "Simple Transaction Creation - No ID returned", str(data))
+        else:
+            print_result(False, f"Simple Transaction Creation - FAILED - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+            print("🚨 CRITICAL ERROR: Simple transaction creation failed!")
+            
+    except Exception as e:
+        print_result(False, "Simple Transaction Creation - Exception occurred", str(e))
+        print("🚨 CRITICAL ERROR: Exception during simple transaction creation!")
+    
+    # Test 3: Complex Transaction Creation with ALL fields
+    print("\n🎯 TEST 2: COMPLEX TRANSACTION CREATION WITH ALL FIELDS")
+    try:
+        complex_transaction = {
+            # Basic fields
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Transação complexa com todos os campos",
+            "amount": 2500.00,
+            "paymentMethod": "PIX",
+            
+            # Travel fields
+            "productType": "Passagem",
+            "departureCity": "São Paulo",
+            "arrivalCity": "Lisboa",
+            "clientReservationCode": "RT789456",
+            "departureDate": "2025-02-15",
+            "returnDate": "2025-02-25",
+            
+            # Supplier fields
+            "supplier": "Companhia Aérea Internacional",
+            "supplierValue": 1800.00,
+            "airportTaxes": 200.00,
+            "supplierUsedMiles": True,
+            "supplierMilesQuantity": 50000,
+            "supplierMilesValue": 35.00,
+            "supplierMilesProgram": "LATAM Pass",
+            
+            # Financial fields
+            "client": "Cliente Teste Complexo",
+            "seller": "Vendedor Teste",
+            "saleValue": 2500.00,
+            "commissionValue": 250.00,
+            "commissionPercentage": 10.0,
+            
+            # Products
+            "products": [
+                {
+                    "name": "Passagem GRU-LIS",
+                    "cost": 1800.00,
+                    "clientValue": 2300.00
+                },
+                {
+                    "name": "Taxa de Embarque",
+                    "cost": 200.00,
+                    "clientValue": 200.00
+                }
+            ],
+            
+            "transactionDate": "2025-01-25"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=complex_transaction, timeout=10)
+        print(f"Complex Transaction Response Status: {response.status_code}")
+        print(f"Complex Transaction Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "Complex Transaction Creation - SUCCESS", 
+                           f"Complex transaction created with ID: {transaction_id}")
+                
+                # Verify key fields are saved
+                field_checks = {
+                    "description": "Transação complexa com todos os campos",
+                    "amount": 2500.00,
+                    "type": "entrada",
+                    "category": "Passagem Aérea",
+                    "supplier": "Companhia Aérea Internacional",
+                    "supplierValue": 1800.00,
+                    "airportTaxes": 200.00,
+                    "supplierUsedMiles": True,
+                    "supplierMilesQuantity": 50000,
+                    "client": "Cliente Teste Complexo"
+                }
+                
+                all_fields_correct = True
+                for field, expected_value in field_checks.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"Complex Transaction - {field} validation", 
+                                   f"Correctly saved: {actual_value}")
+                    else:
+                        print_result(False, f"Complex Transaction - {field} validation", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                        all_fields_correct = False
+                
+                # Verify products array
+                products = data.get("products", [])
+                if len(products) == 2:
+                    print_result(True, "Complex Transaction - Products validation", 
+                               f"Found {len(products)} products as expected")
+                else:
+                    print_result(False, "Complex Transaction - Products validation", 
+                               f"Expected 2 products, got {len(products)}")
+                    all_fields_correct = False
+                
+                if all_fields_correct:
+                    print_result(True, "Complex Transaction Creation - All fields saved correctly", 
+                               "All complex transaction fields saved and validated successfully")
+                else:
+                    print_result(False, "Complex Transaction Creation - Some fields not saved correctly", 
+                               "Some complex transaction fields failed validation")
+                
+            else:
+                print_result(False, "Complex Transaction Creation - No ID returned", str(data))
+        else:
+            print_result(False, f"Complex Transaction Creation - FAILED - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+            print("🚨 CRITICAL ERROR: Complex transaction creation failed!")
+            
+    except Exception as e:
+        print_result(False, "Complex Transaction Creation - Exception occurred", str(e))
+        print("🚨 CRITICAL ERROR: Exception during complex transaction creation!")
+    
+    # Test 4: Error Investigation - Test with invalid data to see error handling
+    print("\n🎯 TEST 3: ERROR MESSAGE INVESTIGATION")
+    try:
+        invalid_transaction = {
+            "description": "Teste erro",
+            "amount": "invalid_amount",  # Invalid amount type
+            "type": "invalid_type"  # Invalid type
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=invalid_transaction, timeout=10)
+        print(f"Invalid Transaction Response Status: {response.status_code}")
+        print(f"Invalid Transaction Response Text: {response.text}")
+        
+        if response.status_code != 200:
+            print_result(True, "Error Investigation - Invalid data handling", 
+                       f"API correctly rejected invalid data with status {response.status_code}")
+            print_result(True, "Error Investigation - Error message", 
+                       f"Error response: {response.text}")
+        else:
+            print_result(False, "Error Investigation - Invalid data accepted", 
+                       "API should have rejected invalid data but accepted it")
+            
+    except Exception as e:
+        print_result(False, "Error Investigation - Exception occurred", str(e))
+
 def test_critical_tax_calculation_fixes():
     """Test Critical Tax Calculation and Update Issues - REVIEW REQUEST"""
     print_test_header("Critical Tax Calculation and Update Issues - Review Request Testing")
