@@ -892,6 +892,141 @@ def test_review_request_complete_enhanced_transaction():
     except Exception as e:
         print_result(False, "Complete enhanced transaction creation failed", str(e))
 
+def test_specific_transaction_creation_bug():
+    """Test Specific Transaction Creation Bug - REVIEW REQUEST"""
+    print_test_header("Specific Transaction Creation Bug - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for specific transaction creation testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for specific transaction creation testing failed", str(e))
+        return
+    
+    # Test 2: Create transaction with EXACT data from review request
+    print("\n🎯 TEST 1: CREATE TRANSACTION WITH EXACT REVIEW REQUEST DATA")
+    try:
+        # Exact data from review request
+        review_transaction = {
+            "type": "entrada",
+            "description": "Teste Bug Lista Atualização",
+            "amount": 750.00
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=review_transaction, timeout=10)
+        print(f"Response Status: {response.status_code}")
+        print(f"Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "Specific Transaction Creation - SUCCESS", 
+                           f"Transaction created with ID: {transaction_id}")
+                
+                # Test 3: Verify response format (message + transaction data)
+                if "message" in data:
+                    print_result(True, "Response format validation - Message present", 
+                               f"Message: {data.get('message')}")
+                else:
+                    print_result(False, "Response format validation - Message missing", 
+                               "Response should include 'message' field")
+                
+                # Verify transaction data is present
+                required_fields = ["id", "type", "description", "amount"]
+                missing_fields = [f for f in required_fields if f not in data]
+                if not missing_fields:
+                    print_result(True, "Response format validation - Transaction data present", 
+                               f"All required fields present: {required_fields}")
+                else:
+                    print_result(False, "Response format validation - Transaction data incomplete", 
+                               f"Missing fields: {missing_fields}")
+                
+                # Test 4: Verify default values are applied
+                expected_defaults = {
+                    "category": "Outros",
+                    "paymentMethod": "Dinheiro"
+                }
+                
+                defaults_applied = True
+                for field, expected_default in expected_defaults.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_default:
+                        print_result(True, f"Default value validation - {field}", 
+                                   f"Default applied correctly: {actual_value}")
+                    else:
+                        print_result(False, f"Default value validation - {field}", 
+                                   f"Expected default: {expected_default}, Got: {actual_value}")
+                        defaults_applied = False
+                
+                # Test 5: Verify transaction appears in list immediately
+                print("\n🎯 TEST 2: VERIFY TRANSACTION APPEARS IN LIST IMMEDIATELY")
+                try:
+                    list_response = requests.get(f"{API_URL}/transactions", timeout=10)
+                    if list_response.status_code == 200:
+                        transactions = list_response.json()
+                        
+                        # Find our transaction in the list
+                        found_transaction = None
+                        for t in transactions:
+                            if t.get("id") == transaction_id:
+                                found_transaction = t
+                                break
+                        
+                        if found_transaction:
+                            print_result(True, "Transaction list update - Transaction found", 
+                                       f"Transaction {transaction_id} found in list immediately")
+                            
+                            # Verify the data matches
+                            if (found_transaction.get("description") == "Teste Bug Lista Atualização" and 
+                                found_transaction.get("amount") == 750.00 and 
+                                found_transaction.get("type") == "entrada"):
+                                print_result(True, "Transaction list update - Data consistency", 
+                                           f"Transaction data consistent in list")
+                            else:
+                                print_result(False, "Transaction list update - Data inconsistency", 
+                                           f"Transaction data differs in list: {found_transaction}")
+                        else:
+                            print_result(False, "Transaction list update - Transaction not found", 
+                                       f"Transaction {transaction_id} NOT found in list")
+                    else:
+                        print_result(False, f"Transaction list retrieval failed - HTTP {list_response.status_code}", 
+                                   list_response.text)
+                except Exception as e:
+                    print_result(False, "Transaction list verification failed", str(e))
+                
+                # Test 6: Final validation summary
+                if defaults_applied and found_transaction:
+                    print_result(True, "🎯 SPECIFIC TRANSACTION CREATION - ALL REQUIREMENTS MET", 
+                               "✅ Transaction created successfully\n✅ Response format correct (message + data)\n✅ Default values applied\n✅ Transaction appears immediately in list")
+                else:
+                    print_result(False, "🎯 SPECIFIC TRANSACTION CREATION - SOME REQUIREMENTS NOT MET", 
+                               "Some requirements from review request not fully satisfied")
+                
+            else:
+                print_result(False, "Specific Transaction Creation - No ID returned", str(data))
+        else:
+            print_result(False, f"Specific Transaction Creation - FAILED - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+            print("🚨 CRITICAL ERROR: Specific transaction creation failed!")
+            
+    except Exception as e:
+        print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
+        print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
+
 def test_review_request_expense_transaction():
     """Test Expense Transaction - REVIEW REQUEST"""
     print_test_header("Expense Transaction Test - Review Request Testing")
