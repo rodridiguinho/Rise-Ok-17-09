@@ -988,6 +988,126 @@ async def get_company_settings():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar configurações da empresa: {str(e)}")
 
+@app.put("/api/transactions/{transaction_id}")
+async def update_transaction(transaction_id: str, transaction: TransactionCreate):
+    try:
+        # Find the transaction to update
+        existing_transaction = await db.transactions.find_one({"id": transaction_id})
+        if not existing_transaction:
+            raise HTTPException(status_code=404, detail="Transação não encontrada")
+        
+        # Parse transaction date
+        transaction_date = transaction.transactionDate
+        if transaction_date:
+            try:
+                parsed_date = datetime.strptime(transaction_date, "%Y-%m-%d")
+                transaction_date = parsed_date.strftime("%Y-%m-%d")
+            except ValueError:
+                transaction_date = date.today().strftime("%Y-%m-%d")
+        else:
+            transaction_date = date.today().strftime("%Y-%m-%d")
+        
+        # Calculate commission percentage
+        commission_percentage = 0.0
+        if transaction.saleValue and transaction.commissionValue:
+            commission_percentage = (transaction.commissionValue / transaction.saleValue) * 100
+        
+        # Determine final category
+        final_category = transaction.customCategory if transaction.customCategory else transaction.category
+        
+        # Prepare updated transaction data
+        updated_transaction_data = {
+            "date": transaction_date,
+            "time": datetime.now().strftime("%H:%M"),
+            "type": transaction.type,
+            "category": final_category,
+            "description": transaction.description,
+            "amount": transaction.amount,
+            "paymentMethod": transaction.paymentMethod,
+            "client": transaction.client,
+            "supplier": transaction.supplier,
+            "seller": transaction.seller,
+            "saleValue": transaction.saleValue,
+            "supplierValue": transaction.supplierValue,
+            "supplierPaymentDate": transaction.supplierPaymentDate,
+            "supplierPaymentStatus": transaction.supplierPaymentStatus or "Pendente",
+            "commissionValue": transaction.commissionValue,
+            "commissionPaymentDate": transaction.commissionPaymentDate,
+            "commissionPaymentStatus": transaction.commissionPaymentStatus or "Pendente",
+            "commissionPercentage": commission_percentage,
+            "customCategory": transaction.customCategory,
+            # Travel-specific fields
+            "clientNumber": transaction.clientNumber,
+            "reservationLocator": transaction.reservationLocator,
+            "departureDate": transaction.departureDate,
+            "returnDate": transaction.returnDate,
+            "departureTime": transaction.departureTime,
+            "arrivalTime": transaction.arrivalTime,
+            "hasStops": transaction.hasStops,
+            "originAirport": transaction.originAirport,
+            "destinationAirport": transaction.destinationAirport,
+            "tripType": transaction.tripType or "Lazer",
+            "products": transaction.products or [],
+            # Enhanced fields for client reservation and supplier miles
+            "clientReservationCode": transaction.clientReservationCode,
+            "departureCity": transaction.departureCity,
+            "arrivalCity": transaction.arrivalCity,
+            "productType": transaction.productType or "Passagem",
+            "supplierUsedMiles": transaction.supplierUsedMiles or False,
+            "supplierMilesQuantity": transaction.supplierMilesQuantity,
+            "supplierMilesValue": transaction.supplierMilesValue,
+            "supplierMilesProgram": transaction.supplierMilesProgram,
+            "airportTaxes": transaction.airportTaxes,
+            # Escalas
+            "outboundStops": transaction.outboundStops,
+            "returnStops": transaction.returnStops,
+            "status": "Confirmado",
+            "transactionDate": transaction_date,
+            "updatedAt": datetime.utcnow(),
+            "entryDate": existing_transaction.get("entryDate", date.today().strftime("%Y-%m-%d"))
+        }
+        
+        # Update the transaction
+        result = await db.transactions.update_one(
+            {"id": transaction_id},
+            {"$set": updated_transaction_data}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Transação não encontrada ou não foi modificada")
+        
+        # Return updated transaction
+        updated_transaction = await db.transactions.find_one({"id": transaction_id})
+        updated_transaction.pop('_id', None)
+        
+        return {"message": "Transação atualizada com sucesso", **updated_transaction}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Update transaction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao atualizar transação: {str(e)}")
+
+@app.delete("/api/transactions/{transaction_id}")
+async def delete_transaction(transaction_id: str):
+    try:
+        # Check if transaction exists
+        existing_transaction = await db.transactions.find_one({"id": transaction_id})
+        if not existing_transaction:
+            raise HTTPException(status_code=404, detail="Transação não encontrada")
+        
+        # Delete the transaction
+        result = await db.transactions.delete_one({"id": transaction_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Transação não encontrada")
+        
+        return {"message": "Transação excluída com sucesso", "id": transaction_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Delete transaction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao excluir transação: {str(e)}")
+
 @app.post("/api/company/settings")
 async def save_company_settings(settings: CompanySettings):
     try:
