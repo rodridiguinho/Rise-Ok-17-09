@@ -398,6 +398,10 @@ const EnhancedTransactions = () => {
         saleValue: newTransaction.saleValue ? parseFloat(newTransaction.saleValue) : null,
         supplierValue: newTransaction.supplierValue ? parseFloat(newTransaction.supplierValue) : null,
         commissionValue: newTransaction.commissionValue ? parseFloat(newTransaction.commissionValue) : null,
+        airportTaxes: newTransaction.airportTaxes ? parseFloat(newTransaction.airportTaxes) : null,
+        milesTaxes: newTransaction.milesTaxes ? parseFloat(newTransaction.milesTaxes) : null,
+        supplierMilesQuantity: newTransaction.supplierMilesQuantity ? parseFloat(newTransaction.supplierMilesQuantity) : null,
+        supplierMilesValue: newTransaction.supplierMilesValue ? parseFloat(newTransaction.supplierMilesValue) : null,
         products: newTransaction.products.filter(p => p.name && (p.clientValue || p.cost))
       };
 
