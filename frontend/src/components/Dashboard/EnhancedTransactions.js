@@ -1050,13 +1050,13 @@ const EnhancedTransactions = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="font-medium">Taxas do Aeroporto (R$)</Label>
+                        <Label className="font-medium">Taxas Extras das Milhas (R$)</Label>
                         <Input
                           type="number"
                           step="0.01"
                           placeholder="Ex: 150,00"
-                          value={newTransaction.airportTaxes}
-                          onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
+                          value={newTransaction.milesTaxes || ''}
+                          onChange={(e) => setNewTransaction({...newTransaction, milesTaxes: e.target.value})}
                           className="bg-white"
                         />
                       </div>
@@ -1072,9 +1072,9 @@ const EnhancedTransactions = () => {
                           />
                           <span className="text-sm text-gray-600">automático</span>
                         </div>
-                        {(calculateMilesTotal() > 0 || newTransaction.airportTaxes) && (
+                        {(calculateMilesTotal() > 0 || newTransaction.milesTaxes) && (
                           <p className="text-xs text-blue-600 mt-1">
-                            {formatCurrency(calculateMilesTotal())} + R$ {parseFloat(newTransaction.airportTaxes || 0).toFixed(2)} = {formatCurrency(calculateMilesTotalWithTaxes())}
+                            {formatCurrency(calculateMilesTotal())} + R$ {parseFloat(newTransaction.milesTaxes || 0).toFixed(2)} = {formatCurrency(calculateMilesTotalWithTaxes())}
                           </p>
                         )}
                       </div>
