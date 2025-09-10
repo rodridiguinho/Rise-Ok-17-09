@@ -547,7 +547,12 @@ const EnhancedTransactions = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Transações Avançadas</h2>
-        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <Dialog open={isAddModalOpen} onOpenChange={(open) => {
+          if (open) {
+            resetForm(); // Limpar formulário ao abrir modal
+          }
+          setIsAddModalOpen(open);
+        }}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500">
               <Plus className="mr-2 h-4 w-4" />
