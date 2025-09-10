@@ -75,11 +75,22 @@ const AdminSettings = () => {
   ]);
   const [categories, setCategories] = useState([]);
   const [expenseCategories, setExpenseCategories] = useState([]);
+  const [revenueCategories, setRevenueCategories] = useState([
+    'Vendas de Passagens',
+    'Comissões',
+    'Taxas de Serviço',
+    'Seguros',
+    'Pacotes Turísticos',
+    'Transfers',
+    'Hospedagem',
+    'Outros'
+  ]);
   const [paymentMethods, setPaymentMethods] = useState([]);
   
   const [newSupplierType, setNewSupplierType] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [newExpenseCategory, setNewExpenseCategory] = useState('');
+  const [newRevenueCategory, setNewRevenueCategory] = useState('');
   const [newPaymentMethod, setNewPaymentMethod] = useState('');
   
   const [isSupplierTypeModalOpen, setIsSupplierTypeModalOpen] = useState(false);
