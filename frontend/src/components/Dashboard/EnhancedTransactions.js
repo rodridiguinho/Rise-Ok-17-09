@@ -310,7 +310,7 @@ const EnhancedTransactions = () => {
       
       setIsAddModalOpen(false);
       
-      // Reset form
+      // Reset form COMPLETAMENTE - TODOS os campos
       setNewTransaction({
         type: 'entrada',
         category: '',
@@ -329,6 +329,7 @@ const EnhancedTransactions = () => {
         commissionPaymentStatus: 'Pendente',
         customCategory: '',
         transactionDate: new Date().toISOString().split('T')[0],
+        // Travel-specific fields
         clientNumber: '',
         reservationLocator: '',
         departureDate: '',
@@ -340,7 +341,7 @@ const EnhancedTransactions = () => {
         destinationAirport: '',
         tripType: 'Lazer',
         products: [{ name: '', cost: '', clientValue: '' }],
-        // Enhanced fields
+        // Enhanced fields for client reservation and supplier miles
         clientReservationCode: '',
         departureCity: '',
         arrivalCity: '',
