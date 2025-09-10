@@ -980,7 +980,8 @@ const EnhancedTransactions = () => {
                         <div className="flex flex-wrap gap-1">
                           {transaction.products.map((product, index) => (
                             <Badge key={index} variant="secondary" className="text-xs">
-                              {product.name}: {formatCurrency(product.value)}
+                              {product.name}: {product.clientValue ? formatCurrency(product.clientValue) : (product.value ? formatCurrency(product.value) : 'N/A')}
+                              {product.cost && ` (Custo: ${formatCurrency(product.cost)})`}
                             </Badge>
                           ))}
                         </div>
