@@ -264,12 +264,14 @@ const EnhancedTransactions = () => {
     setNewTransaction({ ...newTransaction, products: newProducts });
   };
 
-  const handleAddTransaction = async () => {
-    if (!newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.transactionDate) {
+  const handleAddTransaction = async (e) => {
+    if (e) e.preventDefault();
+    
+    if (!newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.paymentMethod) {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        description: "Por favor, preencha todos os campos obrigatórios: categoria, descrição, valor e forma de pagamento.",
       });
       return;
     }
@@ -281,11 +283,16 @@ const EnhancedTransactions = () => {
         saleValue: newTransaction.saleValue ? parseFloat(newTransaction.saleValue) : null,
         supplierValue: newTransaction.supplierValue ? parseFloat(newTransaction.supplierValue) : null,
         commissionValue: newTransaction.commissionValue ? parseFloat(newTransaction.commissionValue) : null,
+        airportTaxes: newTransaction.airportTaxes ? parseFloat(newTransaction.airportTaxes) : null,
+        supplierMilesQuantity: newTransaction.supplierMilesQuantity ? parseFloat(newTransaction.supplierMilesQuantity) : null,
+        supplierMilesValue: newTransaction.supplierMilesValue ? parseFloat(newTransaction.supplierMilesValue) : null,
         products: newTransaction.products.filter(p => p.name && (p.clientValue || p.cost))
       };
 
       const createdTransaction = await transactionsAPI.createTransaction(transactionData);
       setTransactions([createdTransaction, ...transactions]);
+      
+      setIsAddModalOpen(false);
       
       // Reset form
       setNewTransaction({
