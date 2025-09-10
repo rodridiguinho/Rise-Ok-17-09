@@ -78,7 +78,7 @@ export const transactionsAPI = {
   },
   
   updateTransaction: async (id, transactionData) => {
-    const response = await api.put(`/api/transactions/${id}`, transactionData);
+    const response = await api.put(`/transactions/${id}`, transactionData);
     return response.data;
   },
   
