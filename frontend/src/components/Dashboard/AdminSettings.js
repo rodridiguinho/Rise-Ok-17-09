@@ -248,6 +248,27 @@ const AdminSettings = () => {
     });
   };
 
+  const addRevenueCategory = () => {
+    if (newRevenueCategory.trim()) {
+      setRevenueCategories([...revenueCategories, newRevenueCategory.trim()]);
+      setNewRevenueCategory('');
+      setIsRevenueCategoryModalOpen(false);
+      toast({
+        title: "Categoria de receita adicionada",
+        description: `"${newRevenueCategory}" foi adicionada à lista.`,
+      });
+    }
+  };
+
+  const removeRevenueCategory = (index) => {
+    const categoryToRemove = revenueCategories[index];
+    setRevenueCategories(revenueCategories.filter((_, i) => i !== index));
+    toast({
+      title: "Categoria de receita removida",
+      description: `"${categoryToRemove}" foi removida da lista.`,
+    });
+  };
+
   const addPaymentMethod = () => {
     if (!newPaymentMethod.trim()) {
       toast({
