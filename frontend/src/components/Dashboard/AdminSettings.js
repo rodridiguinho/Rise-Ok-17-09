@@ -792,6 +792,78 @@ const AdminSettings = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Limpar Dados de Teste */}
+      <Card className="border-red-200 bg-red-50">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Trash2 className="mr-2 h-5 w-5 text-red-600" />
+            <span className="text-red-800">Limpar Dados de Teste</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-lg border border-red-200">
+              <h4 className="font-medium text-red-800 mb-2">⚠️ Atenção - Ação Irreversível</h4>
+              <p className="text-sm text-gray-700 mb-4">
+                Esta ação irá <strong>remover permanentemente</strong> todos os dados de teste do sistema:
+              </p>
+              <ul className="text-sm text-gray-600 space-y-1 mb-4">
+                <li>• Todas as transações criadas durante os testes</li>
+                <li>• Todos os clientes cadastrados</li>
+                <li>• Todos os fornecedores cadastrados</li>
+                <li>• Todos os usuários (exceto o administrador principal)</li>
+                <li>• Configurações personalizadas e categorias customizadas</li>
+              </ul>
+              <p className="text-sm text-blue-700 bg-blue-50 p-2 rounded">
+                💡 <strong>Recomendado:</strong> Use esta opção quando estiver pronto para começar a usar o sistema em produção.
+              </p>
+            </div>
+            
+            <div className="flex justify-center">
+              <Dialog open={isClearDataModalOpen} onOpenChange={setIsClearDataModalOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="destructive" className="bg-red-600 hover:bg-red-700">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Limpar Todos os Dados de Teste
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-red-800">⚠️ Confirmar Limpeza de Dados</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                      <p className="text-red-800 font-medium mb-2">ATENÇÃO: Esta ação é irreversível!</p>
+                      <p className="text-sm text-gray-700">
+                        Todos os dados de teste serão permanentemente removidos do sistema. 
+                        Certifique-se de que realmente deseja prosseguir.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                      <p className="text-green-800 text-sm">
+                        ✅ <strong>Após a limpeza:</strong> O sistema estará pronto para uso em produção 
+                        com apenas os dados essenciais (configurações da empresa Rise Travel).
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 mt-6">
+                    <Button variant="outline" onClick={() => setIsClearDataModalOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button variant="destructive" onClick={handleClearAllData} className="bg-red-600 hover:bg-red-700">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Sim, Limpar Dados
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
