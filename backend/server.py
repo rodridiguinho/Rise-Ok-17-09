@@ -1026,7 +1026,7 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             "category": final_category,
             "description": transaction.description,
             "amount": transaction.amount,
-            "paymentMethod": transaction.paymentMethod,
+            "paymentMethod": final_payment_method,
             "client": transaction.client,
             "supplier": transaction.supplier,
             "seller": transaction.seller,
