@@ -669,8 +669,8 @@ const EnhancedTransactions = () => {
                     <Label>Localizador da Reserva</Label>
                     <Input
                       placeholder="Ex: ABC123"
-                      value={newTransaction.reservationLocator}
-                      onChange={(e) => setNewTransaction({...newTransaction, reservationLocator: e.target.value})}
+                      value={newTransaction.clientReservationCode}
+                      onChange={(e) => setNewTransaction({...newTransaction, clientReservationCode: e.target.value})}
                     />
                   </div>
                 </div>
