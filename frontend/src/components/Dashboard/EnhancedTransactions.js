@@ -50,7 +50,7 @@ const EnhancedTransactions = () => {
   const [categories, setCategories] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
 
-  const [revenueCategories] = useState([
+  const [revenueCategories, setRevenueCategories] = useState([
     'Vendas de Passagens',
     'Comissões',
     'Taxas de Serviço',
@@ -63,7 +63,7 @@ const EnhancedTransactions = () => {
     'Outros'
   ]);
 
-  const [expenseCategories] = useState([
+  const [expenseCategories, setExpenseCategories] = useState([
     'Marketing',
     'Aluguel',
     'Combustível',
