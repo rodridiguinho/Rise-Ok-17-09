@@ -358,52 +358,8 @@ const EnhancedTransactions = () => {
       
       setIsAddModalOpen(false);
       
-      // Reset form COMPLETAMENTE - TODOS os campos
-      setNewTransaction({
-        type: 'entrada',
-        category: '',
-        description: '',
-        amount: '',
-        paymentMethod: '',
-        client: '',
-        supplier: '',
-        seller: '',
-        saleValue: '',
-        supplierValue: '',
-        supplierPaymentDate: '',
-        supplierPaymentStatus: 'Pendente',
-        commissionValue: '',
-        commissionPaymentDate: '',
-        commissionPaymentStatus: 'Pendente',
-        customCategory: '',
-        transactionDate: new Date().toISOString().split('T')[0],
-        // Travel-specific fields
-        clientNumber: '',
-        reservationLocator: '',
-        departureDate: '',
-        returnDate: '',
-        departureTime: '',
-        arrivalTime: '',
-        hasStops: false,
-        originAirport: '',
-        destinationAirport: '',
-        tripType: 'Lazer',
-        products: [{ name: '', cost: '', clientValue: '' }],
-        // Enhanced fields for client reservation and supplier miles
-        clientReservationCode: '',
-        departureCity: '',
-        arrivalCity: '',
-        productType: 'Passagem',
-        supplierUsedMiles: false,
-        supplierMilesQuantity: '',
-        supplierMilesValue: '',
-        supplierMilesProgram: '',
-        airportTaxes: '',
-        milesTaxes: '',
-        // Escalas
-        outboundStops: '',
-        returnStops: ''
-      });
+      // Reset form COMPLETAMENTE usando a função dedicada
+      resetForm();
       
       setIsAddModalOpen(false);
       
