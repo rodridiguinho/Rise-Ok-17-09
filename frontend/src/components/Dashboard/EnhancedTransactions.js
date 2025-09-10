@@ -254,7 +254,7 @@ const EnhancedTransactions = () => {
         originAirport: '',
         destinationAirport: '',
         tripType: 'Lazer',
-        products: [{ name: '', value: '' }],
+        products: [{ name: '', cost: '', clientValue: '' }],
         // Enhanced fields
         clientReservationCode: '',
         departureCity: '',
