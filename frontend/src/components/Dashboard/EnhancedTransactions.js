@@ -923,7 +923,7 @@ const EnhancedTransactions = () => {
                   🏢 Informações do Fornecedor
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                   <div className="space-y-2">
                     <Label>Fornecedor</Label>
                     <Select value={newTransaction.supplier} onValueChange={(value) => setNewTransaction({...newTransaction, supplier: value})}>
@@ -959,6 +959,24 @@ const EnhancedTransactions = () => {
                       onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>Valor Total do Fornecedor</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="text"
+                        readOnly
+                        value={formatCurrency(calculateSupplierTotal())}
+                        className={`bg-gray-100 font-semibold ${calculateSupplierTotal() > 0 ? 'text-blue-600' : 'text-gray-500'}`}
+                      />
+                      <span className="text-sm text-gray-600">automático</span>
+                    </div>
+                    {(newTransaction.supplierValue || newTransaction.airportTaxes) && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        R$ {parseFloat(newTransaction.supplierValue || 0).toFixed(2)} + R$ {parseFloat(newTransaction.airportTaxes || 0).toFixed(2)} = {formatCurrency(calculateSupplierTotal())}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Checkbox para milhas */}
@@ -986,7 +1004,7 @@ const EnhancedTransactions = () => {
                     <h4 className="font-semibold text-blue-800 mb-4 flex items-center text-lg">
                       ✈️ Detalhes das Milhas do Fornecedor
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                       <div className="space-y-2">
                         <Label className="font-medium">Quantidade de Milhas *</Label>
                         <Input
@@ -1011,7 +1029,7 @@ const EnhancedTransactions = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="font-medium">Valor Total das Milhas</Label>
+                        <Label className="font-medium">Valor das Milhas (R$)</Label>
                         <div className="flex items-center space-x-2">
                           <Input
                             type="text"
@@ -1029,10 +1047,40 @@ const EnhancedTransactions = () => {
                       </div>
 
                       <div className="space-y-2">
+                        <Label className="font-medium">Taxas do Aeroporto (R$)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="Ex: 150,00"
+                          value={newTransaction.airportTaxes}
+                          onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
+                          className="bg-white"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="font-medium">Valor Total (Milhas + Taxas)</Label>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="text"
+                            readOnly
+                            value={formatCurrency(calculateMilesTotalWithTaxes())}
+                            className={`bg-gray-100 font-semibold ${calculateMilesTotalWithTaxes() > 0 ? 'text-green-600' : 'text-gray-500'}`}
+                          />
+                          <span className="text-sm text-gray-600">automático</span>
+                        </div>
+                        {(calculateMilesTotal() > 0 || newTransaction.airportTaxes) && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            {formatCurrency(calculateMilesTotal())} + R$ {parseFloat(newTransaction.airportTaxes || 0).toFixed(2)} = {formatCurrency(calculateMilesTotalWithTaxes())}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 lg:col-span-5">
                         <Label className="font-medium">Programa de Milhas *</Label>
                         <Select value={newTransaction.supplierMilesProgram} onValueChange={(value) => setNewTransaction({...newTransaction, supplierMilesProgram: value})}>
                           <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder="Selecione o programa de milhas" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="LATAM Pass">✈️ LATAM Pass</SelectItem>
@@ -1051,7 +1099,7 @@ const EnhancedTransactions = () => {
                     <div className="mt-4 p-3 bg-blue-100 rounded-md">
                       <p className="text-sm text-blue-800">
                         💡 <strong>Importante:</strong> Quando o fornecedor usa milhas, informe a quantidade de milhas utilizadas, 
-                        o valor pago pelas milhas e o programa utilizado. As taxas extras são cobradas separadamente.
+                        o valor pago pelas milhas e o programa utilizado. As taxas extras são somadas automaticamente ao valor das milhas.
                       </p>
                     </div>
                   </div>
