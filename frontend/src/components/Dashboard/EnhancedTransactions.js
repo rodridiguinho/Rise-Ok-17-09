@@ -94,7 +94,10 @@ const EnhancedTransactions = () => {
     supplierMilesQuantity: '',
     supplierMilesValue: '',
     supplierMilesProgram: '',
-    airportTaxes: ''
+    airportTaxes: '',
+    // Escalas
+    outboundStops: '',
+    returnStops: ''
   });
 
   const formatCurrency = (value) => {
