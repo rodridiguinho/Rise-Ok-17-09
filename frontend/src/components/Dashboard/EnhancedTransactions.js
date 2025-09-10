@@ -899,7 +899,7 @@ const EnhancedTransactions = () => {
                 </div>
               </div>
 
-              {/* Supplier Miles Section */}
+              {/* Supplier Information Section */}
               <div className="lg:col-span-3 border-b pb-4 mb-4">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
                   🏢 Informações do Fornecedor
@@ -921,7 +921,7 @@ const EnhancedTransactions = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Valor do Fornecedor</Label>
+                    <Label>Valor do Fornecedor (R$)</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -931,25 +931,40 @@ const EnhancedTransactions = () => {
                     />
                   </div>
 
-                  <div className="space-y-2 flex items-center justify-center pt-6">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="supplierUsedMiles"
-                        checked={newTransaction.supplierUsedMiles}
-                        onChange={(e) => setNewTransaction({...newTransaction, supplierUsedMiles: e.target.checked})}
-                        className="w-4 h-4 rounded border-gray-300"
-                      />
-                      <Label htmlFor="supplierUsedMiles" className="flex items-center cursor-pointer font-medium text-blue-700">
-                        ✈️ O fornecedor usou milhas
-                      </Label>
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Taxas/Valores Extras (R$)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Ex: Taxas aeroporto, serviços"
+                      value={newTransaction.airportTaxes}
+                      onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
+                    />
                   </div>
+                </div>
+
+                {/* Checkbox para milhas */}
+                <div className="mb-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="supplierUsedMiles"
+                      checked={newTransaction.supplierUsedMiles}
+                      onChange={(e) => setNewTransaction({...newTransaction, supplierUsedMiles: e.target.checked})}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <Label htmlFor="supplierUsedMiles" className="flex items-center cursor-pointer font-medium text-blue-700">
+                      ✈️ O fornecedor usou milhas para esta transação
+                    </Label>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Marque apenas se o fornecedor utilizou milhas para comprar/reservar o produto/serviço
+                  </p>
                 </div>
 
                 {/* Campos de milhas (aparecem apenas quando "Fornecedor usou milhas" está marcado) */}
                 {newTransaction.supplierUsedMiles && (
-                  <div className="mt-4 p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
+                  <div className="p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
                     <h4 className="font-semibold text-blue-800 mb-4 flex items-center text-lg">
                       ✈️ Detalhes das Milhas do Fornecedor
                     </h4>
@@ -1013,24 +1028,12 @@ const EnhancedTransactions = () => {
                           </SelectContent>
                         </Select>
                       </div>
-
-                      <div className="space-y-2">
-                        <Label className="font-medium">Taxas do Aeroporto (R$)</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="Ex: 150,00"
-                          value={newTransaction.airportTaxes}
-                          onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
-                          className="bg-white"
-                        />
-                      </div>
                     </div>
                     
                     <div className="mt-4 p-3 bg-blue-100 rounded-md">
                       <p className="text-sm text-blue-800">
                         💡 <strong>Importante:</strong> Quando o fornecedor usa milhas, informe a quantidade de milhas utilizadas, 
-                        o valor pago pelas milhas e o programa utilizado. As taxas do aeroporto são cobradas separadamente.
+                        o valor pago pelas milhas e o programa utilizado. As taxas extras são cobradas separadamente.
                       </p>
                     </div>
                   </div>
