@@ -326,7 +326,11 @@ const EnhancedTransactions = () => {
       milesTaxes: '',
       // Escalas
       outboundStops: '',
-      returnStops: ''
+      returnStops: '',
+      // Additional fields for expenses
+      saleReference: '',
+      productPurchased: '',
+      additionalInfo: ''
     });
   };
 
