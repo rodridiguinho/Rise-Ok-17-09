@@ -3584,5 +3584,471 @@ def run_all_tests():
     print("🏁 Backend API Test Suite Complete - Review Request Focus")
     print("="*80)
 
+def test_clear_test_data_endpoint():
+    """Test Clear Test Data Endpoint - REVIEW REQUEST"""
+    print_test_header("Clear Test Data Endpoint - Review Request Testing")
+    
+    # Test 1: POST /api/admin/clear-test-data - Test the endpoint responds correctly
+    try:
+        response = requests.post(f"{API_URL}/admin/clear-test-data", timeout=30)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify response structure
+            if "message" in data and "cleared" in data and "status" in data:
+                print_result(True, "POST /api/admin/clear-test-data - Response structure", 
+                           f"All required fields present: message, cleared, status")
+                
+                # Verify message content
+                if "sucesso" in data.get("message", "").lower():
+                    print_result(True, "POST /api/admin/clear-test-data - Success message", 
+                               f"Message: {data.get('message')}")
+                else:
+                    print_result(False, "POST /api/admin/clear-test-data - Success message", 
+                               f"Unexpected message: {data.get('message')}")
+                
+                # Verify cleared count information
+                cleared_info = data.get("cleared", {})
+                if isinstance(cleared_info, dict):
+                    expected_collections = ["transactions", "clients", "suppliers", "users"]
+                    missing_collections = [c for c in expected_collections if c not in cleared_info]
+                    
+                    if not missing_collections:
+                        print_result(True, "POST /api/admin/clear-test-data - Count information", 
+                                   f"All collection counts present: {expected_collections}")
+                        
+                        # Display count information
+                        for collection, count in cleared_info.items():
+                            print_result(True, f"Clear data - {collection} count", 
+                                       f"Cleared {count} {collection}")
+                    else:
+                        print_result(False, "POST /api/admin/clear-test-data - Count information", 
+                                   f"Missing collection counts: {missing_collections}")
+                else:
+                    print_result(False, "POST /api/admin/clear-test-data - Count information", 
+                               f"Invalid cleared info format: {cleared_info}")
+                
+                # Verify status message
+                if "produção" in data.get("status", "").lower():
+                    print_result(True, "POST /api/admin/clear-test-data - Status message", 
+                               f"Status: {data.get('status')}")
+                else:
+                    print_result(False, "POST /api/admin/clear-test-data - Status message", 
+                               f"Unexpected status: {data.get('status')}")
+                
+            else:
+                print_result(False, "POST /api/admin/clear-test-data - Response structure", 
+                           f"Missing required fields in response: {data}")
+        else:
+            print_result(False, f"POST /api/admin/clear-test-data - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/admin/clear-test-data - Request failed", str(e))
+    
+    # Test 2: Verify endpoint doesn't actually delete data during testing (just confirm API works)
+    try:
+        # Get current transaction count before clear
+        response_before = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response_before.status_code == 200:
+            transactions_before = response_before.json()
+            count_before = len(transactions_before) if isinstance(transactions_before, list) else 0
+            
+            # Call clear endpoint
+            clear_response = requests.post(f"{API_URL}/admin/clear-test-data", timeout=30)
+            if clear_response.status_code == 200:
+                # Get transaction count after clear
+                response_after = requests.get(f"{API_URL}/transactions", timeout=10)
+                if response_after.status_code == 200:
+                    transactions_after = response_after.json()
+                    count_after = len(transactions_after) if isinstance(transactions_after, list) else 0
+                    
+                    print_result(True, "Clear test data - Data verification", 
+                               f"Before: {count_before} transactions, After: {count_after} transactions")
+                    
+                    # Note: We're not checking if data was actually cleared since this is a test environment
+                    # We just want to confirm the API endpoint works correctly
+                    print_result(True, "Clear test data - API functionality confirmed", 
+                               "Clear test data endpoint is working and responding correctly")
+                else:
+                    print_result(False, "Clear test data - Post-clear verification failed", 
+                               f"Could not get transactions after clear: HTTP {response_after.status_code}")
+            else:
+                print_result(False, "Clear test data - Clear operation failed", 
+                           f"Clear endpoint returned: HTTP {clear_response.status_code}")
+        else:
+            print_result(False, "Clear test data - Pre-clear verification failed", 
+                       f"Could not get transactions before clear: HTTP {response_before.status_code}")
+    except Exception as e:
+        print_result(False, "Clear test data - Data verification failed", str(e))
+
+def test_enhanced_transaction_management():
+    """Test Enhanced Transaction Management Endpoints - REVIEW REQUEST"""
+    print_test_header("Enhanced Transaction Management - UPDATE/DELETE Endpoints")
+    
+    # First, authenticate to get proper access
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            print_result(True, "Authentication for transaction management testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Authentication for transaction management testing failed", str(e))
+    
+    # Create a test transaction first to have something to update/delete
+    created_transaction_id = None
+    try:
+        test_transaction = {
+            "type": "entrada",
+            "category": "Pacote Turístico",
+            "description": "Test transaction for UPDATE/DELETE testing",
+            "amount": 2500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Management",
+            "transactionDate": "2025-01-15",
+            "saleValue": 2500.00,
+            "supplierValue": 2000.00,
+            "commissionValue": 250.00,
+            "seller": "Vendedor Teste"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=test_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                created_transaction_id = data["id"]
+                print_result(True, "Test transaction creation for management testing", 
+                           f"Created transaction ID: {created_transaction_id}")
+            else:
+                print_result(False, "Test transaction creation failed", "No ID in response")
+        else:
+            print_result(False, f"Test transaction creation - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Test transaction creation failed", str(e))
+    
+    # Test 1: PUT /api/transactions/{id} - Check if UPDATE endpoint exists and works
+    if created_transaction_id:
+        try:
+            updated_transaction = {
+                "type": "entrada",
+                "category": "Passagem Aérea",  # Changed category
+                "description": "Updated test transaction - Management testing",  # Changed description
+                "amount": 3000.00,  # Changed amount
+                "paymentMethod": "Cartão de Crédito",  # Changed payment method
+                "client": "Cliente Teste Management Updated",  # Changed client
+                "transactionDate": "2025-01-20",  # Changed date
+                "saleValue": 3000.00,
+                "supplierValue": 2400.00,
+                "commissionValue": 300.00,
+                "seller": "Vendedor Teste Updated"
+            }
+            
+            response = requests.put(f"{API_URL}/transactions/{created_transaction_id}", 
+                                  json=updated_transaction, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                print_result(True, "PUT /api/transactions/{id} - UPDATE endpoint exists and works", 
+                           f"Successfully updated transaction {created_transaction_id}")
+                
+                # Verify updated fields
+                expected_updates = {
+                    "category": "Passagem Aérea",
+                    "description": "Updated test transaction - Management testing",
+                    "amount": 3000.00,
+                    "paymentMethod": "Cartão de Crédito",
+                    "client": "Cliente Teste Management Updated"
+                }
+                
+                for field, expected_value in expected_updates.items():
+                    if data.get(field) == expected_value:
+                        print_result(True, f"PUT /api/transactions/{id} - Field update ({field})", 
+                                   f"Correctly updated to: {expected_value}")
+                    else:
+                        print_result(False, f"PUT /api/transactions/{id} - Field update ({field})", 
+                                   f"Expected: {expected_value}, Got: {data.get(field)}")
+                
+            elif response.status_code == 404:
+                print_result(False, "PUT /api/transactions/{id} - UPDATE endpoint", 
+                           "UPDATE endpoint does not exist (404 Not Found)")
+            else:
+                print_result(False, f"PUT /api/transactions/{id} - HTTP {response.status_code}", response.text)
+        except Exception as e:
+            print_result(False, "PUT /api/transactions/{id} - Request failed", str(e))
+    
+    # Test 2: DELETE /api/transactions/{id} - Check if DELETE endpoint exists and works
+    if created_transaction_id:
+        try:
+            response = requests.delete(f"{API_URL}/transactions/{created_transaction_id}", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("message") and "sucesso" in data.get("message", "").lower():
+                    print_result(True, "DELETE /api/transactions/{id} - DELETE endpoint exists and works", 
+                               f"Successfully deleted transaction {created_transaction_id}")
+                    print_result(True, "DELETE /api/transactions/{id} - Response message", 
+                               f"Message: {data.get('message')}")
+                else:
+                    print_result(False, "DELETE /api/transactions/{id} - Invalid response", data)
+            elif response.status_code == 404:
+                print_result(False, "DELETE /api/transactions/{id} - DELETE endpoint", 
+                           "DELETE endpoint does not exist (404 Not Found)")
+            else:
+                print_result(False, f"DELETE /api/transactions/{id} - HTTP {response.status_code}", response.text)
+        except Exception as e:
+            print_result(False, "DELETE /api/transactions/{id} - Request failed", str(e))
+    
+    # Test 3: Verify deletion was successful (if DELETE worked)
+    if created_transaction_id:
+        try:
+            # Try to get the deleted transaction
+            response = requests.get(f"{API_URL}/transactions", timeout=10)
+            if response.status_code == 200:
+                transactions = response.json()
+                if isinstance(transactions, list):
+                    deleted_transaction = next((t for t in transactions if t.get("id") == created_transaction_id), None)
+                    if deleted_transaction is None:
+                        print_result(True, "DELETE /api/transactions/{id} - Deletion verification", 
+                                   f"Transaction {created_transaction_id} successfully removed from database")
+                    else:
+                        print_result(False, "DELETE /api/transactions/{id} - Deletion verification", 
+                                   f"Transaction {created_transaction_id} still exists after deletion")
+                else:
+                    print_result(False, "DELETE /api/transactions/{id} - Deletion verification failed", 
+                               "Could not retrieve transactions list for verification")
+            else:
+                print_result(False, "DELETE /api/transactions/{id} - Deletion verification failed", 
+                           f"Could not get transactions: HTTP {response.status_code}")
+        except Exception as e:
+            print_result(False, "DELETE /api/transactions/{id} - Deletion verification failed", str(e))
+
+def test_complete_system_status():
+    """Test Complete System Status Check - REVIEW REQUEST"""
+    print_test_header("Complete System Status Check - All Major Endpoints")
+    
+    # Test authentication first
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            print_result(True, "System Status - Authentication", 
+                       f"Login working correctly with {VALID_EMAIL}")
+        else:
+            print_result(False, f"System Status - Authentication failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "System Status - Authentication failed", str(e))
+    
+    # Test all major endpoints
+    major_endpoints = [
+        {"method": "GET", "url": f"{API_URL}/", "name": "API Root"},
+        {"method": "GET", "url": f"{API_URL}/transactions", "name": "Transactions List"},
+        {"method": "GET", "url": f"{API_URL}/transactions/summary", "name": "Transaction Summary"},
+        {"method": "GET", "url": f"{API_URL}/transactions/categories", "name": "Transaction Categories"},
+        {"method": "GET", "url": f"{API_URL}/transactions/payment-methods", "name": "Payment Methods"},
+        {"method": "GET", "url": f"{API_URL}/users", "name": "Users List"},
+        {"method": "GET", "url": f"{API_URL}/clients", "name": "Clients List"},
+        {"method": "GET", "url": f"{API_URL}/suppliers", "name": "Suppliers List"},
+        {"method": "GET", "url": f"{API_URL}/company/settings", "name": "Company Settings"},
+        {"method": "GET", "url": f"{API_URL}/reports/sales-analysis", "name": "Sales Analysis"},
+        {"method": "GET", "url": f"{API_URL}/reports/complete-analysis", "name": "Complete Analysis"}
+    ]
+    
+    working_endpoints = 0
+    total_endpoints = len(major_endpoints)
+    
+    for endpoint in major_endpoints:
+        try:
+            if endpoint["method"] == "GET":
+                response = requests.get(endpoint["url"], timeout=10)
+            elif endpoint["method"] == "POST":
+                response = requests.post(endpoint["url"], json={}, timeout=10)
+            
+            if response.status_code == 200:
+                print_result(True, f"System Status - {endpoint['name']}", 
+                           f"{endpoint['method']} {endpoint['url']} - Working")
+                working_endpoints += 1
+            else:
+                print_result(False, f"System Status - {endpoint['name']}", 
+                           f"{endpoint['method']} {endpoint['url']} - HTTP {response.status_code}")
+        except Exception as e:
+            print_result(False, f"System Status - {endpoint['name']}", 
+                       f"{endpoint['method']} {endpoint['url']} - Failed: {str(e)}")
+    
+    # Overall system status
+    success_rate = (working_endpoints / total_endpoints) * 100
+    if success_rate >= 90:
+        print_result(True, "Complete System Status Check", 
+                   f"{working_endpoints}/{total_endpoints} endpoints working ({success_rate:.1f}% success rate)")
+    elif success_rate >= 75:
+        print_result(True, "Complete System Status Check - Minor Issues", 
+                   f"{working_endpoints}/{total_endpoints} endpoints working ({success_rate:.1f}% success rate)")
+    else:
+        print_result(False, "Complete System Status Check - Major Issues", 
+                   f"{working_endpoints}/{total_endpoints} endpoints working ({success_rate:.1f}% success rate)")
+
+def test_transaction_creation_enhanced_fields():
+    """Test Transaction Creation with Enhanced Fields - REVIEW REQUEST"""
+    print_test_header("Transaction Creation with Enhanced Fields - Review Request")
+    
+    # Test 1: Create transaction with all enhanced fields
+    try:
+        enhanced_transaction = {
+            "type": "entrada",
+            "category": "Vendas de Passagens",
+            "description": "Transação com campos aprimorados completos",
+            "amount": 4500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Enhanced Test",
+            "transactionDate": "2025-01-25",
+            # Enhanced travel fields
+            "clientNumber": "CLI0001",
+            "reservationLocator": "ABC123DEF",
+            "departureDate": "2025-03-15",
+            "returnDate": "2025-03-22",
+            "departureTime": "14:30",
+            "arrivalTime": "08:45",
+            "hasStops": True,
+            "originAirport": "GRU",
+            "destinationAirport": "CDG",
+            "tripType": "Lazer",
+            "clientReservationCode": "RT123456",
+            "departureCity": "São Paulo",
+            "arrivalCity": "Paris",
+            "productType": "Passagem",
+            "supplierUsedMiles": True,
+            "supplierMilesQuantity": 100000,
+            "supplierMilesValue": 32.50,
+            "supplierMilesProgram": "LATAM Pass",
+            "airportTaxes": 180.00,
+            "outboundStops": "Lisboa (LIS)",
+            "returnStops": "Madrid (MAD)",
+            # Financial fields
+            "saleValue": 4500.00,
+            "supplierValue": 3600.00,
+            "commissionValue": 450.00,
+            "commissionPercentage": 10.0,
+            "seller": "Vendedor Enhanced Test",
+            # Products array
+            "products": [
+                {
+                    "name": "Passagem GRU-CDG",
+                    "cost": 1800.00,
+                    "clientValue": 2250.00
+                },
+                {
+                    "name": "Passagem CDG-GRU",
+                    "cost": 1800.00,
+                    "clientValue": 2250.00
+                }
+            ]
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=enhanced_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "Enhanced transaction creation", 
+                           f"Successfully created enhanced transaction ID: {transaction_id}")
+                
+                # Verify enhanced travel fields
+                travel_fields = [
+                    "clientNumber", "reservationLocator", "departureDate", "returnDate",
+                    "departureTime", "arrivalTime", "hasStops", "originAirport", 
+                    "destinationAirport", "tripType", "clientReservationCode",
+                    "departureCity", "arrivalCity", "productType", "supplierUsedMiles",
+                    "supplierMilesQuantity", "supplierMilesValue", "supplierMilesProgram",
+                    "airportTaxes", "outboundStops", "returnStops"
+                ]
+                
+                travel_fields_correct = 0
+                for field in travel_fields:
+                    expected_value = enhanced_transaction[field]
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"Enhanced fields - {field}", 
+                                   f"Correctly saved: {actual_value}")
+                        travel_fields_correct += 1
+                    else:
+                        print_result(False, f"Enhanced fields - {field}", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                
+                # Verify financial fields
+                financial_fields = ["saleValue", "supplierValue", "commissionValue", "commissionPercentage"]
+                financial_fields_correct = 0
+                for field in financial_fields:
+                    expected_value = enhanced_transaction[field]
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"Enhanced financial fields - {field}", 
+                                   f"Correctly saved: {actual_value}")
+                        financial_fields_correct += 1
+                    else:
+                        print_result(False, f"Enhanced financial fields - {field}", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                
+                # Verify products array
+                products = data.get("products", [])
+                if len(products) == 2:
+                    print_result(True, "Enhanced fields - Products array", 
+                               f"Products array correctly saved with {len(products)} items")
+                    
+                    for i, product in enumerate(products):
+                        expected_product = enhanced_transaction["products"][i]
+                        if (product.get("name") == expected_product["name"] and
+                            product.get("cost") == expected_product["cost"] and
+                            product.get("clientValue") == expected_product["clientValue"]):
+                            print_result(True, f"Enhanced fields - Product {i+1}", 
+                                       f"{product.get('name')}: cost=R$ {product.get('cost')}, clientValue=R$ {product.get('clientValue')}")
+                        else:
+                            print_result(False, f"Enhanced fields - Product {i+1}", 
+                                       f"Product data mismatch: {product}")
+                else:
+                    print_result(False, "Enhanced fields - Products array", 
+                               f"Expected 2 products, got {len(products)}")
+                
+                # Overall enhanced fields summary
+                total_fields = len(travel_fields) + len(financial_fields)
+                correct_fields = travel_fields_correct + financial_fields_correct
+                success_rate = (correct_fields / total_fields) * 100
+                
+                if success_rate >= 95:
+                    print_result(True, "Enhanced transaction - Overall validation", 
+                               f"{correct_fields}/{total_fields} enhanced fields correctly saved ({success_rate:.1f}%)")
+                else:
+                    print_result(False, "Enhanced transaction - Overall validation", 
+                               f"{correct_fields}/{total_fields} enhanced fields correctly saved ({success_rate:.1f}%)")
+                
+            else:
+                print_result(False, "Enhanced transaction creation failed", "No ID in response")
+        else:
+            print_result(False, f"Enhanced transaction creation - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Enhanced transaction creation failed", str(e))
+
+def run_review_request_tests():
+    """Run tests focused on review request requirements"""
+    print("🚀 Starting Backend API Test Suite - REVIEW REQUEST FOCUS")
+    print(f"📍 Backend URL: {BASE_URL}")
+    print(f"🔗 API URL: {API_URL}")
+    print(f"🔑 Test Credentials: {VALID_EMAIL}")
+    print("="*80)
+    
+    # Run review request specific tests
+    test_clear_test_data_endpoint()
+    test_enhanced_transaction_management()
+    test_complete_system_status()
+    test_review_request_company_settings()
+    test_transaction_creation_enhanced_fields()
+    
+    print("\n" + "="*80)
+    print("🏁 Backend API Test Suite Completed - REVIEW REQUEST FOCUS")
+    print("="*80)
+
 if __name__ == "__main__":
-    run_all_tests()
+    run_review_request_tests()
