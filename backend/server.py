@@ -1098,12 +1098,12 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
 async def delete_transaction(transaction_id: str):
     try:
         # Check if transaction exists
-        existing_transaction = await db.transactions.find_one({"id": transaction_id})
+        existing_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
         if not existing_transaction:
             raise HTTPException(status_code=404, detail="Transação não encontrada")
         
         # Delete the transaction
-        result = await db.transactions.delete_one({"id": transaction_id})
+        result = await db.transactions.delete_one({"_id": ObjectId(transaction_id)})
         
         if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Transação não encontrada")
