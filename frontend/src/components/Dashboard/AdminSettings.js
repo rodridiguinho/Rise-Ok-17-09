@@ -320,6 +320,63 @@ const AdminSettings = () => {
     });
   };
 
+  const removePaymentMethod = (index) => {
+    setPaymentMethods(paymentMethods.filter((_, i) => i !== index));
+    toast({
+      title: "Método de pagamento removido",
+      description: "O método foi removido da lista.",
+    });
+  };
+
+  const handleClearAllData = async () => {
+    try {
+      const response = await api.post('/api/admin/clear-test-data');
+      
+      if (response.status === 200) {
+        // Limpar dados locais também
+        localStorage.removeItem('riseTravel_revenueCategories');
+        localStorage.removeItem('riseTravel_expenseCategories');
+        
+        // Resetar categorias para padrão
+        setRevenueCategories([
+          'Vendas de Passagens',
+          'Comissões',
+          'Taxas de Serviço',
+          'Seguros',
+          'Pacotes Turísticos',
+          'Transfers',
+          'Hospedagem',
+          'Outros'
+        ]);
+        
+        setExpenseCategories([
+          'Marketing',
+          'Aluguel',
+          'Combustível',
+          'Alimentação',
+          'Material de Escritório',
+          'Telefone/Internet',
+          'Impostos',
+          'Outros'
+        ]);
+        
+        setIsClearDataModalOpen(false);
+        
+        toast({
+          title: "Dados limpos com sucesso",
+          description: "Todos os dados de teste foram removidos. O sistema está pronto para uso em produção.",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao limpar dados:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao limpar dados de teste. Tente novamente.",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
