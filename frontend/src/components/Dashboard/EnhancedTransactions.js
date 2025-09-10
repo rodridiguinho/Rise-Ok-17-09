@@ -1109,7 +1109,34 @@ const EnhancedTransactions = () => {
                         </Badge>
                       )}
                     </div>
-                    <h3 className="font-semibold text-gray-900">{transaction.description}</h3>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-medium text-gray-900">{transaction.description}</h3>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditTransaction(transaction)}
+                              className="text-blue-600 hover:text-blue-800 p-1"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => confirmDeleteTransaction(transaction)}
+                              className="text-red-600 hover:text-red-800 p-1"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <span className={`text-lg font-bold ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                              {transaction.type === 'entrada' ? '+' : '-'} {formatCurrency(transaction.amount)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     
                     {/* Travel Details */}
                     {(transaction.originAirport || transaction.destinationAirport) && (
