@@ -2765,6 +2765,365 @@ def test_enhanced_transactions_travel_fields():
     except Exception as e:
         print_result(False, "GET /api/transactions - Travel fields persistence test failed", str(e))
 
+def test_company_settings_api():
+    """Test company settings API endpoints - REVIEW REQUEST"""
+    print_test_header("Company Settings API - Review Request Testing")
+    
+    # Test 1: GET /api/company/settings - Retrieve company configuration
+    try:
+        response = requests.get(f"{API_URL}/company/settings", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify response structure
+            expected_fields = ["name", "email", "phone", "address", "city", "state", "zipCode", "cnpj", "website"]
+            missing_fields = [f for f in expected_fields if f not in data]
+            
+            if not missing_fields:
+                print_result(True, "GET /api/company/settings - Response structure validation", 
+                           f"All expected fields present: {expected_fields}")
+                
+                # Display current settings
+                print_result(True, "GET /api/company/settings - Current settings retrieved", 
+                           f"Company: {data.get('name')}, Email: {data.get('email')}, Phone: {data.get('phone')}")
+            else:
+                print_result(False, "GET /api/company/settings - Response structure validation", 
+                           f"Missing fields: {missing_fields}")
+        else:
+            print_result(False, f"GET /api/company/settings - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/company/settings - Request failed", str(e))
+    
+    # Test 2: POST /api/company/settings - Save company settings with new data from review request
+    try:
+        new_settings = {
+            "name": "Rise Travel Updated",
+            "email": "new-email@risetravel.com",
+            "phone": "(11) 98888-8888",
+            "address": "Rua Nova, 456",
+            "city": "São Paulo",
+            "state": "SP",
+            "zipCode": "01234-567",
+            "cnpj": "12.345.678/0001-90",
+            "website": "www.risetravel.com.br"
+        }
+        
+        response = requests.post(f"{API_URL}/company/settings", json=new_settings, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            if data.get("message") and "sucesso" in data.get("message", "").lower():
+                print_result(True, "POST /api/company/settings - Settings saved successfully", 
+                           f"Message: {data.get('message')}")
+                
+                # Verify the settings were saved correctly
+                if "settings" in data:
+                    saved_settings = data["settings"]
+                    settings_correct = True
+                    
+                    for field, expected_value in new_settings.items():
+                        actual_value = saved_settings.get(field)
+                        if actual_value == expected_value:
+                            print_result(True, f"POST /api/company/settings - Field validation ({field})", 
+                                       f"Correctly saved: {actual_value}")
+                        else:
+                            print_result(False, f"POST /api/company/settings - Field validation ({field})", 
+                                       f"Expected: {expected_value}, Got: {actual_value}")
+                            settings_correct = False
+                    
+                    if settings_correct:
+                        print_result(True, "POST /api/company/settings - All fields validation", 
+                                   "All company settings fields saved correctly")
+                else:
+                    print_result(False, "POST /api/company/settings - Response validation", 
+                               "Response missing 'settings' field")
+            else:
+                print_result(False, "POST /api/company/settings - Save failed", 
+                           f"Unexpected response: {data}")
+        else:
+            print_result(False, f"POST /api/company/settings - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/company/settings - Request failed", str(e))
+    
+    # Test 3: Verify settings persistence - GET again to confirm changes were saved
+    try:
+        response = requests.get(f"{API_URL}/company/settings", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Check if the new settings persist
+            expected_values = {
+                "name": "Rise Travel Updated",
+                "email": "new-email@risetravel.com", 
+                "phone": "(11) 98888-8888"
+            }
+            
+            persistence_correct = True
+            for field, expected_value in expected_values.items():
+                actual_value = data.get(field)
+                if actual_value == expected_value:
+                    print_result(True, f"Company settings persistence check ({field})", 
+                               f"Value correctly persisted: {actual_value}")
+                else:
+                    print_result(False, f"Company settings persistence check ({field})", 
+                               f"Expected: {expected_value}, Got: {actual_value}")
+                    persistence_correct = False
+            
+            if persistence_correct:
+                print_result(True, "Company settings - Complete persistence validation", 
+                           "All company settings correctly persisted to database")
+            else:
+                print_result(False, "Company settings - Complete persistence validation", 
+                           "Some company settings failed to persist correctly")
+        else:
+            print_result(False, f"Company settings persistence check - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Company settings persistence check failed", str(e))
+
+def test_enhanced_transaction_with_products():
+    """Test enhanced transaction with new product structure - REVIEW REQUEST"""
+    print_test_header("Enhanced Transaction with New Product Structure - Review Request")
+    
+    # Test 1: Authenticate first
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "access_token" in data:
+                print_result(True, "Authentication for product structure testing", 
+                           f"Successfully logged in as {VALID_EMAIL}")
+            else:
+                print_result(False, "Authentication for product structure testing", 
+                           "Login response missing access_token")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Authentication for product structure testing failed", str(e))
+    
+    # Test 2: Create transaction with products that have both cost and client value
+    try:
+        transaction_with_products = {
+            "type": "entrada",
+            "category": "Pacote Turístico",
+            "description": "Pacote completo com passagem e seguro",
+            "amount": 1580.00,  # Total client value (1500 + 80)
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Produtos",
+            "transactionDate": "2025-01-20",
+            "products": [
+                {
+                    "name": "Passagem Aérea",
+                    "cost": 1200.00,
+                    "clientValue": 1500.00,
+                    "quantity": 1,
+                    "category": "Passagem Aérea"
+                },
+                {
+                    "name": "Seguro Viagem",
+                    "cost": 50.00,
+                    "clientValue": 80.00,
+                    "quantity": 1,
+                    "category": "Seguro Viagem"
+                }
+            ],
+            "saleValue": 1580.00,  # Total client value
+            "supplierValue": 1250.00,  # Total cost (1200 + 50)
+            "commissionValue": 158.00,  # 10% commission
+            "seller": "Vendedor Teste"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_with_products, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "POST /api/transactions - Transaction with products created", 
+                           f"ID: {transaction_id}, Total Amount: R$ {data.get('amount')}")
+                
+                # Test 3: Verify products array structure is saved correctly
+                saved_products = data.get("products", [])
+                if isinstance(saved_products, list) and len(saved_products) == 2:
+                    print_result(True, "Enhanced transaction - Products array validation", 
+                               f"Products array correctly saved with {len(saved_products)} items")
+                    
+                    # Verify Product 1: Passagem Aérea
+                    product1 = saved_products[0] if len(saved_products) > 0 else {}
+                    if (product1.get("name") == "Passagem Aérea" and 
+                        product1.get("cost") == 1200.00 and 
+                        product1.get("clientValue") == 1500.00):
+                        print_result(True, "Enhanced transaction - Product 1 validation", 
+                                   f"Passagem Aérea: cost=R$ {product1.get('cost')}, clientValue=R$ {product1.get('clientValue')}")
+                    else:
+                        print_result(False, "Enhanced transaction - Product 1 validation", 
+                                   f"Product 1 data incorrect: {product1}")
+                    
+                    # Verify Product 2: Seguro Viagem
+                    product2 = saved_products[1] if len(saved_products) > 1 else {}
+                    if (product2.get("name") == "Seguro Viagem" and 
+                        product2.get("cost") == 50.00 and 
+                        product2.get("clientValue") == 80.00):
+                        print_result(True, "Enhanced transaction - Product 2 validation", 
+                                   f"Seguro Viagem: cost=R$ {product2.get('cost')}, clientValue=R$ {product2.get('clientValue')}")
+                    else:
+                        print_result(False, "Enhanced transaction - Product 2 validation", 
+                                   f"Product 2 data incorrect: {product2}")
+                else:
+                    print_result(False, "Enhanced transaction - Products array validation", 
+                               f"Expected 2 products, got: {len(saved_products) if isinstance(saved_products, list) else 'not a list'}")
+                
+                # Test 4: Verify transaction includes both cost and client values
+                financial_fields = {
+                    "saleValue": 1580.00,
+                    "supplierValue": 1250.00,
+                    "commissionValue": 158.00
+                }
+                
+                for field, expected_value in financial_fields.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"Enhanced transaction - Financial field ({field})", 
+                                   f"Correctly saved: R$ {actual_value}")
+                    else:
+                        print_result(False, f"Enhanced transaction - Financial field ({field})", 
+                                   f"Expected: R$ {expected_value}, Got: R$ {actual_value}")
+                
+            else:
+                print_result(False, "POST /api/transactions - Invalid response format", data)
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/transactions - Request failed", str(e))
+
+def test_complete_travel_transaction():
+    """Test complete travel transaction with all enhanced fields - REVIEW REQUEST"""
+    print_test_header("Complete Travel Transaction Test - All Enhanced Fields")
+    
+    # Test 1: Create transaction with all enhanced fields from review request
+    try:
+        complete_travel_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Viagem completa São Paulo - Lisboa com escalas e milhas",
+            "amount": 4500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Viagem Completa",
+            "transactionDate": "2025-02-15",
+            # Enhanced travel fields
+            "hasStops": True,
+            "outboundStops": "Lisboa",
+            "returnStops": "Madrid",
+            "supplierUsedMiles": True,
+            "supplierMilesQuantity": 150000,
+            "supplierMilesValue": 35.00,  # valor por 1000 milhas
+            "supplierMilesProgram": "LATAM Pass",
+            "airportTaxes": 300.00,
+            # Multiple products with cost/client value structure
+            "products": [
+                {
+                    "name": "Passagem Aérea GRU-LIS",
+                    "cost": 2200.00,
+                    "clientValue": 2800.00,
+                    "quantity": 1,
+                    "category": "Passagem Aérea"
+                },
+                {
+                    "name": "Passagem Aérea LIS-GRU",
+                    "cost": 2100.00,
+                    "clientValue": 2700.00,
+                    "quantity": 1,
+                    "category": "Passagem Aérea"
+                },
+                {
+                    "name": "Seguro Viagem Europa",
+                    "cost": 80.00,
+                    "clientValue": 120.00,
+                    "quantity": 1,
+                    "category": "Seguro Viagem"
+                }
+            ],
+            "saleValue": 5620.00,  # Total client value (2800 + 2700 + 120)
+            "supplierValue": 4380.00,  # Total cost (2200 + 2100 + 80)
+            "commissionValue": 562.00,  # 10% commission
+            "seller": "Vendedor Especialista",
+            # Additional travel details
+            "productType": "Passagem",
+            "clientReservationCode": "RT789012",
+            "departureCity": "São Paulo",
+            "arrivalCity": "Lisboa",
+            "departureDate": "2025-02-15",
+            "returnDate": "2025-02-28",
+            "departureTime": "23:50",
+            "arrivalTime": "14:30",
+            "originAirport": "GRU",
+            "destinationAirport": "LIS",
+            "tripType": "Lazer"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=complete_travel_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "POST /api/transactions - Complete travel transaction created", 
+                           f"ID: {transaction_id}, Total Amount: R$ {data.get('amount')}")
+                
+                # Test 2: Verify hasStops and stops fields
+                if (data.get("hasStops") == True and 
+                    data.get("outboundStops") == "Lisboa" and 
+                    data.get("returnStops") == "Madrid"):
+                    print_result(True, "Complete travel transaction - Stops validation", 
+                               f"Stops correctly saved: hasStops={data.get('hasStops')}, outbound={data.get('outboundStops')}, return={data.get('returnStops')}")
+                else:
+                    print_result(False, "Complete travel transaction - Stops validation", 
+                               f"Stops data incorrect: hasStops={data.get('hasStops')}, outbound={data.get('outboundStops')}, return={data.get('returnStops')}")
+                
+                # Test 3: Verify supplierUsedMiles and calculation fields
+                if (data.get("supplierUsedMiles") == True and 
+                    data.get("supplierMilesQuantity") == 150000 and 
+                    data.get("supplierMilesValue") == 35.00 and 
+                    data.get("supplierMilesProgram") == "LATAM Pass"):
+                    print_result(True, "Complete travel transaction - Supplier miles validation", 
+                               f"Miles data correctly saved: {data.get('supplierMilesQuantity')} milhas, R$ {data.get('supplierMilesValue')}/1000, {data.get('supplierMilesProgram')}")
+                    
+                    # Calculate expected miles value (150000 / 1000 * 35.00 = 5250.00)
+                    expected_miles_total = (150000 / 1000) * 35.00
+                    print_result(True, "Complete travel transaction - Miles calculation", 
+                               f"Expected total miles value: R$ {expected_miles_total:.2f} (150000 milhas × R$ 35.00/1000)")
+                else:
+                    print_result(False, "Complete travel transaction - Supplier miles validation", 
+                               f"Miles data incorrect: used={data.get('supplierUsedMiles')}, quantity={data.get('supplierMilesQuantity')}, value={data.get('supplierMilesValue')}, program={data.get('supplierMilesProgram')}")
+                
+                # Test 4: Verify multiple products with cost/client value structure
+                saved_products = data.get("products", [])
+                if isinstance(saved_products, list) and len(saved_products) == 3:
+                    print_result(True, "Complete travel transaction - Multiple products validation", 
+                               f"Products array correctly saved with {len(saved_products)} items")
+                    
+                    # Verify each product has cost and clientValue
+                    for i, product in enumerate(saved_products):
+                        if ("cost" in product and "clientValue" in product and 
+                            isinstance(product.get("cost"), (int, float)) and 
+                            isinstance(product.get("clientValue"), (int, float))):
+                            print_result(True, f"Complete travel transaction - Product {i+1} cost/value structure", 
+                                       f"{product.get('name')}: cost=R$ {product.get('cost')}, clientValue=R$ {product.get('clientValue')}")
+                        else:
+                            print_result(False, f"Complete travel transaction - Product {i+1} cost/value structure", 
+                                       f"Missing or invalid cost/clientValue fields in product: {product}")
+                else:
+                    print_result(False, "Complete travel transaction - Multiple products validation", 
+                               f"Expected 3 products, got: {len(saved_products) if isinstance(saved_products, list) else 'not a list'}")
+                
+            else:
+                print_result(False, "POST /api/transactions - Invalid response format", data)
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST /api/transactions - Complete travel transaction failed", str(e))
+
 def run_all_tests():
     """Run all test suites"""
     print(f"\n🚀 Starting AgentePro Backend API Tests")
