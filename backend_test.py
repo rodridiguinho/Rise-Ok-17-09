@@ -3130,6 +3130,11 @@ def run_all_tests():
     print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"🔗 API Base URL: {API_URL}")
     
+    # NEW TESTS FROM REVIEW REQUEST - PRIORITY TESTING
+    test_company_settings_api()  # NEW: Test company settings API endpoints
+    test_enhanced_transaction_with_products()  # NEW: Test enhanced transaction with new product structure
+    test_complete_travel_transaction()  # NEW: Test complete travel transaction with all enhanced fields
+    
     # PRIORITY TESTS FROM REVIEW REQUEST - Test enhanced transaction system
     test_enhanced_transaction_system()  # NEW: Test enhanced transaction system with new travel fields
     test_supplier_travel_fields_update()  # CRITICAL: Test supplier update with travel fields
