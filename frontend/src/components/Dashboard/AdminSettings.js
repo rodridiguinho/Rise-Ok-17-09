@@ -250,7 +250,9 @@ const AdminSettings = () => {
 
   const addRevenueCategory = () => {
     if (newRevenueCategory.trim()) {
-      setRevenueCategories([...revenueCategories, newRevenueCategory.trim()]);
+      const updatedCategories = [...revenueCategories, newRevenueCategory.trim()];
+      setRevenueCategories(updatedCategories);
+      localStorage.setItem('riseTravel_revenueCategories', JSON.stringify(updatedCategories));
       setNewRevenueCategory('');
       setIsRevenueCategoryModalOpen(false);
       toast({
@@ -262,7 +264,9 @@ const AdminSettings = () => {
 
   const removeRevenueCategory = (index) => {
     const categoryToRemove = revenueCategories[index];
-    setRevenueCategories(revenueCategories.filter((_, i) => i !== index));
+    const updatedCategories = revenueCategories.filter((_, i) => i !== index);
+    setRevenueCategories(updatedCategories);
+    localStorage.setItem('riseTravel_revenueCategories', JSON.stringify(updatedCategories));
     toast({
       title: "Categoria de receita removida",
       description: `"${categoryToRemove}" foi removida da lista.`,
