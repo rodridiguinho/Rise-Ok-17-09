@@ -1207,9 +1207,6 @@ const EnhancedTransactions = () => {
                     )}
                   </div>
                   <div className="text-right">
-                    <div className={`text-xl font-bold ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transaction.type === 'entrada' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                    </div>
                     <div className="text-sm text-gray-500">{transaction.time}</div>
                   </div>
                 </div>
