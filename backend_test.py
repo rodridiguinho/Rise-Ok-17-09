@@ -5054,6 +5054,12 @@ def run_review_request_tests():
     print(f"🔑 Test Credentials: {VALID_EMAIL}")
     print("="*80)
     
+    # 🎯 PRIORITY TESTS FROM REVIEW REQUEST - BUG FIX VALIDATION
+    print("\n🎯 REVIEW REQUEST BUG FIX TESTS - PRIORITY")
+    test_edit_modal_completeness()
+    test_edit_save_functionality()
+    test_supplier_tax_calculation()
+    
     # Run the specific corrected supplier information functionality test as requested in the review
     test_corrected_supplier_information_functionality()
     
