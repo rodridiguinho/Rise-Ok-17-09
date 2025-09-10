@@ -1074,6 +1074,10 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             # Escalas
             "outboundStops": transaction.outboundStops,
             "returnStops": transaction.returnStops,
+            # Additional fields for expenses
+            "saleReference": transaction.saleReference,
+            "productPurchased": transaction.productPurchased,
+            "additionalInfo": transaction.additionalInfo,
             "status": "Confirmado",
             "transactionDate": transaction_date,
             "updatedAt": datetime.utcnow(),
