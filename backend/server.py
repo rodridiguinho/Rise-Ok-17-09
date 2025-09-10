@@ -950,6 +950,64 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
         logging.error(f"Complete analysis error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting complete analysis")
 
+class CompanySettings(BaseModel):
+    name: str
+    email: str
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zipCode: Optional[str] = None
+    cnpj: Optional[str] = None
+    website: Optional[str] = None
+
+# Company settings endpoints
+@app.get("/api/company/settings")
+async def get_company_settings():
+    try:
+        # Try to get existing settings
+        settings = await db.company_settings.find_one({})
+        if settings:
+            # Remove MongoDB _id field
+            settings.pop('_id', None)
+            return settings
+        else:
+            # Return default settings
+            default_settings = {
+                "name": "Rise Travel",
+                "email": "rodrigo@risetravel.com",
+                "phone": "(11) 99999-9999",
+                "address": "Rua das Viagens, 123",
+                "city": "São Paulo",
+                "state": "SP",
+                "zipCode": "01234-567",
+                "cnpj": "12.345.678/0001-90",
+                "website": "www.risetravel.com.br"
+            }
+            return default_settings
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar configurações da empresa: {str(e)}")
+
+@app.post("/api/company/settings")
+async def save_company_settings(settings: CompanySettings):
+    try:
+        settings_dict = settings.dict()
+        settings_dict["updatedAt"] = datetime.utcnow()
+        
+        # Upsert: update if exists, create if not
+        result = await db.company_settings.replace_one(
+            {},  # Empty filter to match any document (assuming single company)
+            settings_dict,
+            upsert=True
+        )
+        
+        return {
+            "message": "Configurações da empresa salvas com sucesso",
+            "settings": settings_dict
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar configurações da empresa: {str(e)}")
+
 @api_router.get("/travel/airlines")
 async def get_airlines():
     """Obter lista de companhias aéreas"""
