@@ -1128,12 +1128,11 @@ const EnhancedTransactions = () => {
               <DialogTitle>Editar Transação - Agência de Viagens</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleUpdateTransaction}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
-                
-                {/* Basic Transaction Info */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-h-[80vh] overflow-y-auto">
+                {/* Basic Information */}
                 <div className="lg:col-span-3 border-b pb-4 mb-4">
                   <h3 className="text-lg font-semibold mb-4">Informações Básicas</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
                       <Label>Tipo *</Label>
                       <Select value={newTransaction.type} onValueChange={(value) => setNewTransaction({...newTransaction, type: value})}>
@@ -1141,8 +1140,8 @@ const EnhancedTransactions = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="entrada">Entrada</SelectItem>
-                          <SelectItem value="saida">Saída</SelectItem>
+                          <SelectItem value="entrada">💰 Entrada (Receita)</SelectItem>
+                          <SelectItem value="saida">💸 Saída (Despesa)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1185,9 +1184,7 @@ const EnhancedTransactions = () => {
                         onChange={(e) => setNewTransaction({...newTransaction, transactionDate: e.target.value})}
                       />
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div className="space-y-2">
                       <Label>Descrição *</Label>
                       <Input
@@ -1196,7 +1193,153 @@ const EnhancedTransactions = () => {
                         onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
                       />
                     </div>
+                  </div>
+                </div>
 
+                {/* Travel Details */}
+                <div className="lg:col-span-3 border-b pb-4 mb-4">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <Plane className="mr-2 h-5 w-5" />
+                    Detalhes da Viagem
+                  </h3>
+                  
+                  {/* Primeira linha - Informações do cliente e produto */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <Label>Tipo de Produto *</Label>
+                      <Select value={newTransaction.productType} onValueChange={(value) => setNewTransaction({...newTransaction, productType: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Passagem">✈️ Passagem Aérea</SelectItem>
+                          <SelectItem value="Hotel">🏨 Hotel/Hospedagem</SelectItem>
+                          <SelectItem value="Pacote">📦 Pacote Turístico</SelectItem>
+                          <SelectItem value="Seguro">🛡️ Seguro Viagem</SelectItem>
+                          <SelectItem value="Transfer">🚗 Transfer</SelectItem>
+                          <SelectItem value="Outros">📋 Outros</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Código da Reserva do Cliente</Label>
+                      <Input
+                        placeholder="Ex: BR123456"
+                        value={newTransaction.clientReservationCode}
+                        onChange={(e) => setNewTransaction({...newTransaction, clientReservationCode: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Cidade de Saída</Label>
+                      <Input
+                        placeholder="Ex: São Paulo"
+                        value={newTransaction.departureCity}
+                        onChange={(e) => setNewTransaction({...newTransaction, departureCity: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Cidade de Chegada</Label>
+                      <Input
+                        placeholder="Ex: Rio de Janeiro"
+                        value={newTransaction.arrivalCity}
+                        onChange={(e) => setNewTransaction({...newTransaction, arrivalCity: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Segunda linha - Datas e tipo de viagem */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Tipo de Viagem</Label>
+                      <Select value={newTransaction.tripType} onValueChange={(value) => setNewTransaction({...newTransaction, tripType: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Lazer">
+                            <div className="flex items-center">
+                              <Heart className="mr-2 h-4 w-4" />
+                              Lazer
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="Negócios">
+                            <div className="flex items-center">
+                              <Briefcase className="mr-2 h-4 w-4" />
+                              Negócios
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Data de Partida</Label>
+                      <Input
+                        type="date"
+                        value={newTransaction.departureDate}
+                        onChange={(e) => setNewTransaction({...newTransaction, departureDate: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Data de Retorno</Label>
+                      <Input
+                        type="date"
+                        value={newTransaction.returnDate}
+                        onChange={(e) => setNewTransaction({...newTransaction, returnDate: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 mt-6">
+                        <input
+                          type="checkbox"
+                          id="hasStopsEdit"
+                          checked={newTransaction.hasStops}
+                          onChange={(e) => setNewTransaction({...newTransaction, hasStops: e.target.checked})}
+                          className="rounded border-gray-300"
+                        />
+                        <Label htmlFor="hasStopsEdit">Possui escalas</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Campos de escalas (aparecem quando "Possui escalas" está marcado) */}
+                  {newTransaction.hasStops && (
+                    <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <h4 className="font-medium text-yellow-800 mb-3 flex items-center">
+                        ✈️ Detalhes das Escalas
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Escala da Ida</Label>
+                          <Input
+                            placeholder="Ex: Lisboa (LIS), Frankfurt (FRA)"
+                            value={newTransaction.outboundStops || ''}
+                            onChange={(e) => setNewTransaction({...newTransaction, outboundStops: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Escala da Volta</Label>
+                          <Input
+                            placeholder="Ex: Paris (CDG), Amsterdam (AMS)"
+                            value={newTransaction.returnStops || ''}
+                            onChange={(e) => setNewTransaction({...newTransaction, returnStops: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Financial Details */}
+                <div className="lg:col-span-3 border-b pb-4 mb-4">
+                  <h3 className="text-lg font-semibold mb-4">💰 Detalhes Financeiros</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Forma de Pagamento *</Label>
                       <Select value={newTransaction.paymentMethod} onValueChange={(value) => setNewTransaction({...newTransaction, paymentMethod: value})}>
@@ -1210,9 +1353,7 @@ const EnhancedTransactions = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div className="space-y-2">
                       <Label>Valor Total *</Label>
                       <Input
