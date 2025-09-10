@@ -1,0 +1,17 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="30" cy="30" r="25" fill="#1e40af" opacity="0.1"/>
+  
+  <!-- Airplane icon -->
+  <g transform="translate(10, 15)">
+    <path d="M35 15L25 20L10 18L8 20L15 25L5 27L3 29L8 30L12 32L14 30L25 28L35 15Z" fill="#1e40af"/>
+    <path d="M35 15L30 10L25 15L35 15Z" fill="#3b82f6"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="65" y="22" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e40af">Rise</text>
+  <text x="65" y="42" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">Travel</text>
+  
+  <!-- Decorative line -->
+  <line x1="65" y1="27" x2="120" y2="27" stroke="#3b82f6" stroke-width="2"/>
+</svg>
