@@ -355,22 +355,20 @@ const EnhancedTransactions = () => {
 
       console.log('🔍 Transaction data being sent:', transactionData); // Debug log
 
-      const createdTransaction = await transactionsAPI.createTransaction(transactionData);
+      const response = await transactionsAPI.createTransaction(transactionData);
+      
+      // Extrair a transação criada da resposta (o backend retorna {message, ...transaction})
+      const { message, ...createdTransaction } = response;
+      
+      console.log('✅ Transaction created successfully:', createdTransaction); // Debug log
       
       // Atualizar a lista imediatamente com a nova transação
       setTransactions(prevTransactions => [createdTransaction, ...prevTransactions]);
-      
-      // Forçar recarregamento dos dados para garantir sincronia
-      setTimeout(() => {
-        fetchData();
-      }, 500);
       
       setIsAddModalOpen(false);
       
       // Reset form COMPLETAMENTE usando a função dedicada
       resetForm();
-      
-      setIsAddModalOpen(false);
       
       toast({
         title: "Transação adicionada",
