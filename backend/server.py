@@ -737,6 +737,10 @@ async def create_transaction(transaction: TransactionCreate):
             # Escalas
             "outboundStops": transaction.outboundStops,
             "returnStops": transaction.returnStops,
+            # Additional fields for expenses
+            "saleReference": transaction.saleReference,
+            "productPurchased": transaction.productPurchased,
+            "additionalInfo": transaction.additionalInfo,
             "status": "Confirmado",
             "transactionDate": transaction_date,  # Store the actual transaction date
             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
