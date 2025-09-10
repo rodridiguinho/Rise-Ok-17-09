@@ -630,6 +630,18 @@ backend:
           agent: "testing"
           comment: "🎯 ENHANCED TRANSACTION SYSTEM WITH NEW TRAVEL FIELDS - COMPREHENSIVE REVIEW REQUEST TESTING COMPLETED: Successfully tested the exact enhanced transaction system requirements from the review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ ALL NEW FIELDS IMPLEMENTED AND WORKING: productType: 'Passagem' ✓, clientReservationCode: 'RT123456' ✓, departureCity: 'São Paulo' ✓, arrivalCity: 'Lisboa' ✓, hasStops: true ✓, outboundStops: 'Frankfurt (FRA)' ✓, returnStops: 'Madrid (MAD)' ✓, supplierUsedMiles: true ✓, supplierMilesQuantity: 100000 ✓, supplierMilesValue: 30.00 ✓, supplierMilesProgram: 'LATAM Pass' ✓, airportTaxes: 250.00 ✓. ✅ DATA PERSISTENCE VERIFIED: All enhanced travel fields correctly saved and persisted to MongoDB database. Transaction ID 68c0c6fbbd83e9aa54e1836f created successfully with all fields intact. ✅ AUTOMATIC MILES CALCULATION: Verified calculation logic (100000 milhas × R$ 30.00/1000 = R$ 3000.00) working correctly. ✅ ESCALAS FUNCTIONALITY: Stop information (Frankfurt FRA outbound, Madrid MAD return) correctly saved and retrieved. ✅ SUPPLIER MILES INTEGRATION: All supplier miles fields (quantity, value per 1000, program, taxes) working perfectly. ✅ COMPLETE PERSISTENCE VALIDATION: All 12 enhanced travel fields correctly persisted and retrievable from database. The enhanced transaction system fully meets all review request requirements with complete data integrity and automatic calculation functionality."
 
+  - task: "Critical Tax Calculation and Update Fixes"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 CRITICAL TAX CALCULATION AND UPDATE FIXES - ALL REVIEW REQUEST REQUIREMENTS VALIDATED: Successfully tested all 3 critical fixes using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ ENHANCED PROFIT CALCULATION TEST: Created transaction with saleValue: R$ 2000.00, supplierValue: R$ 800.00, airportTaxes: R$ 150.00, commissionValue: R$ 100.00. Verified profit calculation now includes airport taxes: R$ 2000 - (R$ 800 + R$ 150) - R$ 100 = R$ 950.00. Airport taxes are now correctly included in profit calculation as requested. ✅ UPDATE TRANSACTION SAVE TEST: Created basic transaction and successfully updated with PUT operation changing supplierValue: R$ 900.00, airportTaxes: R$ 200.00, milesTaxes: R$ 75.00 (NEW FIELD), description: 'Updated transaction test'. All changes persist correctly after PUT operation including the new milesTaxes field. ✅ COMPLETE TAX INTEGRATION TEST: Created transaction with miles enabled (supplierValue: R$ 500.00, airportTaxes: R$ 100.00, supplierUsedMiles: true, supplierMilesQuantity: 30000, supplierMilesValue: R$ 30.00, milesTaxes: R$ 80.00). Verified both tax systems work independently: Supplier taxes (R$ 600.00 = R$ 500 + R$ 100) and Miles taxes (R$ 980.00 = R$ 900 + R$ 80) calculated and saved correctly without interference. All critical fixes are now fully operational and meet the exact review requirements."
+
 frontend:
   - task: "User Management - Create User"
     implemented: true
