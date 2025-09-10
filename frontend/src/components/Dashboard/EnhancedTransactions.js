@@ -1336,10 +1336,285 @@ const EnhancedTransactions = () => {
                   )}
                 </div>
 
+                {/* Multiple Products - MOVED UP */}
+                <div className="lg:col-span-3 border-b pb-4 mb-4">
+                  <h3 className="text-lg font-semibold mb-4">📦 Produtos/Serviços da Venda</h3>
+                  {newTransaction.products.map((product, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border rounded-lg bg-gray-50">
+                      <div className="space-y-2">
+                        <Label>Produto/Serviço</Label>
+                        <Input
+                          placeholder="Ex: Passagem, Seguro, Transfer"
+                          value={product.name}
+                          onChange={(e) => updateProduct(index, 'name', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Custo (R$)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0,00"
+                          value={product.cost}
+                          onChange={(e) => updateProduct(index, 'cost', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Valor Cliente (R$)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0,00"
+                          value={product.clientValue}
+                          onChange={(e) => updateProduct(index, 'clientValue', e.target.value)}
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        {index > 0 && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeProduct(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addProduct}
+                    className="w-full"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Adicionar Produto/Serviço
+                  </Button>
+                </div>
+
+                {/* Supplier Information Section */}
+                <div className="lg:col-span-3 border-b pb-4 mb-4">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    🏢 Informações do Fornecedor
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <Label>Fornecedor</Label>
+                      <Select value={newTransaction.supplier} onValueChange={(value) => setNewTransaction({...newTransaction, supplier: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o fornecedor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {suppliers.map(supplier => (
+                            <SelectItem key={supplier.id} value={supplier.name}>{supplier.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Valor do Fornecedor (R$)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0,00"
+                        value={newTransaction.supplierValue}
+                        onChange={(e) => setNewTransaction({...newTransaction, supplierValue: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Taxas/Valores Extras (R$)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: Taxas aeroporto, serviços"
+                        value={newTransaction.airportTaxes}
+                        onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Valor Total do Fornecedor</Label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="text"
+                          readOnly
+                          value={formatCurrency(calculateSupplierTotal())}
+                          className={`bg-gray-100 font-semibold ${calculateSupplierTotal() > 0 ? 'text-blue-600' : 'text-gray-500'}`}
+                        />
+                        <span className="text-sm text-gray-600">automático</span>
+                      </div>
+                      {(newTransaction.supplierValue || newTransaction.airportTaxes) && (
+                        <p className="text-xs text-blue-600 mt-1">
+                          R$ {parseFloat(newTransaction.supplierValue || 0).toFixed(2)} + R$ {parseFloat(newTransaction.airportTaxes || 0).toFixed(2)} = {formatCurrency(calculateSupplierTotal())}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Checkbox para milhas */}
+                  <div className="mb-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="supplierUsedMilesEdit"
+                        checked={newTransaction.supplierUsedMiles}
+                        onChange={(e) => setNewTransaction({...newTransaction, supplierUsedMiles: e.target.checked})}
+                        className="w-4 h-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="supplierUsedMilesEdit" className="flex items-center cursor-pointer font-medium text-blue-700">
+                        ✈️ O fornecedor usou milhas para esta transação
+                      </Label>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Marque apenas se o fornecedor utilizou milhas para comprar/reservar o produto/serviço
+                    </p>
+                  </div>
+
+                  {/* Campos de milhas (aparecem apenas quando "Fornecedor usou milhas" está marcado) */}
+                  {newTransaction.supplierUsedMiles && (
+                    <div className="p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
+                      <h4 className="font-semibold text-blue-800 mb-4 flex items-center text-lg">
+                        ✈️ Detalhes das Milhas do Fornecedor
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-medium">Quantidade de Milhas *</Label>
+                          <Input
+                            type="number"
+                            placeholder="Ex: 25000"
+                            value={newTransaction.supplierMilesQuantity}
+                            onChange={(e) => setNewTransaction({...newTransaction, supplierMilesQuantity: e.target.value})}
+                            className="bg-white"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="font-medium">Valor por 1.000 milhas (R$) *</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Ex: 26,00"
+                            value={newTransaction.supplierMilesValue}
+                            onChange={(e) => setNewTransaction({...newTransaction, supplierMilesValue: e.target.value})}
+                            className="bg-white"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="font-medium">Valor das Milhas (R$)</Label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="text"
+                              readOnly
+                              value={formatCurrency(calculateMilesTotal())}
+                              className={`bg-gray-100 font-semibold ${calculateMilesTotal() > 0 ? 'text-green-600' : 'text-gray-500'}`}
+                            />
+                            <span className="text-sm text-gray-600">automático</span>
+                          </div>
+                          {newTransaction.supplierMilesQuantity && newTransaction.supplierMilesValue && (
+                            <p className="text-xs text-blue-600 mt-1">
+                              {parseInt(newTransaction.supplierMilesQuantity).toLocaleString('pt-BR')} milhas × R$ {parseFloat(newTransaction.supplierMilesValue).toFixed(2)} = {formatCurrency(calculateMilesTotal())}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="font-medium">Taxas do Aeroporto (R$)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Ex: 150,00"
+                            value={newTransaction.airportTaxes}
+                            onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
+                            className="bg-white"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="font-medium">Valor Total (Milhas + Taxas)</Label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="text"
+                              readOnly
+                              value={formatCurrency(calculateMilesTotalWithTaxes())}
+                              className={`bg-gray-100 font-semibold ${calculateMilesTotalWithTaxes() > 0 ? 'text-green-600' : 'text-gray-500'}`}
+                            />
+                            <span className="text-sm text-gray-600">automático</span>
+                          </div>
+                          {(calculateMilesTotal() > 0 || newTransaction.airportTaxes) && (
+                            <p className="text-xs text-blue-600 mt-1">
+                              {formatCurrency(calculateMilesTotal())} + R$ {parseFloat(newTransaction.airportTaxes || 0).toFixed(2)} = {formatCurrency(calculateMilesTotalWithTaxes())}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2 lg:col-span-5">
+                          <Label className="font-medium">Programa de Milhas *</Label>
+                          <Select value={newTransaction.supplierMilesProgram} onValueChange={(value) => setNewTransaction({...newTransaction, supplierMilesProgram: value})}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Selecione o programa de milhas" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="LATAM Pass">✈️ LATAM Pass</SelectItem>
+                              <SelectItem value="Smiles">✈️ Smiles (GOL)</SelectItem>
+                              <SelectItem value="TudoAzul">✈️ TudoAzul (Azul)</SelectItem>
+                              <SelectItem value="Multiplus">✈️ Multiplus</SelectItem>
+                              <SelectItem value="American Airlines">✈️ American Airlines</SelectItem>
+                              <SelectItem value="United">✈️ United MileagePlus</SelectItem>
+                              <SelectItem value="Delta">✈️ Delta SkyMiles</SelectItem>
+                              <SelectItem value="Outros">📋 Outros</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 p-3 bg-blue-100 rounded-md">
+                        <p className="text-sm text-blue-800">
+                          💡 <strong>Importante:</strong> Quando o fornecedor usa milhas, informe a quantidade de milhas utilizadas, 
+                          o valor pago pelas milhas e o programa utilizado. As taxas extras são somadas automaticamente ao valor das milhas.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Financial Details */}
                 <div className="lg:col-span-3 border-b pb-4 mb-4">
                   <h3 className="text-lg font-semibold mb-4">💰 Detalhes Financeiros</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Cliente</Label>
+                      <Select value={newTransaction.client} onValueChange={(value) => setNewTransaction({...newTransaction, client: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o cliente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map(client => (
+                            <SelectItem key={client.id} value={client.name}>{client.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Vendedor</Label>
+                      <Select value={newTransaction.seller} onValueChange={(value) => setNewTransaction({...newTransaction, seller: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o vendedor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users.map(user => (
+                            <SelectItem key={user.id} value={user.name}>{user.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <div className="space-y-2">
                       <Label>Forma de Pagamento *</Label>
                       <Select value={newTransaction.paymentMethod} onValueChange={(value) => setNewTransaction({...newTransaction, paymentMethod: value})}>
@@ -1355,6 +1630,41 @@ const EnhancedTransactions = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label>Valor da Venda</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0,00"
+                        value={newTransaction.saleValue}
+                        onChange={(e) => setNewTransaction({...newTransaction, saleValue: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Valor da Comissão</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0,00"
+                        value={newTransaction.commissionValue}
+                        onChange={(e) => setNewTransaction({...newTransaction, commissionValue: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Percentual da Comissão</Label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="text"
+                          readOnly
+                          value={`${calculateCommissionPercentage()}%`}
+                          className="bg-gray-100"
+                        />
+                        <span className="text-sm text-gray-600">automático</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label>Valor Total *</Label>
                       <Input
                         type="number"
@@ -1363,6 +1673,19 @@ const EnhancedTransactions = () => {
                         value={newTransaction.amount}
                         onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Lucro Final</Label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="text"
+                          readOnly
+                          value={formatCurrency(calculateProfit())}
+                          className={`bg-gray-100 ${calculateProfit() >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        />
+                        <span className="text-sm text-gray-600">automático</span>
+                      </div>
                     </div>
                   </div>
                 </div>
