@@ -29,11 +29,18 @@ const Header = ({ user, toggleSidebar, isMobile }) => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent truncate">
-              Rise Travel
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-500 truncate">Sistema de Controle de Caixa</p>
+          <div className="flex items-center space-x-3">
+            <img 
+              src="/rise-logo.svg" 
+              alt="Rise Travel" 
+              className="w-8 h-8 flex-shrink-0"
+            />
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent truncate">
+                Rise Travel
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 truncate">Sistema de Controle de Caixa</p>
+            </div>
           </div>
         </div>
 
