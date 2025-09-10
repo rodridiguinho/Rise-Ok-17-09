@@ -96,6 +96,7 @@ const AdminSettings = () => {
   const [isSupplierTypeModalOpen, setIsSupplierTypeModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isExpenseCategoryModalOpen, setIsExpenseCategoryModalOpen] = useState(false);
+  const [isRevenueCategoryModalOpen, setIsRevenueCategoryModalOpen] = useState(false);
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
 
   // Carregar configurações da empresa ao inicializar
