@@ -177,6 +177,18 @@ backend:
           agent: "testing"
           comment: "✅ COMPLETE ENHANCED TRANSACTION REVIEW REQUEST TESTING COMPLETED: Successfully tested transaction with all new features as specified in review request. ✅ REVENUE CATEGORY: Type 'entrada' with revenue category 'Vendas de Passagens' correctly handled and saved. ✅ ENHANCED TRAVEL FIELDS: All travel fields working perfectly - hasStops=true, outboundStops='Frankfurt', returnStops='Madrid', supplierUsedMiles=true, supplierMilesQuantity=150000, supplierMilesValue=35.00, supplierMilesProgram='LATAM Pass', airportTaxes=200.00, departureCity='São Paulo', arrivalCity='Paris', clientReservationCode='RT789012'. ✅ MULTIPLE PRODUCTS WITH COST/CLIENT STRUCTURE: 3 products correctly saved - Passagem GRU-CDG (cost: R$ 2250.00, clientValue: R$ 2800.00), Passagem CDG-GRU (cost: R$ 2100.00, clientValue: R$ 2700.00), Seguro Viagem Europa (cost: R$ 80.00, clientValue: R$ 120.00). ✅ CALCULATED FIELDS: All calculated fields working - saleValue: R$ 5620.00, supplierValue: R$ 4430.00, commissionValue: R$ 562.00. Transaction ID: 68c0d34b10d83c5b765515ba. All enhanced features work with proper category segregation and data persistence."
 
+  - task: "Expense Transaction Test"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ EXPENSE TRANSACTION TEST REVIEW REQUEST COMPLETED: Successfully tested expense transaction functionality as specified in review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ EXPENSE CATEGORIES: Successfully retrieved 14 expense categories including 'Salários', 'Aluguel', 'Conta de Água', 'Conta de Luz', 'Internet' from GET /api/transactions/categories endpoint. ✅ EXPENSE TRANSACTION CREATION: Successfully created expense transaction with type='saída' and category='Salários' from expense categories. Transaction details: description='Pagamento salário funcionário', amount=R$ 3500.00, paymentMethod='Transferência', supplier='Funcionário Teste'. ✅ CATEGORY HANDLING: Correct category handling based on type - expense type 'saída' with expense category 'Salários' correctly saved and validated. ✅ FIELD VALIDATION: All expense transaction fields correctly saved and validated. Transaction ID: 68c0d34c10d83c5b765515bb. The expense transaction system properly handles expense categories and type-based category segregation as required."
+
   - task: "API Health Check Endpoint"
     implemented: true
     working: true
