@@ -149,14 +149,25 @@ const EnhancedTransactions = () => {
     return '0.00';
   };
 
+  const calculateSupplierTotal = () => {
+    const supplierValue = parseFloat(newTransaction.supplierValue) || 0;
+    const airportTaxes = parseFloat(newTransaction.airportTaxes) || 0;
+    return supplierValue + airportTaxes;
+  };
+
   const calculateMilesTotal = () => {
     if (newTransaction.supplierMilesQuantity && newTransaction.supplierMilesValue) {
       const quantity = parseFloat(newTransaction.supplierMilesQuantity) || 0;
       const valuePerThousand = parseFloat(newTransaction.supplierMilesValue) || 0;
-      const total = (quantity / 1000) * valuePerThousand;
-      return total;
+      return (quantity / 1000) * valuePerThousand;
     }
     return 0;
+  };
+
+  const calculateMilesTotalWithTaxes = () => {
+    const milesValue = calculateMilesTotal();
+    const taxesValue = parseFloat(newTransaction.airportTaxes) || 0;
+    return milesValue + taxesValue;
   };
 
   const calculateProfit = () => {
