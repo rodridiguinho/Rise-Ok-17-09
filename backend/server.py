@@ -1069,7 +1069,7 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
         
         # Update the transaction
         result = await db.transactions.update_one(
-            {"id": transaction_id},
+            {"_id": ObjectId(transaction_id)},
             {"$set": updated_transaction_data}
         )
         
@@ -1077,8 +1077,15 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             raise HTTPException(status_code=404, detail="Transação não encontrada ou não foi modificada")
         
         # Return updated transaction
-        updated_transaction = await db.transactions.find_one({"id": transaction_id})
-        updated_transaction.pop('_id', None)
+        updated_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
+        if updated_transaction:
+            updated_transaction["id"] = str(updated_transaction["_id"])
+            updated_transaction["_id"] = str(updated_transaction["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in updated_transaction:
+                updated_transaction["createdAt"] = updated_transaction["createdAt"].isoformat()
+            if "updatedAt" in updated_transaction:
+                updated_transaction["updatedAt"] = updated_transaction["updatedAt"].isoformat()
         
         return {"message": "Transação atualizada com sucesso", **updated_transaction}
     except HTTPException:
