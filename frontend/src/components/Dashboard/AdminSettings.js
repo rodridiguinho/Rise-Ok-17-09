@@ -86,8 +86,6 @@ const AdminSettings = () => {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isExpenseCategoryModalOpen, setIsExpenseCategoryModalOpen] = useState(false);
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
-  
-  const { toast } = useToast();
 
   // Carregar configurações da empresa ao inicializar
   useEffect(() => {
