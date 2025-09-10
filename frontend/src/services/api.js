@@ -83,7 +83,7 @@ export const transactionsAPI = {
   },
   
   deleteTransaction: async (id) => {
-    const response = await api.delete(`/api/transactions/${id}`);
+    const response = await api.delete(`/transactions/${id}`);
     return response.data;
   },
   
