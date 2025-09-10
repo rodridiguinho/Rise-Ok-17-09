@@ -55,8 +55,8 @@
 ##   test_priority: "high_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
+##     - agent: "main"
+##       message: "Fixed response parsing issue in EnhancedTransactions.js handleAddTransaction function. Backend API works perfectly (confirmed by testing agent), issue was frontend not properly extracting transaction data from {message, ...transaction} response format. Applied fix to destructure response correctly and update local state immediately. Needs frontend testing to confirm the real-time update works."
 
 # Protocol Guidelines for Main agent
 #
