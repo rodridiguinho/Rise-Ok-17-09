@@ -429,7 +429,10 @@ const EnhancedTransactions = () => {
         products: newTransaction.products.filter(p => p.name && (p.clientValue || p.cost))
       };
 
-      const updatedTransaction = await transactionsAPI.updateTransaction(selectedTransaction.id, transactionData);
+      const response = await transactionsAPI.updateTransaction(selectedTransaction.id, transactionData);
+      
+      // Extrair a transação atualizada da resposta (o backend pode retornar {message, ...transaction})
+      const updatedTransaction = response.message ? { ...response, message: undefined } : response;
       
       setTransactions(transactions.map(t => 
         t.id === selectedTransaction.id ? updatedTransaction : t
