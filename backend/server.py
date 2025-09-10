@@ -120,6 +120,7 @@ class TransactionCreate(BaseModel):
     supplierMilesValue: Optional[float] = None
     supplierMilesProgram: Optional[str] = None
     airportTaxes: Optional[float] = None
+    milesTaxes: Optional[float] = None
     # Escalas
     outboundStops: Optional[str] = None
     returnStops: Optional[str] = None
