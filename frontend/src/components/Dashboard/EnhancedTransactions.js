@@ -676,6 +676,140 @@ const EnhancedTransactions = () => {
                 </div>
               </div>
 
+              {/* Campos específicos para SAÍDAS/DESPESAS */}
+              {newTransaction.type === 'saida' && (
+                <div className="lg:col-span-3 border-b pb-4 mb-4">
+                  <h3 className="text-lg font-semibold mb-4 text-red-600">💸 Informações da Despesa/Pagamento</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    {/* Fornecedor */}
+                    <div className="space-y-2">
+                      <Label>Fornecedor *</Label>
+                      <Select value={newTransaction.supplier} onValueChange={(value) => setNewTransaction({...newTransaction, supplier: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o fornecedor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {suppliers.map(supplier => (
+                            <SelectItem key={supplier.id} value={supplier.name}>
+                              {supplier.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Número da Venda Referência */}
+                    <div className="space-y-2">
+                      <Label>Nº Venda (Referência)</Label>
+                      <Input
+                        placeholder="Ex: V-2025-001"
+                        value={newTransaction.saleReference}
+                        onChange={(e) => setNewTransaction({...newTransaction, saleReference: e.target.value})}
+                      />
+                    </div>
+
+                    {/* Produto Comprado */}
+                    <div className="space-y-2">
+                      <Label>Produto Comprado</Label>
+                      <Input
+                        placeholder="Ex: Passagem GRU-MIA"
+                        value={newTransaction.productPurchased}
+                        onChange={(e) => setNewTransaction({...newTransaction, productPurchased: e.target.value})}
+                      />
+                    </div>
+
+                    {/* Data de Pagamento */}
+                    <div className="space-y-2">
+                      <Label>Data de Pagamento</Label>
+                      <Input
+                        type="date"
+                        value={newTransaction.supplierPaymentDate}
+                        onChange={(e) => setNewTransaction({...newTransaction, supplierPaymentDate: e.target.value})}
+                      />
+                    </div>
+
+                    {/* Forma de Pagamento */}
+                    <div className="space-y-2">
+                      <Label>Forma de Pagamento *</Label>
+                      <Select value={newTransaction.paymentMethod} onValueChange={(value) => setNewTransaction({...newTransaction, paymentMethod: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a forma" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {paymentMethods.map(method => (
+                            <SelectItem key={method} value={method}>
+                              {method}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Valor Pago */}
+                    <div className="space-y-2">
+                      <Label>Valor Pago ao Fornecedor *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0,00"
+                        value={newTransaction.amount}
+                        onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                      />
+                    </div>
+
+                    {/* Informações Adicionais */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-3">
+                      <Label>Informações Adicionais</Label>
+                      <Textarea
+                        placeholder="Observações, detalhes do pagamento, condições especiais..."
+                        value={newTransaction.additionalInfo}
+                        onChange={(e) => setNewTransaction({...newTransaction, additionalInfo: e.target.value})}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Campos para ENTRADAS (mantém como estava antes) */}
+              {newTransaction.type === 'entrada' && (
+                <>
+                  <div className="lg:col-span-3 border-b pb-4 mb-4">
+                    <h3 className="text-lg font-semibold mb-4">💰 Informações da Receita</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Valor da Transação *</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={newTransaction.amount}
+                          onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Forma de Pagamento *</Label>
+                        <Select value={newTransaction.paymentMethod} onValueChange={(value) => setNewTransaction({...newTransaction, paymentMethod: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a forma" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {paymentMethods.map(method => (
+                              <SelectItem key={method} value={method}>
+                                {method}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Travel Details */}
               <div className="lg:col-span-3 border-b pb-4 mb-4">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
