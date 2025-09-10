@@ -988,7 +988,7 @@ async def get_company_settings():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar configurações da empresa: {str(e)}")
 
-@app.put("/api/transactions/{transaction_id}")
+@api_router.put("/transactions/{transaction_id}")
 async def update_transaction(transaction_id: str, transaction: TransactionCreate):
     try:
         # Find the transaction to update
