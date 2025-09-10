@@ -32,6 +32,8 @@ import { useToast } from '../../hooks/use-toast';
 import api from '../../services/api';
 
 const AdminSettings = () => {
+  const { toast } = useToast();
+  
   // Configurações da empresa
   const [companySettings, setCompanySettings] = useState({
     name: 'Rise Travel',
@@ -44,6 +46,23 @@ const AdminSettings = () => {
     cnpj: '12.345.678/0001-90',
     website: 'www.risetravel.com.br'
   });
+
+  // Carregar configurações da empresa ao inicializar
+  useEffect(() => {
+    loadCompanySettings();
+  }, []);
+
+  const loadCompanySettings = async () => {
+    try {
+      const response = await api.get('/api/company/settings');
+      if (response.data) {
+        setCompanySettings(response.data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações da empresa:', error);
+      // Manter as configurações padrão se houver erro
+    }
+  };
 
   const [supplierTypes, setSupplierTypes] = useState([
     'Operadora',
