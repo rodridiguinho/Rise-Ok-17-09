@@ -519,6 +519,74 @@ const AdminSettings = () => {
         </CardContent>
       </Card>
 
+      {/* Categorias de Receitas */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Tag className="mr-2 h-5 w-5 text-green-600" />
+              Categorias de Receitas
+            </div>
+            <Dialog open={isRevenueCategoryModalOpen} onOpenChange={setIsRevenueCategoryModalOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Adicionar
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Adicionar Categoria de Receita</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Nome da Categoria</Label>
+                    <Input
+                      placeholder="Ex: Vendas Online, Consultoria"
+                      value={newRevenueCategory}
+                      onChange={(e) => setNewRevenueCategory(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addRevenueCategory()}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setIsRevenueCategoryModalOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={addRevenueCategory} className="bg-green-600 hover:bg-green-700">
+                      Adicionar
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {revenueCategories.map((category, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200">
+                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300">
+                  💰 {category}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeRevenueCategory(index)}
+                  className="text-red-600 hover:text-red-800 p-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          {revenueCategories.length === 0 && (
+            <p className="text-center py-8 text-gray-500">
+              Nenhuma categoria de receita cadastrada. Clique em "Adicionar" para criar a primeira.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Categorias de Despesa */}
       <Card>
         <CardHeader>
