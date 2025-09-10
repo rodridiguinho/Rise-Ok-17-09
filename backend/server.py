@@ -1071,17 +1071,17 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             "entryDate": existing_transaction.get("entryDate", date.today().strftime("%Y-%m-%d"))
         }
         
-        # Update the transaction
+        # Update the transaction using the same field we searched by
         result = await db.transactions.update_one(
-            {"_id": ObjectId(transaction_id)},
+            {"id": transaction_id},
             {"$set": updated_transaction_data}
         )
         
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Transação não encontrada ou não foi modificada")
         
-        # Return updated transaction
-        updated_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
+        # Return updated transaction  
+        updated_transaction = await db.transactions.find_one({"id": transaction_id})
         if updated_transaction:
             updated_transaction["id"] = str(updated_transaction["_id"])
             updated_transaction["_id"] = str(updated_transaction["_id"])
