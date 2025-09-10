@@ -78,12 +78,12 @@ export const transactionsAPI = {
   },
   
   updateTransaction: async (id, transactionData) => {
-    const response = await api.put(`/transactions/${id}`, transactionData);
+    const response = await api.put(`/api/transactions/${id}`, transactionData);
     return response.data;
   },
   
   deleteTransaction: async (id) => {
-    const response = await api.delete(`/transactions/${id}`);
+    const response = await api.delete(`/api/transactions/${id}`);
     return response.data;
   },
   
