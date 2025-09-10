@@ -174,8 +174,21 @@ const EnhancedTransactions = () => {
   const calculateProfit = () => {
     const saleValue = parseFloat(newTransaction.saleValue) || 0;
     const supplierValue = parseFloat(newTransaction.supplierValue) || 0;
+    const airportTaxes = parseFloat(newTransaction.airportTaxes) || 0;
     const commissionValue = parseFloat(newTransaction.commissionValue) || 0;
-    const profit = saleValue - supplierValue - commissionValue;
+    
+    // Total supplier cost includes value + taxes
+    const totalSupplierCost = supplierValue + airportTaxes;
+    
+    // If using miles, add miles costs
+    let totalCost = totalSupplierCost;
+    if (newTransaction.supplierUsedMiles) {
+      const milesValue = calculateMilesTotal();
+      const milesTaxes = parseFloat(newTransaction.milesTaxes) || 0;
+      totalCost += milesValue + milesTaxes;
+    }
+    
+    const profit = saleValue - totalCost - commissionValue;
     return profit;
   };
 
