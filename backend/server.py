@@ -1087,7 +1087,7 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
         logging.error(f"Update transaction error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao atualizar transação: {str(e)}")
 
-@app.delete("/api/transactions/{transaction_id}")
+@api_router.delete("/transactions/{transaction_id}")
 async def delete_transaction(transaction_id: str):
     try:
         # Check if transaction exists
