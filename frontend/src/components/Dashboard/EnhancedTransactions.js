@@ -1107,16 +1107,17 @@ const EnhancedTransactions = () => {
                 )}
               </div>
 
-            </div>
+              </div>
 
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleAddTransaction} className="bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500">
-                Salvar Transação
-              </Button>
-            </div>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500">
+                  Salvar Transação
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
