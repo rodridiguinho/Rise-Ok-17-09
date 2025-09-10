@@ -329,11 +329,12 @@ const EnhancedTransactions = () => {
   const handleAddTransaction = async (e) => {
     if (e) e.preventDefault();
     
-    if (!newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.paymentMethod) {
+    // Validação mais simples - apenas campos realmente essenciais
+    if (!newTransaction.description || !newTransaction.amount || newTransaction.amount <= 0) {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios: categoria, descrição, valor e forma de pagamento.",
+        title: "Erro de Validação",
+        description: "Por favor, preencha a descrição e um valor maior que zero.",
       });
       return;
     }
