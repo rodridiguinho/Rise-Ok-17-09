@@ -337,6 +337,130 @@ const EnhancedTransactions = () => {
     }
   };
 
+  const handleEditTransaction = (transaction) => {
+    setSelectedTransaction(transaction);
+    setNewTransaction({
+      ...transaction,
+      products: transaction.products || [{ name: '', cost: '', clientValue: '' }]
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateTransaction = async (e) => {
+    e.preventDefault();
+    
+    if (!newTransaction.type || !newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.paymentMethod) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+      });
+      return;
+    }
+
+    try {
+      const transactionData = {
+        ...newTransaction,
+        amount: parseFloat(newTransaction.amount),
+        saleValue: newTransaction.saleValue ? parseFloat(newTransaction.saleValue) : null,
+        supplierValue: newTransaction.supplierValue ? parseFloat(newTransaction.supplierValue) : null,
+        commissionValue: newTransaction.commissionValue ? parseFloat(newTransaction.commissionValue) : null,
+        products: newTransaction.products.filter(p => p.name && (p.clientValue || p.cost))
+      };
+
+      const updatedTransaction = await transactionsAPI.updateTransaction(selectedTransaction.id, transactionData);
+      
+      setTransactions(transactions.map(t => 
+        t.id === selectedTransaction.id ? updatedTransaction : t
+      ));
+      
+      setIsEditModalOpen(false);
+      setSelectedTransaction(null);
+      
+      // Reset form
+      setNewTransaction({
+        type: 'entrada',
+        category: '',
+        description: '',
+        amount: '',
+        paymentMethod: '',
+        client: '',
+        supplier: '',
+        seller: '',
+        saleValue: '',
+        supplierValue: '',
+        supplierPaymentDate: '',
+        supplierPaymentStatus: 'Pendente',
+        commissionValue: '',
+        commissionPaymentDate: '',
+        commissionPaymentStatus: 'Pendente',
+        customCategory: '',
+        transactionDate: new Date().toISOString().split('T')[0],
+        clientNumber: '',
+        reservationLocator: '',
+        departureDate: '',
+        returnDate: '',
+        departureTime: '',
+        arrivalTime: '',
+        hasStops: false,
+        originAirport: '',
+        destinationAirport: '',
+        tripType: 'Lazer',
+        products: [{ name: '', cost: '', clientValue: '' }],
+        clientReservationCode: '',
+        departureCity: '',
+        arrivalCity: '',
+        productType: 'Passagem',
+        supplierUsedMiles: false,
+        supplierMilesQuantity: '',
+        supplierMilesValue: '',
+        supplierMilesProgram: '',
+        airportTaxes: '',
+        outboundStops: '',
+        returnStops: ''
+      });
+
+      toast({
+        title: "Transação atualizada",
+        description: "A transação foi atualizada com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao atualizar transação.",
+      });
+    }
+  };
+
+  const handleDeleteTransaction = async () => {
+    try {
+      await transactionsAPI.deleteTransaction(transactionToDelete.id);
+      setTransactions(transactions.filter(t => t.id !== transactionToDelete.id));
+      
+      setIsDeleteConfirmOpen(false);
+      setTransactionToDelete(null);
+      
+      toast({
+        title: "Transação excluída",
+        description: "A transação foi excluída com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao excluir transação.",
+      });
+    }
+  };
+
+  const confirmDeleteTransaction = (transaction) => {
+    setTransactionToDelete(transaction);
+    setIsDeleteConfirmOpen(true);
+  };
+
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (transaction.client && transaction.client.toLowerCase().includes(searchTerm.toLowerCase())) ||
