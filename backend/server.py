@@ -81,10 +81,10 @@ class UserLogin(BaseModel):
 
 class TransactionCreate(BaseModel):
     type: str
-    category: str
+    category: Optional[str] = "Outros"  # Valor padrão
     description: str
     amount: float
-    paymentMethod: str
+    paymentMethod: Optional[str] = "Dinheiro"  # Valor padrão
     client: Optional[str] = None
     supplier: Optional[str] = None
     seller: Optional[str] = None
