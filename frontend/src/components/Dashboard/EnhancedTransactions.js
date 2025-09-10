@@ -219,7 +219,7 @@ const EnhancedTransactions = () => {
         saleValue: newTransaction.saleValue ? parseFloat(newTransaction.saleValue) : null,
         supplierValue: newTransaction.supplierValue ? parseFloat(newTransaction.supplierValue) : null,
         commissionValue: newTransaction.commissionValue ? parseFloat(newTransaction.commissionValue) : null,
-        products: newTransaction.products.filter(p => p.name && p.value)
+        products: newTransaction.products.filter(p => p.name && (p.clientValue || p.cost))
       };
 
       const createdTransaction = await transactionsAPI.createTransaction(transactionData);
