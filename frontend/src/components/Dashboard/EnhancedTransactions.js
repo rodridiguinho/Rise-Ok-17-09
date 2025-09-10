@@ -165,7 +165,28 @@ const EnhancedTransactions = () => {
 
   useEffect(() => {
     fetchData();
+    loadCustomCategories();
   }, []);
+
+  const loadCustomCategories = async () => {
+    try {
+      // Carregar categorias personalizadas do AdminSettings
+      const storedRevenueCategories = localStorage.getItem('riseTravel_revenueCategories');
+      const storedExpenseCategories = localStorage.getItem('riseTravel_expenseCategories');
+      
+      if (storedRevenueCategories) {
+        const customRevenue = JSON.parse(storedRevenueCategories);
+        setRevenueCategories(prev => [...new Set([...prev, ...customRevenue])]);
+      }
+      
+      if (storedExpenseCategories) {
+        const customExpense = JSON.parse(storedExpenseCategories);
+        setExpenseCategories(prev => [...new Set([...prev, ...customExpense])]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar categorias personalizadas:', error);
+    }
+  };
 
   const fetchData = async () => {
     try {
