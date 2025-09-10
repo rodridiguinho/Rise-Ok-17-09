@@ -244,6 +244,108 @@ const AdminSettings = () => {
         </div>
       </div>
 
+      {/* Configurações da Empresa */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Building2 className="mr-2 h-5 w-5 text-blue-600" />
+            Configurações da Empresa
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Nome da Empresa *</Label>
+              <Input
+                value={companySettings.name}
+                onChange={(e) => setCompanySettings({...companySettings, name: e.target.value})}
+                placeholder="Rise Travel"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                value={companySettings.email}
+                onChange={(e) => setCompanySettings({...companySettings, email: e.target.value})}
+                placeholder="rodrigo@risetravel.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Telefone</Label>
+              <Input
+                value={companySettings.phone}
+                onChange={(e) => setCompanySettings({...companySettings, phone: e.target.value})}
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Endereço</Label>
+              <Input
+                value={companySettings.address}
+                onChange={(e) => setCompanySettings({...companySettings, address: e.target.value})}
+                placeholder="Rua das Viagens, 123"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Cidade</Label>
+              <Input
+                value={companySettings.city}
+                onChange={(e) => setCompanySettings({...companySettings, city: e.target.value})}
+                placeholder="São Paulo"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Estado</Label>
+              <Input
+                value={companySettings.state}
+                onChange={(e) => setCompanySettings({...companySettings, state: e.target.value})}
+                placeholder="SP"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>CEP</Label>
+              <Input
+                value={companySettings.zipCode}
+                onChange={(e) => setCompanySettings({...companySettings, zipCode: e.target.value})}
+                placeholder="01234-567"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>CNPJ</Label>
+              <Input
+                value={companySettings.cnpj}
+                onChange={(e) => setCompanySettings({...companySettings, cnpj: e.target.value})}
+                placeholder="12.345.678/0001-90"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Website</Label>
+              <Input
+                value={companySettings.website}
+                onChange={(e) => setCompanySettings({...companySettings, website: e.target.value})}
+                placeholder="www.risetravel.com.br"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-6">
+            <Button onClick={handleSaveCompanySettings} className="flex items-center bg-blue-600 hover:bg-blue-700">
+              <Building2 className="mr-2 h-4 w-4" />
+              Salvar Configurações da Empresa
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Tipos de Fornecedor */}
       <Card>
         <CardHeader>
