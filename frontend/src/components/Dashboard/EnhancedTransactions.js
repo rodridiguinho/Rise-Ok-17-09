@@ -489,7 +489,11 @@ const EnhancedTransactions = () => {
         supplierMilesProgram: '',
         airportTaxes: '',
         outboundStops: '',
-        returnStops: ''
+        returnStops: '',
+        // Additional fields for expenses
+        saleReference: '',
+        productPurchased: '',
+        additionalInfo: ''
       });
 
       toast({
