@@ -104,23 +104,20 @@
 
 user_problem_statement: "BUG CRÍTICO: Transações novas são salvas com sucesso no backend, mas não aparecem imediatamente na lista de transações no frontend. O usuário precisa navegar para outra aba e voltar para ver a transação. Este é um problema de atualização da lista em tempo real no componente EnhancedTransactions.js."
 
-  - task: "Supplier Travel-Specific Fields API"
+  - task: "Transaction List Real-Time Update Bug Fix"
     implemented: true
-    working: true
-    file: "backend/server.py"
+    working: false
+    file: "frontend/src/components/Dashboard/EnhancedTransactions.js"
     stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Backend supplier API endpoints already include travel-specific fields (purchaseType: Milhas/Dinheiro/Voucher, milesQuantity, milesValuePer1000, milesProgram, milesAccount, discountApplied, discountType). All CRUD operations (GET, POST, PUT, DELETE) support these fields. API ready for frontend integration testing."
         - working: false
-          agent: "testing"
-          comment: "🚨 CRITICAL SUPPLIER API ISSUES IDENTIFIED: ✅ CREATION WORKS: Successfully created supplier with purchaseType='Milhas' and all travel fields (milesQuantity: 50000, milesValuePer1000: 35.50, milesProgram: 'LATAM Pass', milesAccount: 'LP123456789', discountApplied: 5.0, discountType: 'percentual'). All fields correctly saved and persisted to MongoDB. ❌ UPDATE FUNCTIONALITY BROKEN: PUT /api/suppliers/{id} does NOT update travel-specific fields. When attempting to change purchaseType from 'Milhas' to 'Dinheiro', the fields remain unchanged (purchaseType still 'Milhas', milesQuantity still 50000, discountType still 'percentual'). This is a critical bug preventing supplier management workflow. ❌ EMAIL VALIDATION MISSING: Duplicate email validation not working - should return 400 for duplicate emails but returns 200 instead. ✅ DELETE WORKS: Supplier deletion and persistence working correctly. ✅ VOUCHER TYPE WORKS: Successfully created supplier with purchaseType='Voucher'. AUTHENTICATION: Used rodrigo@risetravel.com.br / Emily2030* as specified. ROOT CAUSE: The PUT endpoint is not updating travel-specific fields in the update_data dictionary."
-        - working: true
-          agent: "testing"
-          comment: "✅ CRITICAL SUPPLIER UPDATE BUG COMPLETELY FIXED - COMPREHENSIVE TESTING COMPLETED: Successfully tested the exact scenario from review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ CREATION WITH MILHAS: Successfully created supplier with purchaseType='Milhas' and complete travel fields (milesQuantity: 50000, milesValuePer1000: 35.50, milesProgram: 'LATAM Pass', milesAccount: 'LP123456789', discountApplied: 5.0, discountType: 'percentual'). All fields correctly saved and persisted to MongoDB. ✅ UPDATE TO DINHEIRO: PUT /api/suppliers/{id} now CORRECTLY updates all travel-specific fields. Successfully changed purchaseType from 'Milhas' to 'Dinheiro' and updated all related fields (milesQuantity: 50000→0, milesValuePer1000: 35.5→0, milesProgram: 'LATAM Pass'→'', milesAccount: 'LP123456789'→'', discountApplied: 5.0→10.0, discountType: 'percentual'→'reais'). ✅ DATABASE PERSISTENCE: All travel field updates correctly persisted to MongoDB database and retrievable via GET requests. ✅ EMAIL VALIDATION FIXED: Duplicate email validation now working correctly - returns 400 status for duplicate emails. ✅ VOUCHER TYPE SUPPORT: Successfully tested purchaseType='Voucher' creation and functionality. ✅ COMPREHENSIVE CRUD: All supplier operations (CREATE, READ, UPDATE, DELETE) working perfectly with travel-specific fields. The critical supplier update functionality is now fully operational and meets all review requirements."
+          agent: "main"
+          comment: "User reported critical bug: New transactions save successfully to backend but don't appear immediately in the transaction list. User has to navigate away and back to see the transaction. Fixed response parsing in handleAddTransaction to properly extract transaction data from backend response that includes {message, ...transaction} format. Backend testing confirms API works perfectly, issue is frontend state update logic."
+        - working: false
+          agent: "user"
+          comment: "Estava tudo a funcionar perfeitamente, só é preciso que ao criar a transação ela foque salva e seja vista na lista de todas as transações, apenas isso, isso já estava a funcionar muito bem, o agenter alteerou algo e deixou de funcionar"
 
 backend:
   - task: "Company Settings API"
