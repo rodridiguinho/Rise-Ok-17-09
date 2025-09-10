@@ -376,11 +376,21 @@ const EnhancedTransactions = () => {
         description: "A transação foi criada com sucesso.",
       });
     } catch (error) {
-      console.error('Error creating transaction:', error);
+      console.error('❌ Error creating transaction:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      
+      let errorMessage = "Erro ao criar transação";
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: "Erro ao criar transação",
+        title: "Erro ao salvar transação",
+        description: errorMessage,
       });
     }
   };
