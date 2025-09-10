@@ -356,6 +356,11 @@ const EnhancedTransactions = () => {
       // Atualizar a lista imediatamente com a nova transação
       setTransactions(prevTransactions => [createdTransaction, ...prevTransactions]);
       
+      // Forçar recarregamento dos dados para garantir sincronia
+      setTimeout(() => {
+        fetchData();
+      }, 500);
+      
       setIsAddModalOpen(false);
       
       // Reset form COMPLETAMENTE usando a função dedicada
