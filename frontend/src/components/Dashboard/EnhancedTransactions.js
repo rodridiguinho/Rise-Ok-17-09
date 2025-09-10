@@ -1049,6 +1049,153 @@ const EnhancedTransactions = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Transaction Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Editar Transação - Agência de Viagens</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdateTransaction}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
+                
+                {/* Basic Transaction Info */}
+                <div className="lg:col-span-3 border-b pb-4 mb-4">
+                  <h3 className="text-lg font-semibold mb-4">Informações Básicas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Tipo *</Label>
+                      <Select value={newTransaction.type} onValueChange={(value) => setNewTransaction({...newTransaction, type: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="entrada">Entrada</SelectItem>
+                          <SelectItem value="saida">Saída</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Categoria *</Label>
+                      <Select value={newTransaction.category} onValueChange={(value) => setNewTransaction({...newTransaction, category: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {newTransaction.type === 'entrada' ? (
+                            <>
+                              <SelectItem disabled className="font-semibold text-green-700">💰 RECEITAS</SelectItem>
+                              {revenueCategories.map(category => (
+                                <SelectItem key={category} value={category} className="text-green-600">
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </>
+                          ) : (
+                            <>
+                              <SelectItem disabled className="font-semibold text-red-700">💸 DESPESAS</SelectItem>
+                              {expenseCategories.map(category => (
+                                <SelectItem key={category} value={category} className="text-red-600">
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Data da Transação *</Label>
+                      <Input
+                        type="date"
+                        value={newTransaction.transactionDate}
+                        onChange={(e) => setNewTransaction({...newTransaction, transactionDate: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label>Descrição *</Label>
+                      <Input
+                        placeholder="Descrição da transação"
+                        value={newTransaction.description}
+                        onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Forma de Pagamento *</Label>
+                      <Select value={newTransaction.paymentMethod} onValueChange={(value) => setNewTransaction({...newTransaction, paymentMethod: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a forma" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {paymentMethods.map(method => (
+                            <SelectItem key={method} value={method}>{method}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label>Valor Total *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0,00"
+                        value={newTransaction.amount}
+                        onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500">
+                  Atualizar Transação
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Modal */}
+        <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Exclusão</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p>Tem certeza que deseja excluir esta transação?</p>
+              {transactionToDelete && (
+                <div className="mt-2 p-3 bg-gray-50 rounded">
+                  <p className="font-medium">{transactionToDelete.description}</p>
+                  <p className="text-sm text-gray-600">
+                    {formatCurrency(transactionToDelete.amount)} - {transactionToDelete.category}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteTransaction}>
+                Excluir
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search and Filter */}
