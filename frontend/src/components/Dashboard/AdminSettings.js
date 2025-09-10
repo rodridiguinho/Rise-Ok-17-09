@@ -98,6 +98,7 @@ const AdminSettings = () => {
   const [isExpenseCategoryModalOpen, setIsExpenseCategoryModalOpen] = useState(false);
   const [isRevenueCategoryModalOpen, setIsRevenueCategoryModalOpen] = useState(false);
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
+  const [isClearDataModalOpen, setIsClearDataModalOpen] = useState(false);
 
   // Carregar configurações da empresa ao inicializar
   useEffect(() => {
