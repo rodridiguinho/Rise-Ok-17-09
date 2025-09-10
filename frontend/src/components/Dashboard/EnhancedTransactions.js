@@ -391,9 +391,25 @@ const EnhancedTransactions = () => {
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map(category => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
-                        ))}
+                        {newTransaction.type === 'entrada' ? (
+                          <>
+                            <SelectItem disabled className="font-semibold text-green-700">💰 RECEITAS</SelectItem>
+                            {revenueCategories.map(category => (
+                              <SelectItem key={category} value={category} className="text-green-600">
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            <SelectItem disabled className="font-semibold text-red-700">💸 DESPESAS</SelectItem>
+                            {expenseCategories.map(category => (
+                              <SelectItem key={category} value={category} className="text-red-600">
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
