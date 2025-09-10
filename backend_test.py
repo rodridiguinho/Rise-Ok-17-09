@@ -38,6 +38,19 @@ INVALID_PASSWORD = "wrongpassword"
 # Global token storage
 auth_token = None
 
+def print_test_header(title):
+    """Print a formatted test header"""
+    print("\n" + "="*80)
+    print(f"🧪 {title}")
+    print("="*80)
+
+def print_result(success, test_name, details=""):
+    """Print a formatted test result"""
+    status = "✅ PASS" if success else "❌ FAIL"
+    print(f"{status} | {test_name}")
+    if details:
+        print(f"     └─ {details}")
+
 def test_critical_transaction_creation_bug():
     """Test Critical Transaction Creation Bug - REVIEW REQUEST"""
     print_test_header("Critical Transaction Creation Bug - Review Request Testing")
