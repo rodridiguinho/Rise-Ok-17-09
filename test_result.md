@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Testar especificamente as APIs de usuários que acabamos de corrigir: GET /api/users, POST /api/users, PUT /api/users/{id}, DELETE /api/users/{id}. Verificar se os dados estão sendo salvos corretamente no MongoDB, se as respostas estão no formato JSON correto, se não há erros de serialização e se as operações CRUD funcionam completamente."
+user_problem_statement: "BUG CRÍTICO: Transações novas são salvas com sucesso no backend, mas não aparecem imediatamente na lista de transações no frontend. O usuário precisa navegar para outra aba e voltar para ver a transação. Este é um problema de atualização da lista em tempo real no componente EnhancedTransactions.js."
 
   - task: "Supplier Travel-Specific Fields API"
     implemented: true
