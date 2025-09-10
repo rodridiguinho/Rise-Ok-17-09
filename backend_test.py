@@ -3557,40 +3557,32 @@ def test_complete_travel_transaction():
         print_result(False, "POST /api/transactions - Complete travel transaction failed", str(e))
 
 def run_all_tests():
-    """Run all test suites"""
-    print(f"\n🚀 Starting AgentePro Backend API Tests")
+    """Run all test suites - REVIEW REQUEST FOCUS"""
+    print(f"\n🚀 Starting Backend API Tests - REVIEW REQUEST FOCUS")
     print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"🔗 API Base URL: {API_URL}")
+    print(f"🔐 Authentication: {VALID_EMAIL} / {VALID_PASSWORD}")
+    print("="*80)
     
-    # NEW TESTS FROM REVIEW REQUEST - PRIORITY TESTING
-    test_company_settings_api()  # NEW: Test company settings API endpoints
-    test_enhanced_transaction_with_products()  # NEW: Test enhanced transaction with new product structure
-    test_complete_travel_transaction()  # NEW: Test complete travel transaction with all enhanced fields
+    # REVIEW REQUEST SPECIFIC TESTS - HIGHEST PRIORITY
+    print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
+    print("="*50)
+    test_review_request_company_settings()
+    test_review_request_enhanced_products()
+    test_review_request_complete_enhanced_transaction()
+    test_review_request_expense_transaction()
     
-    # PRIORITY TESTS FROM REVIEW REQUEST - Test enhanced transaction system
-    test_enhanced_transaction_system()  # NEW: Test enhanced transaction system with new travel fields
-    test_supplier_travel_fields_update()  # CRITICAL: Test supplier update with travel fields
-    test_enhanced_transactions_travel_fields()
-    
-    # Run URGENT transaction persistence test
-    test_urgent_transaction_persistence()
-    
-    # Run other test suites
+    # ADDITIONAL COMPREHENSIVE TESTS
+    print("\n🔧 ADDITIONAL COMPREHENSIVE TESTS")
+    print("="*50)
     test_api_connectivity()
     test_authentication()
     test_transactions()
-    test_transaction_date_functionality()  # NEW: Test transaction date vs entry date functionality
-    test_sales_analysis_endpoints()  # NEW: Test newly implemented sales analysis and reporting endpoints
-    test_analytics_endpoints()  # NEW: Test analytics endpoints as requested
-    test_analytics_integration()  # NEW: Test integration with existing endpoints
-    test_reports()
-    test_users_api()  # Added comprehensive user API testing
-    test_client_api()  # CRITICAL: Test client API endpoints for persistence bug
-    test_jwt_validation()
+    test_enhanced_transaction_system()
     
-    print(f"\n{'='*60}")
-    print("🏁 All tests completed!")
-    print(f"{'='*60}")
+    print(f"\n{'='*80}")
+    print("🏁 Backend API Test Suite Complete - Review Request Focus")
+    print("="*80)
 
 if __name__ == "__main__":
     run_all_tests()
