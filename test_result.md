@@ -296,9 +296,9 @@ backend:
 
   - task: "Create Transaction API"
     implemented: true
-    working: true
+    working: false
     file: "backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -308,6 +308,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "🚨 URGENT TRANSACTION PERSISTENCE TEST COMPLETED - CRITICAL ISSUE RESOLVED: ✅ AUTHENTICATION: Successfully logged in with rodrigo@risetravel.com.br / Emily2030* as specified in review request. ✅ TRANSACTION CREATION: POST /api/transactions with exact test data (type: entrada, category: Pacote Turístico, description: Teste Persistencia Transacao, amount: 1500.00, paymentMethod: PIX, transactionDate: 2025-09-07) successfully created transaction with ID 68bdd494b9ee15b315c6f681. ✅ FIELD VALIDATION: All transaction fields correctly saved and returned (type, category, description, amount, paymentMethod, transactionDate). ✅ IMMEDIATE PERSISTENCE: GET /api/transactions immediately after creation shows transaction count increased from 0 to 1, created transaction found in list with correct data. ✅ DELAYED PERSISTENCE: After 2-second delay, transaction still exists in database confirming persistence. ✅ MONGODB PERSISTENCE CONFIRMED: Final verification shows transaction exists in MongoDB database with all correct details (ID: 68bdd494b9ee15b315c6f681, Description: Teste Persistencia Transacao, Amount: R$ 1500.0, Payment: PIX, Date: 2025-09-07). 🎯 FINAL RESULT: YES - TRANSACTION PERSISTENCE IS NOW WORKING CORRECTLY. The user's critical persistence issue has been resolved. Transactions are properly saved to MongoDB and persist across API calls and navigation."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL TRANSACTION CREATION BUG IDENTIFIED - USER REPORTED ISSUE CONFIRMED: Successfully tested the exact user scenario using rodrigo@risetravel.com.br / Emily2030* authentication. ❌ USER'S EXACT SCENARIO FAILS: User cannot create transactions with minimal fields (description: 'Teste salvamento simples', amount: 500.00, type: 'entrada') - API returns HTTP 422 with validation errors requiring 'category' and 'paymentMethod' fields. ✅ COMPLEX TRANSACTIONS WORK: Full transactions with all fields (category, paymentMethod, travel details, supplier info, products) save successfully (ID: 68c17ba1583097747a06fb52). ✅ CORRECTED MINIMAL TRANSACTIONS WORK: When 'category' and 'paymentMethod' are included, simple transactions save successfully (ID: 68c17ba1583097747a06fb51). 🎯 ROOT CAUSE: API validation requires 'category' and 'paymentMethod' as mandatory fields, but user expects to create transactions with just description, amount, and type. 🎯 USER IMPACT: User cannot create simple transactions as expected - this is the critical bug causing payment issues. The API should either make these fields optional with defaults or provide better error messaging to guide users."
 
   - task: "Delete Transaction API"
     implemented: true
