@@ -497,6 +497,34 @@ const EnhancedTransactions = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Campos de escalas (aparecem quando "Possui escalas" está marcado) */}
+                {newTransaction.hasStops && (
+                  <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <h4 className="font-medium text-yellow-800 mb-3 flex items-center">
+                      ✈️ Detalhes das Escalas
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Escala da Ida</Label>
+                        <Input
+                          placeholder="Ex: Lisboa (LIS), Frankfurt (FRA)"
+                          value={newTransaction.outboundStops || ''}
+                          onChange={(e) => setNewTransaction({...newTransaction, outboundStops: e.target.value})}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Escala da Volta</Label>
+                        <Input
+                          placeholder="Ex: Paris (CDG), Amsterdam (AMS)"
+                          value={newTransaction.returnStops || ''}
+                          onChange={(e) => setNewTransaction({...newTransaction, returnStops: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Financial Details */}
