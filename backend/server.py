@@ -993,15 +993,10 @@ async def get_company_settings():
 @api_router.put("/transactions/{transaction_id}")
 async def update_transaction(transaction_id: str, transaction: TransactionCreate):
     try:
-        logging.info(f"🔍 Trying to update transaction with ID: {transaction_id}")
-        
         # Find the transaction to update using _id ObjectId
         existing_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
-        
-        logging.info(f"🔍 Found transaction: {existing_transaction is not None}")
                 
         if not existing_transaction:
-            logging.error(f"❌ Transaction not found with ID: {transaction_id}")
             raise HTTPException(status_code=404, detail="Transação não encontrada")
         
         # Parse transaction date
