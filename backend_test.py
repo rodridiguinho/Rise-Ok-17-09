@@ -470,6 +470,248 @@ def test_review_request_expense_transaction():
     except Exception as e:
         print_result(False, "Expense transaction creation failed", str(e))
 
+def test_supplier_miles_bug_fix():
+    """Test Supplier Miles Bug Fix - SPECIFIC REVIEW REQUEST"""
+    print_test_header("Supplier Miles Bug Fix - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            print_result(True, "Authentication for supplier miles testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for supplier miles testing failed", str(e))
+        return
+    
+    # Test 2: Create transaction WITHOUT miles (supplierUsedMiles: false) but with supplier info
+    try:
+        transaction_without_miles = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Transação com fornecedor sem milhas",
+            "amount": 850.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Sem Milhas",
+            "supplier": "Fornecedor Teste",
+            "supplierValue": 800.00,
+            "airportTaxes": 50.00,
+            "supplierUsedMiles": False,  # Key test: supplier info without miles
+            "transactionDate": "2025-01-20"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_without_miles, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id_without_miles = data["id"]
+                print_result(True, "POST /api/transactions - Transaction WITHOUT miles created", 
+                           f"ID: {transaction_id_without_miles}, Supplier: {data.get('supplier')}")
+                
+                # Verify supplier information is saved correctly
+                if (data.get("supplier") == "Fornecedor Teste" and 
+                    data.get("supplierValue") == 800.00 and 
+                    data.get("airportTaxes") == 50.00 and 
+                    data.get("supplierUsedMiles") == False):
+                    print_result(True, "Transaction WITHOUT miles - Supplier info validation", 
+                               f"All supplier fields correctly saved: supplier={data.get('supplier')}, value=R$ {data.get('supplierValue')}, taxes=R$ {data.get('airportTaxes')}")
+                else:
+                    print_result(False, "Transaction WITHOUT miles - Supplier info validation", 
+                               f"Supplier info not saved correctly. Got: supplier={data.get('supplier')}, value={data.get('supplierValue')}, taxes={data.get('airportTaxes')}, usedMiles={data.get('supplierUsedMiles')}")
+                
+                # Verify miles fields are not required/present when supplierUsedMiles is false
+                miles_fields = ["supplierMilesQuantity", "supplierMilesValue", "supplierMilesProgram"]
+                miles_fields_empty = all(data.get(field) is None or data.get(field) == 0 or data.get(field) == "" for field in miles_fields)
+                if miles_fields_empty:
+                    print_result(True, "Transaction WITHOUT miles - Miles fields validation", 
+                               "Miles fields correctly empty/null when supplierUsedMiles=false")
+                else:
+                    print_result(False, "Transaction WITHOUT miles - Miles fields validation", 
+                               f"Miles fields should be empty when supplierUsedMiles=false. Got: {[f'{field}={data.get(field)}' for field in miles_fields]}")
+                
+            else:
+                print_result(False, "POST /api/transactions - Transaction WITHOUT miles creation failed", data)
+        else:
+            print_result(False, f"POST /api/transactions - Transaction WITHOUT miles - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Transaction WITHOUT miles creation failed", str(e))
+    
+    # Test 3: Create transaction WITH miles (supplierUsedMiles: true) with complete miles data
+    try:
+        transaction_with_miles = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Transação com fornecedor usando milhas",
+            "amount": 1075.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Com Milhas",
+            "supplier": "Fornecedor Teste Milhas",
+            "supplierValue": 1000.00,
+            "airportTaxes": 75.00,
+            "supplierUsedMiles": True,  # Key test: supplier using miles
+            "supplierMilesQuantity": 50000,
+            "supplierMilesValue": 28.00,
+            "supplierMilesProgram": "LATAM Pass",
+            "transactionDate": "2025-01-20"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_with_miles, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id_with_miles = data["id"]
+                print_result(True, "POST /api/transactions - Transaction WITH miles created", 
+                           f"ID: {transaction_id_with_miles}, Supplier: {data.get('supplier')}")
+                
+                # Verify supplier information is saved correctly
+                if (data.get("supplier") == "Fornecedor Teste Milhas" and 
+                    data.get("supplierValue") == 1000.00 and 
+                    data.get("airportTaxes") == 75.00 and 
+                    data.get("supplierUsedMiles") == True):
+                    print_result(True, "Transaction WITH miles - Supplier info validation", 
+                               f"All supplier fields correctly saved: supplier={data.get('supplier')}, value=R$ {data.get('supplierValue')}, taxes=R$ {data.get('airportTaxes')}")
+                else:
+                    print_result(False, "Transaction WITH miles - Supplier info validation", 
+                               f"Supplier info not saved correctly. Got: supplier={data.get('supplier')}, value={data.get('supplierValue')}, taxes={data.get('airportTaxes')}, usedMiles={data.get('supplierUsedMiles')}")
+                
+                # Verify miles fields are correctly saved when supplierUsedMiles is true
+                expected_miles_data = {
+                    "supplierMilesQuantity": 50000,
+                    "supplierMilesValue": 28.00,
+                    "supplierMilesProgram": "LATAM Pass"
+                }
+                
+                miles_data_correct = True
+                for field, expected_value in expected_miles_data.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"Transaction WITH miles - Miles field ({field})", 
+                                   f"Correctly saved: {actual_value}")
+                    else:
+                        print_result(False, f"Transaction WITH miles - Miles field ({field})", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                        miles_data_correct = False
+                
+                if miles_data_correct:
+                    print_result(True, "Transaction WITH miles - Complete miles data validation", 
+                               "All miles fields correctly saved when supplierUsedMiles=true")
+                
+            else:
+                print_result(False, "POST /api/transactions - Transaction WITH miles creation failed", data)
+        else:
+            print_result(False, f"POST /api/transactions - Transaction WITH miles - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Transaction WITH miles creation failed", str(e))
+    
+    # Test 4: Verify both transactions persist correctly in database
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            
+            # Find our test transactions
+            without_miles_transaction = None
+            with_miles_transaction = None
+            
+            for transaction in transactions:
+                if transaction.get("description") == "Transação com fornecedor sem milhas":
+                    without_miles_transaction = transaction
+                elif transaction.get("description") == "Transação com fornecedor usando milhas":
+                    with_miles_transaction = transaction
+            
+            # Verify WITHOUT miles transaction persistence
+            if without_miles_transaction:
+                print_result(True, "Database persistence - Transaction WITHOUT miles", 
+                           f"Transaction found in database with supplier: {without_miles_transaction.get('supplier')}")
+                
+                # Verify supplier fields persist correctly
+                if (without_miles_transaction.get("supplier") == "Fornecedor Teste" and 
+                    without_miles_transaction.get("supplierValue") == 800.00 and 
+                    without_miles_transaction.get("supplierUsedMiles") == False):
+                    print_result(True, "Database persistence - WITHOUT miles supplier fields", 
+                               "All supplier-related fields correctly persisted regardless of miles usage")
+                else:
+                    print_result(False, "Database persistence - WITHOUT miles supplier fields", 
+                               "Supplier fields not correctly persisted")
+            else:
+                print_result(False, "Database persistence - Transaction WITHOUT miles", 
+                           "Transaction without miles not found in database")
+            
+            # Verify WITH miles transaction persistence
+            if with_miles_transaction:
+                print_result(True, "Database persistence - Transaction WITH miles", 
+                           f"Transaction found in database with supplier: {with_miles_transaction.get('supplier')}")
+                
+                # Verify all fields including miles data persist correctly
+                if (with_miles_transaction.get("supplier") == "Fornecedor Teste Milhas" and 
+                    with_miles_transaction.get("supplierUsedMiles") == True and 
+                    with_miles_transaction.get("supplierMilesQuantity") == 50000 and 
+                    with_miles_transaction.get("supplierMilesProgram") == "LATAM Pass"):
+                    print_result(True, "Database persistence - WITH miles complete data", 
+                               "All supplier and miles fields correctly persisted")
+                else:
+                    print_result(False, "Database persistence - WITH miles complete data", 
+                               "Supplier and miles fields not correctly persisted")
+            else:
+                print_result(False, "Database persistence - Transaction WITH miles", 
+                           "Transaction with miles not found in database")
+            
+            # Final validation: Both scenarios work
+            if without_miles_transaction and with_miles_transaction:
+                print_result(True, "🎯 SUPPLIER MILES BUG FIX VALIDATION - COMPLETE SUCCESS", 
+                           "Both transactions (with and without miles) save successfully, proving the bug is fixed and supplier information can be saved regardless of miles usage")
+            else:
+                print_result(False, "🎯 SUPPLIER MILES BUG FIX VALIDATION - FAILED", 
+                           "One or both test transactions failed to persist correctly")
+                           
+        else:
+            print_result(False, f"Database persistence check - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Database persistence check failed", str(e))
+    
+    # Test 5: Verify API doesn't require miles data when supplierUsedMiles is false
+    try:
+        minimal_supplier_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Transação mínima com fornecedor",
+            "amount": 500.00,
+            "paymentMethod": "PIX",
+            "supplier": "Fornecedor Mínimo",
+            "supplierValue": 450.00,
+            "supplierUsedMiles": False,
+            # Deliberately NOT including any miles fields
+            "transactionDate": "2025-01-20"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=minimal_supplier_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                print_result(True, "API validation - Minimal supplier transaction", 
+                           f"Transaction created successfully without requiring miles data when supplierUsedMiles=false")
+                
+                # Verify supplier info is saved even without miles data
+                if data.get("supplier") == "Fornecedor Mínimo" and data.get("supplierValue") == 450.00:
+                    print_result(True, "API validation - Supplier info without miles requirement", 
+                               "Supplier information correctly saved without needing to provide miles data")
+                else:
+                    print_result(False, "API validation - Supplier info without miles requirement", 
+                               "Supplier information not saved correctly")
+            else:
+                print_result(False, "API validation - Minimal supplier transaction creation failed", data)
+        else:
+            print_result(False, f"API validation - Minimal supplier transaction - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "API validation - Minimal supplier transaction failed", str(e))
+
 def print_test_header(test_name):
     print(f"\n{'='*60}")
     print(f"🧪 TESTING: {test_name}")
