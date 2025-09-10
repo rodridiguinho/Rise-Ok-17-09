@@ -5511,18 +5511,18 @@ def test_corrected_supplier_information_functionality():
 
 def run_review_request_tests():
     """Run tests focused on review request requirements"""
-    print("🚀 Starting Backend API Test Suite - CRITICAL TAX CALCULATION AND UPDATE FIXES")
+    print("🚀 Starting Backend API Test Suite - CRITICAL TRANSACTION CREATION BUG TESTING")
     print(f"📍 Backend URL: {BASE_URL}")
     print(f"🔗 API URL: {API_URL}")
     print(f"🔑 Test Credentials: {VALID_EMAIL}")
     print("="*80)
     
-    # 🎯 PRIORITY TESTS FROM REVIEW REQUEST - CRITICAL FIXES VALIDATION
-    print("\n🎯 CRITICAL TAX CALCULATION AND UPDATE FIXES - REVIEW REQUEST")
-    test_critical_tax_calculation_fixes()
+    # 🎯 PRIORITY TEST FROM REVIEW REQUEST - CRITICAL TRANSACTION CREATION BUG
+    print("\n🎯 CRITICAL TRANSACTION CREATION BUG - REVIEW REQUEST")
+    test_critical_transaction_creation_bug()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Completed - CRITICAL TAX CALCULATION AND UPDATE FIXES")
+    print("🏁 Backend API Test Suite Completed - CRITICAL TRANSACTION CREATION BUG TESTING")
     print("="*80)
 
 if __name__ == "__main__":
