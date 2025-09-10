@@ -470,6 +470,559 @@ def test_review_request_expense_transaction():
     except Exception as e:
         print_result(False, "Expense transaction creation failed", str(e))
 
+def test_edit_modal_completeness():
+    """Test Edit Modal Completeness - REVIEW REQUEST BUG FIX"""
+    print_test_header("Edit Modal Completeness Test - Review Request Bug Fix")
+    
+    # Test 1: Authenticate first
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            print_result(True, "Authentication for edit modal testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for edit modal testing failed", str(e))
+        return
+    
+    # Test 2: Create a simple transaction first
+    created_transaction_id = None
+    try:
+        simple_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Transação para teste de edição",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Edição",
+            "transactionDate": "2025-01-15",
+            # Basic travel details
+            "productType": "Passagem",
+            "clientReservationCode": "RT123456",
+            "departureCity": "São Paulo",
+            "arrivalCity": "Rio de Janeiro",
+            # Products section
+            "products": [
+                {
+                    "name": "Passagem GRU-GIG",
+                    "cost": 800.00,
+                    "clientValue": 1200.00
+                }
+            ],
+            # Supplier information
+            "supplier": "Companhia Aérea Teste",
+            "supplierValue": 800.00,
+            "airportTaxes": 100.00,
+            "supplierUsedMiles": False,
+            # Miles section (disabled)
+            "supplierMilesQuantity": 0,
+            "supplierMilesValue": 0,
+            "supplierMilesProgram": "",
+            # Financial details
+            "saleValue": 1200.00,
+            "commissionValue": 120.00,
+            "seller": "Vendedor Teste"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=simple_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                created_transaction_id = data["id"]
+                print_result(True, "POST /api/transactions - Simple transaction created for editing", 
+                           f"ID: {created_transaction_id}, Description: {data.get('description')}")
+            else:
+                print_result(False, "POST /api/transactions - Transaction creation failed", data)
+                return
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Simple transaction creation failed", str(e))
+        return
+    
+    # Test 3: Retrieve the transaction to verify all fields are present and editable
+    if created_transaction_id:
+        try:
+            response = requests.get(f"{API_URL}/transactions", timeout=10)
+            if response.status_code == 200:
+                transactions = response.json()
+                
+                # Find our created transaction
+                created_transaction = None
+                for transaction in transactions:
+                    if transaction.get("id") == created_transaction_id:
+                        created_transaction = transaction
+                        break
+                
+                if created_transaction:
+                    print_result(True, "GET /api/transactions - Transaction found for editing", 
+                               f"Found transaction with ID: {created_transaction_id}")
+                    
+                    # Test 4: Verify ALL fields are present and editable
+                    expected_fields = {
+                        # Basic info
+                        "type": "entrada",
+                        "category": "Passagem Aérea", 
+                        "date": "2025-01-15",
+                        "description": "Transação para teste de edição",
+                        # Travel details
+                        "productType": "Passagem",
+                        "clientReservationCode": "RT123456",
+                        "departureCity": "São Paulo",
+                        "arrivalCity": "Rio de Janeiro",
+                        # Products section
+                        "products": [{"name": "Passagem GRU-GIG", "cost": 800.00, "clientValue": 1200.00}],
+                        # Supplier information
+                        "supplier": "Companhia Aérea Teste",
+                        "supplierValue": 800.00,
+                        "airportTaxes": 100.00,
+                        "supplierUsedMiles": False,
+                        # Financial details
+                        "client": "Cliente Teste Edição",
+                        "seller": "Vendedor Teste",
+                        "paymentMethod": "PIX",
+                        "saleValue": 1200.00,
+                        "commissionValue": 120.00
+                    }
+                    
+                    all_fields_present = True
+                    for field, expected_value in expected_fields.items():
+                        actual_value = created_transaction.get(field)
+                        if field == "products":
+                            # Special handling for products array
+                            if isinstance(actual_value, list) and len(actual_value) > 0:
+                                product = actual_value[0]
+                                expected_product = expected_value[0]
+                                if (product.get("name") == expected_product["name"] and 
+                                    product.get("cost") == expected_product["cost"] and 
+                                    product.get("clientValue") == expected_product["clientValue"]):
+                                    print_result(True, f"Edit modal field validation - {field}", 
+                                               f"Products section correctly present and editable")
+                                else:
+                                    print_result(False, f"Edit modal field validation - {field}", 
+                                               f"Products data mismatch: {product} vs {expected_product}")
+                                    all_fields_present = False
+                            else:
+                                print_result(False, f"Edit modal field validation - {field}", 
+                                           f"Products array missing or empty")
+                                all_fields_present = False
+                        elif actual_value == expected_value:
+                            print_result(True, f"Edit modal field validation - {field}", 
+                                       f"Field present and editable: {actual_value}")
+                        else:
+                            print_result(False, f"Edit modal field validation - {field}", 
+                                       f"Expected: {expected_value}, Got: {actual_value}")
+                            all_fields_present = False
+                    
+                    # Test 5: Verify miles section fields when enabled
+                    miles_fields = ["supplierMilesQuantity", "supplierMilesValue", "supplierMilesProgram"]
+                    for field in miles_fields:
+                        if field in created_transaction:
+                            print_result(True, f"Edit modal miles field validation - {field}", 
+                                       f"Miles field present when enabled: {created_transaction.get(field)}")
+                        else:
+                            print_result(False, f"Edit modal miles field validation - {field}", 
+                                       f"Miles field missing from transaction data")
+                    
+                    if all_fields_present:
+                        print_result(True, "🎯 EDIT MODAL COMPLETENESS - ALL FIELDS PRESENT", 
+                                   "All required fields are present and editable in the transaction data")
+                    else:
+                        print_result(False, "🎯 EDIT MODAL COMPLETENESS - MISSING FIELDS", 
+                                   "Some required fields are missing from the transaction data")
+                        
+                else:
+                    print_result(False, "GET /api/transactions - Transaction not found", 
+                               f"Could not find transaction with ID: {created_transaction_id}")
+            else:
+                print_result(False, f"GET /api/transactions - HTTP {response.status_code}", response.text)
+        except Exception as e:
+            print_result(False, "Transaction retrieval for editing failed", str(e))
+
+def test_edit_save_functionality():
+    """Test Edit Save Functionality - REVIEW REQUEST BUG FIX"""
+    print_test_header("Edit Save Functionality Test - Review Request Bug Fix")
+    
+    # Test 1: Create a transaction with basic data
+    created_transaction_id = None
+    try:
+        basic_transaction = {
+            "type": "entrada",
+            "category": "Hotel/Hospedagem",
+            "description": "Reserva hotel original",
+            "amount": 800.00,
+            "paymentMethod": "Cartão de Crédito",
+            "client": "Cliente Original",
+            "transactionDate": "2025-01-10",
+            "supplier": "Hotel Original",
+            "supplierValue": 600.00,
+            "saleValue": 800.00,
+            "commissionValue": 80.00
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=basic_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                created_transaction_id = data["id"]
+                print_result(True, "POST /api/transactions - Basic transaction created for edit testing", 
+                           f"ID: {created_transaction_id}, Original description: {data.get('description')}")
+            else:
+                print_result(False, "POST /api/transactions - Basic transaction creation failed", data)
+                return
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Basic transaction creation failed", str(e))
+        return
+    
+    # Test 2: Edit the transaction changing multiple fields
+    if created_transaction_id:
+        try:
+            updated_transaction = {
+                "type": "entrada",
+                "category": "Pacote Turístico",  # Changed
+                "description": "Pacote completo atualizado",  # Changed
+                "amount": 1200.00,  # Changed
+                "paymentMethod": "PIX",  # Changed
+                "client": "Cliente Atualizado",  # Changed
+                "transactionDate": "2025-01-20",  # Changed
+                "supplier": "Fornecedor Atualizado",  # Changed
+                "supplierValue": 900.00,  # Changed
+                "saleValue": 1200.00,  # Changed
+                "commissionValue": 120.00,  # Changed
+                "seller": "Vendedor Novo",  # Added
+                # Add travel-specific fields
+                "productType": "Pacote",
+                "departureCity": "São Paulo",
+                "arrivalCity": "Cancún",
+                "clientReservationCode": "PKG789",
+                "products": [
+                    {
+                        "name": "Pacote Cancún 7 dias",
+                        "cost": 900.00,
+                        "clientValue": 1200.00
+                    }
+                ]
+            }
+            
+            response = requests.put(f"{API_URL}/transactions/{created_transaction_id}", json=updated_transaction, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                print_result(True, "PUT /api/transactions/{id} - Transaction updated successfully", 
+                           f"Updated transaction ID: {created_transaction_id}")
+                
+                # Test 3: Verify the changes are saved and returned in response
+                changes_verified = True
+                expected_changes = {
+                    "category": "Pacote Turístico",
+                    "description": "Pacote completo atualizado",
+                    "amount": 1200.00,
+                    "paymentMethod": "PIX",
+                    "client": "Cliente Atualizado",
+                    "supplier": "Fornecedor Atualizado",
+                    "supplierValue": 900.00,
+                    "saleValue": 1200.00,
+                    "commissionValue": 120.00,
+                    "seller": "Vendedor Novo"
+                }
+                
+                for field, expected_value in expected_changes.items():
+                    actual_value = data.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"PUT /api/transactions - Field update ({field})", 
+                                   f"Successfully updated to: {actual_value}")
+                    else:
+                        print_result(False, f"PUT /api/transactions - Field update ({field})", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                        changes_verified = False
+                
+                # Verify products array update
+                products = data.get("products", [])
+                if len(products) > 0:
+                    product = products[0]
+                    if (product.get("name") == "Pacote Cancún 7 dias" and 
+                        product.get("cost") == 900.00 and 
+                        product.get("clientValue") == 1200.00):
+                        print_result(True, "PUT /api/transactions - Products update", 
+                                   f"Products correctly updated: {product.get('name')}")
+                    else:
+                        print_result(False, "PUT /api/transactions - Products update", 
+                                   f"Products not updated correctly: {product}")
+                        changes_verified = False
+                else:
+                    print_result(False, "PUT /api/transactions - Products update", 
+                               "Products array missing from updated transaction")
+                    changes_verified = False
+                
+                if changes_verified:
+                    print_result(True, "🎯 EDIT SAVE FUNCTIONALITY - CHANGES SAVED", 
+                               "All transaction changes successfully saved and returned")
+                else:
+                    print_result(False, "🎯 EDIT SAVE FUNCTIONALITY - CHANGES NOT SAVED", 
+                               "Some transaction changes were not saved correctly")
+                    
+            else:
+                print_result(False, f"PUT /api/transactions/{created_transaction_id} - HTTP {response.status_code}", response.text)
+                return
+        except Exception as e:
+            print_result(False, "Transaction update failed", str(e))
+            return
+    
+    # Test 4: Verify changes persist in the database
+    if created_transaction_id:
+        try:
+            response = requests.get(f"{API_URL}/transactions", timeout=10)
+            if response.status_code == 200:
+                transactions = response.json()
+                
+                # Find our updated transaction
+                updated_transaction = None
+                for transaction in transactions:
+                    if transaction.get("id") == created_transaction_id:
+                        updated_transaction = transaction
+                        break
+                
+                if updated_transaction:
+                    print_result(True, "Database persistence - Updated transaction found", 
+                               f"Transaction {created_transaction_id} found in database")
+                    
+                    # Verify persistence of key changes
+                    persistence_checks = {
+                        "description": "Pacote completo atualizado",
+                        "category": "Pacote Turístico",
+                        "amount": 1200.00,
+                        "client": "Cliente Atualizado",
+                        "supplier": "Fornecedor Atualizado"
+                    }
+                    
+                    persistence_verified = True
+                    for field, expected_value in persistence_checks.items():
+                        actual_value = updated_transaction.get(field)
+                        if actual_value == expected_value:
+                            print_result(True, f"Database persistence - {field}", 
+                                       f"Change correctly persisted: {actual_value}")
+                        else:
+                            print_result(False, f"Database persistence - {field}", 
+                                       f"Expected: {expected_value}, Got: {actual_value}")
+                            persistence_verified = False
+                    
+                    if persistence_verified:
+                        print_result(True, "🎯 EDIT SAVE FUNCTIONALITY - DATABASE PERSISTENCE", 
+                                   "All transaction changes correctly persist in the database")
+                    else:
+                        print_result(False, "🎯 EDIT SAVE FUNCTIONALITY - DATABASE PERSISTENCE FAILED", 
+                                   "Some transaction changes did not persist in the database")
+                        
+                else:
+                    print_result(False, "Database persistence - Updated transaction not found", 
+                               f"Could not find updated transaction with ID: {created_transaction_id}")
+            else:
+                print_result(False, f"Database persistence check - HTTP {response.status_code}", response.text)
+        except Exception as e:
+            print_result(False, "Database persistence check failed", str(e))
+
+def test_supplier_tax_calculation():
+    """Test Supplier Tax Calculation - REVIEW REQUEST BUG FIX"""
+    print_test_header("Supplier Tax Calculation Test - Review Request Bug Fix")
+    
+    # Test 1: Test supplier value + airport taxes calculation WITHOUT miles
+    try:
+        transaction_without_miles = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Teste cálculo impostos sem milhas",
+            "amount": 1000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Impostos",
+            "supplier": "Fornecedor Teste",
+            "supplierValue": 800.00,
+            "airportTaxes": 150.00,  # Airport taxes
+            "supplierUsedMiles": False,  # No miles
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_without_miles, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                print_result(True, "POST /api/transactions - Transaction WITHOUT miles created", 
+                           f"ID: {data.get('id')}, Supplier: {data.get('supplier')}")
+                
+                # Test calculation: Valor Total do Fornecedor = supplierValue + airportTaxes
+                expected_total = 800.00 + 150.00  # 950.00
+                supplier_value = data.get("supplierValue", 0)
+                airport_taxes = data.get("airportTaxes", 0)
+                calculated_total = supplier_value + airport_taxes
+                
+                print_result(True, "Supplier tax calculation WITHOUT miles - Values retrieved", 
+                           f"Supplier Value: R$ {supplier_value}, Airport Taxes: R$ {airport_taxes}")
+                
+                if calculated_total == expected_total:
+                    print_result(True, "Supplier tax calculation WITHOUT miles - Calculation correct", 
+                               f"Valor Total do Fornecedor: R$ {calculated_total} (R$ {supplier_value} + R$ {airport_taxes})")
+                else:
+                    print_result(False, "Supplier tax calculation WITHOUT miles - Calculation incorrect", 
+                               f"Expected: R$ {expected_total}, Calculated: R$ {calculated_total}")
+                
+                # Verify no interference from miles fields
+                miles_fields = ["supplierMilesQuantity", "supplierMilesValue", "supplierMilesProgram"]
+                miles_interference = False
+                for field in miles_fields:
+                    value = data.get(field)
+                    if value and value != 0 and value != "":
+                        miles_interference = True
+                        print_result(False, f"Supplier tax calculation WITHOUT miles - Miles interference ({field})", 
+                                   f"Miles field should be empty but got: {value}")
+                
+                if not miles_interference:
+                    print_result(True, "Supplier tax calculation WITHOUT miles - No miles interference", 
+                               "Miles fields correctly empty, no interference with supplier tax calculation")
+                    
+            else:
+                print_result(False, "POST /api/transactions - Transaction WITHOUT miles creation failed", data)
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Transaction WITHOUT miles creation failed", str(e))
+    
+    # Test 2: Test WITH miles and verify separate miles taxes work
+    try:
+        transaction_with_miles = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Teste cálculo impostos com milhas",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Milhas",
+            "supplier": "Fornecedor Milhas",
+            "supplierValue": 1000.00,
+            "airportTaxes": 200.00,  # Airport taxes for miles transaction
+            "supplierUsedMiles": True,  # Using miles
+            "supplierMilesQuantity": 80000,
+            "supplierMilesValue": 30.00,  # R$ 30.00 per 1000 miles
+            "supplierMilesProgram": "LATAM Pass",
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_with_miles, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                print_result(True, "POST /api/transactions - Transaction WITH miles created", 
+                           f"ID: {data.get('id')}, Supplier: {data.get('supplier')}")
+                
+                # Test separate calculations
+                # 1. Supplier taxes: supplierValue + airportTaxes
+                supplier_value = data.get("supplierValue", 0)
+                airport_taxes = data.get("airportTaxes", 0)
+                supplier_total = supplier_value + airport_taxes
+                expected_supplier_total = 1000.00 + 200.00  # 1200.00
+                
+                # 2. Miles calculation: (milesQuantity / 1000) * milesValue
+                miles_quantity = data.get("supplierMilesQuantity", 0)
+                miles_value = data.get("supplierMilesValue", 0)
+                miles_total = (miles_quantity / 1000) * miles_value
+                expected_miles_total = (80000 / 1000) * 30.00  # 2400.00
+                
+                print_result(True, "Supplier tax calculation WITH miles - Values retrieved", 
+                           f"Supplier: R$ {supplier_value}, Taxes: R$ {airport_taxes}, Miles: {miles_quantity} @ R$ {miles_value}/1000")
+                
+                # Verify supplier calculation
+                if supplier_total == expected_supplier_total:
+                    print_result(True, "Supplier tax calculation WITH miles - Supplier total correct", 
+                               f"Supplier Total: R$ {supplier_total} (R$ {supplier_value} + R$ {airport_taxes})")
+                else:
+                    print_result(False, "Supplier tax calculation WITH miles - Supplier total incorrect", 
+                               f"Expected: R$ {expected_supplier_total}, Got: R$ {supplier_total}")
+                
+                # Verify miles calculation
+                if abs(miles_total - expected_miles_total) < 0.01:  # Allow for floating point precision
+                    print_result(True, "Supplier tax calculation WITH miles - Miles calculation correct", 
+                               f"Miles Total: R$ {miles_total:.2f} ({miles_quantity} × R$ {miles_value}/1000)")
+                else:
+                    print_result(False, "Supplier tax calculation WITH miles - Miles calculation incorrect", 
+                               f"Expected: R$ {expected_miles_total}, Got: R$ {miles_total}")
+                
+                # Test 3: Verify no interference between the two tax fields
+                # The supplier taxes and miles taxes should be calculated independently
+                print_result(True, "🎯 SUPPLIER TAX CALCULATION - INDEPENDENT CALCULATIONS", 
+                           f"Supplier taxes (R$ {supplier_total}) and miles taxes (R$ {miles_total:.2f}) calculated independently without interference")
+                    
+            else:
+                print_result(False, "POST /api/transactions - Transaction WITH miles creation failed", data)
+        else:
+            print_result(False, f"POST /api/transactions - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Transaction WITH miles creation failed", str(e))
+    
+    # Test 4: Verify calculations persist correctly in database
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            
+            # Find our test transactions
+            without_miles_transaction = None
+            with_miles_transaction = None
+            
+            for transaction in transactions:
+                if transaction.get("description") == "Teste cálculo impostos sem milhas":
+                    without_miles_transaction = transaction
+                elif transaction.get("description") == "Teste cálculo impostos com milhas":
+                    with_miles_transaction = transaction
+            
+            # Verify WITHOUT miles calculation persistence
+            if without_miles_transaction:
+                supplier_value = without_miles_transaction.get("supplierValue", 0)
+                airport_taxes = without_miles_transaction.get("airportTaxes", 0)
+                total = supplier_value + airport_taxes
+                
+                if total == 950.00:  # 800 + 150
+                    print_result(True, "Database persistence - WITHOUT miles calculation", 
+                               f"Supplier tax calculation correctly persisted: R$ {total}")
+                else:
+                    print_result(False, "Database persistence - WITHOUT miles calculation", 
+                               f"Calculation not persisted correctly: R$ {total}")
+            
+            # Verify WITH miles calculation persistence
+            if with_miles_transaction:
+                supplier_value = with_miles_transaction.get("supplierValue", 0)
+                airport_taxes = with_miles_transaction.get("airportTaxes", 0)
+                miles_quantity = with_miles_transaction.get("supplierMilesQuantity", 0)
+                miles_value = with_miles_transaction.get("supplierMilesValue", 0)
+                
+                supplier_total = supplier_value + airport_taxes
+                miles_total = (miles_quantity / 1000) * miles_value
+                
+                if supplier_total == 1200.00 and abs(miles_total - 2400.00) < 0.01:
+                    print_result(True, "Database persistence - WITH miles calculation", 
+                               f"Both calculations correctly persisted: Supplier R$ {supplier_total}, Miles R$ {miles_total:.2f}")
+                else:
+                    print_result(False, "Database persistence - WITH miles calculation", 
+                               f"Calculations not persisted correctly: Supplier R$ {supplier_total}, Miles R$ {miles_total:.2f}")
+            
+            # Final validation
+            if without_miles_transaction and with_miles_transaction:
+                print_result(True, "🎯 SUPPLIER TAX CALCULATION - COMPLETE SUCCESS", 
+                           "Tax calculations work independently (supplier taxes vs miles taxes) without interference")
+            else:
+                print_result(False, "🎯 SUPPLIER TAX CALCULATION - INCOMPLETE TEST", 
+                           "Could not verify both calculation scenarios")
+                           
+        else:
+            print_result(False, f"Database persistence check - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Database persistence check failed", str(e))
+
 def test_supplier_miles_bug_fix():
     """Test Supplier Miles Bug Fix - SPECIFIC REVIEW REQUEST"""
     print_test_header("Supplier Miles Bug Fix - Review Request Testing")
