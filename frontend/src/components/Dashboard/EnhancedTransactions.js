@@ -166,7 +166,7 @@ const EnhancedTransactions = () => {
 
   const calculateMilesTotalWithTaxes = () => {
     const milesValue = calculateMilesTotal();
-    const taxesValue = parseFloat(newTransaction.airportTaxes) || 0;
+    const taxesValue = parseFloat(newTransaction.milesTaxes) || 0;
     return milesValue + taxesValue;
   };
 
