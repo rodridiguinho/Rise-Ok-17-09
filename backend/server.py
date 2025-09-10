@@ -124,6 +124,10 @@ class TransactionCreate(BaseModel):
     # Escalas
     outboundStops: Optional[str] = None
     returnStops: Optional[str] = None
+    # Additional fields for expenses
+    saleReference: Optional[str] = None
+    productPurchased: Optional[str] = None
+    additionalInfo: Optional[str] = None
 
 # Create API router
 from fastapi import APIRouter
