@@ -728,6 +728,9 @@ async def create_transaction(transaction: TransactionCreate):
             "supplierMilesValue": transaction.supplierMilesValue,
             "supplierMilesProgram": transaction.supplierMilesProgram,
             "airportTaxes": transaction.airportTaxes,
+            # Escalas
+            "outboundStops": transaction.outboundStops,
+            "returnStops": transaction.returnStops,
             "status": "Confirmado",
             "transactionDate": transaction_date,  # Store the actual transaction date
             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
