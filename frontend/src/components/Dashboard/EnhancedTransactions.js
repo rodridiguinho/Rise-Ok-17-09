@@ -125,6 +125,7 @@ const EnhancedTransactions = () => {
     supplierMilesValue: '',
     supplierMilesProgram: '',
     airportTaxes: '',
+    milesTaxes: '',
     // Escalas
     outboundStops: '',
     returnStops: ''
