@@ -729,6 +729,7 @@ async def create_transaction(transaction: TransactionCreate):
             "supplierMilesValue": transaction.supplierMilesValue,
             "supplierMilesProgram": transaction.supplierMilesProgram,
             "airportTaxes": transaction.airportTaxes,
+            "milesTaxes": transaction.milesTaxes,
             # Escalas
             "outboundStops": transaction.outboundStops,
             "returnStops": transaction.returnStops,
