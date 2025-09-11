@@ -1724,193 +1724,149 @@ const EnhancedTransactions = () => {
                   </Button>
                 </div>
 
-                {/* Supplier Information Section */}
+                {/* Multiple Suppliers Section - Edit Modal */}
                 <div className="lg:col-span-3 border-b pb-4 mb-4">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    🏢 Informações do Fornecedor
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div className="space-y-2">
-                      <Label>Fornecedor</Label>
-                      <Select value={newTransaction.supplier} onValueChange={(value) => setNewTransaction({...newTransaction, supplier: value})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o fornecedor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {suppliers.map(supplier => (
-                            <SelectItem key={supplier.id} value={supplier.name}>{supplier.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      🏢 Fornecedores (até 6)
+                    </h3>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addSupplier}
+                      disabled={newTransaction.suppliers.length >= 6}
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Adicionar Fornecedor
+                    </Button>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label>Valor do Fornecedor (R$)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0,00"
-                        value={newTransaction.supplierValue}
-                        onChange={(e) => setNewTransaction({...newTransaction, supplierValue: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Taxas/Valores Extras (R$)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="Ex: Taxas aeroporto, serviços"
-                        value={newTransaction.airportTaxes}
-                        onChange={(e) => setNewTransaction({...newTransaction, airportTaxes: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Valor Total do Fornecedor</Label>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          type="text"
-                          readOnly
-                          value={formatCurrency(calculateSupplierTotal())}
-                          className={`bg-gray-100 font-semibold ${calculateSupplierTotal() > 0 ? 'text-blue-600' : 'text-gray-500'}`}
-                        />
-                        <span className="text-sm text-gray-600">automático</span>
+                  {newTransaction.suppliers.map((supplier, index) => (
+                    <div key={index} className="mb-6 p-4 border rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-700">Fornecedor {index + 1}</h4>
+                        {index > 0 && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeSupplier(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
-                      {(newTransaction.supplierValue || newTransaction.airportTaxes) && (
-                        <p className="text-xs text-blue-600 mt-1">
-                          R$ {parseFloat(newTransaction.supplierValue || 0).toFixed(2)} + R$ {parseFloat(newTransaction.airportTaxes || 0).toFixed(2)} = {formatCurrency(calculateSupplierTotal())}
-                        </p>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Checkbox para milhas */}
-                  <div className="mb-4">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="supplierUsedMilesEdit"
-                        checked={newTransaction.supplierUsedMiles}
-                        onChange={(e) => setNewTransaction({...newTransaction, supplierUsedMiles: e.target.checked})}
-                        className="w-4 h-4 rounded border-gray-300"
-                      />
-                      <Label htmlFor="supplierUsedMilesEdit" className="flex items-center cursor-pointer font-medium text-blue-700">
-                        ✈️ O fornecedor usou milhas para esta transação
-                      </Label>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Marque apenas se o fornecedor utilizou milhas para comprar/reservar o produto/serviço
-                    </p>
-                  </div>
-
-                  {/* Campos de milhas (aparecem apenas quando "Fornecedor usou milhas" está marcado) */}
-                  {newTransaction.supplierUsedMiles && (
-                    <div className="p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
-                      <h4 className="font-semibold text-blue-800 mb-4 flex items-center text-lg">
-                        ✈️ Detalhes das Milhas do Fornecedor
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="space-y-2">
-                          <Label className="font-medium">Quantidade de Milhas *</Label>
-                          <Input
-                            type="number"
-                            placeholder="Ex: 25000"
-                            value={newTransaction.supplierMilesQuantity}
-                            onChange={(e) => setNewTransaction({...newTransaction, supplierMilesQuantity: e.target.value})}
-                            className="bg-white"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="font-medium">Valor por 1.000 milhas (R$) *</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="Ex: 26,00"
-                            value={newTransaction.supplierMilesValue}
-                            onChange={(e) => setNewTransaction({...newTransaction, supplierMilesValue: e.target.value})}
-                            className="bg-white"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="font-medium">Valor das Milhas (R$)</Label>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="text"
-                              readOnly
-                              value={formatCurrency(calculateMilesTotal())}
-                              className={`bg-gray-100 font-semibold ${calculateMilesTotal() > 0 ? 'text-green-600' : 'text-gray-500'}`}
-                            />
-                            <span className="text-sm text-gray-600">automático</span>
-                          </div>
-                          {newTransaction.supplierMilesQuantity && newTransaction.supplierMilesValue && (
-                            <p className="text-xs text-blue-600 mt-1">
-                              {parseInt(newTransaction.supplierMilesQuantity).toLocaleString('pt-BR')} milhas × R$ {parseFloat(newTransaction.supplierMilesValue).toFixed(2)} = {formatCurrency(calculateMilesTotal())}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="font-medium">Taxas Extras das Milhas (R$)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="Ex: 150,00"
-                            value={newTransaction.milesTaxes || ''}
-                            onChange={(e) => setNewTransaction({...newTransaction, milesTaxes: e.target.value})}
-                            className="bg-white"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="font-medium">Valor Total (Milhas + Taxas)</Label>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="text"
-                              readOnly
-                              value={formatCurrency(calculateMilesTotalWithTaxes())}
-                              className={`bg-gray-100 font-semibold ${calculateMilesTotalWithTaxes() > 0 ? 'text-green-600' : 'text-gray-500'}`}
-                            />
-                            <span className="text-sm text-gray-600">automático</span>
-                          </div>
-                          {(calculateMilesTotal() > 0 || newTransaction.milesTaxes) && (
-                            <p className="text-xs text-blue-600 mt-1">
-                              {formatCurrency(calculateMilesTotal())} + R$ {parseFloat(newTransaction.milesTaxes || 0).toFixed(2)} = {formatCurrency(calculateMilesTotalWithTaxes())}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="space-y-2 lg:col-span-5">
-                          <Label className="font-medium">Programa de Milhas *</Label>
-                          <Select value={newTransaction.supplierMilesProgram} onValueChange={(value) => setNewTransaction({...newTransaction, supplierMilesProgram: value})}>
-                            <SelectTrigger className="bg-white">
-                              <SelectValue placeholder="Selecione o programa de milhas" />
+                          <Label>Nome do Fornecedor</Label>
+                          <Select value={supplier.name || ''} onValueChange={(value) => updateSupplier(index, 'name', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o fornecedor" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="LATAM Pass">✈️ LATAM Pass</SelectItem>
-                              <SelectItem value="Smiles">✈️ Smiles (GOL)</SelectItem>
-                              <SelectItem value="TudoAzul">✈️ TudoAzul (Azul)</SelectItem>
-                              <SelectItem value="Multiplus">✈️ Multiplus</SelectItem>
-                              <SelectItem value="American Airlines">✈️ American Airlines</SelectItem>
-                              <SelectItem value="United">✈️ United MileagePlus</SelectItem>
-                              <SelectItem value="Delta">✈️ Delta SkyMiles</SelectItem>
-                              <SelectItem value="Outros">📋 Outros</SelectItem>
+                              {suppliers.map(sup => (
+                                <SelectItem key={sup.id} value={sup.name}>{sup.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Valor (R$)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0,00"
+                            value={supplier.value || ''}
+                            onChange={(e) => updateSupplier(index, 'value', e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Data de Pagamento</Label>
+                          <Input
+                            type="date"
+                            value={supplier.paymentDate || ''}
+                            onChange={(e) => updateSupplier(index, 'paymentDate', e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Status do Pagamento</Label>
+                          <Select value={supplier.paymentStatus || 'Pendente'} onValueChange={(value) => updateSupplier(index, 'paymentStatus', value)}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Pendente">🕐 Pendente</SelectItem>
+                              <SelectItem value="Pago">✅ Pago</SelectItem>
+                              <SelectItem value="Cancelado">❌ Cancelado</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
-                      
-                      <div className="mt-4 p-3 bg-blue-100 rounded-md">
-                        <p className="text-sm text-blue-800">
-                          💡 <strong>Importante:</strong> Quando o fornecedor usa milhas, informe a quantidade de milhas utilizadas, 
-                          o valor pago pelas milhas e o programa utilizado. As taxas extras são somadas automaticamente ao valor das milhas.
-                        </p>
+
+                      {/* Miles section for each supplier */}
+                      <div className="mt-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Checkbox
+                            id={`editUsedMiles-${index}`}
+                            checked={supplier.usedMiles || false}
+                            onCheckedChange={(checked) => updateSupplier(index, 'usedMiles', checked)}
+                          />
+                          <Label htmlFor={`editUsedMiles-${index}`} className="font-medium">
+                            Fornecedor utilizou milhas
+                          </Label>
+                        </div>
+
+                        {supplier.usedMiles && (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-blue-50 rounded-md">
+                            <div className="space-y-2">
+                              <Label>Quantidade de Milhas</Label>
+                              <Input
+                                type="number"
+                                placeholder="Ex: 25000"
+                                value={supplier.milesQuantity || ''}
+                                onChange={(e) => updateSupplier(index, 'milesQuantity', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Valor por 1.000 milhas (R$)</Label>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="Ex: 26,00"
+                                value={supplier.milesValue || ''}
+                                onChange={(e) => updateSupplier(index, 'milesValue', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Programa de Milhas</Label>
+                              <Select value={supplier.milesProgram || ''} onValueChange={(value) => updateSupplier(index, 'milesProgram', value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o programa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="LATAM Pass">✈️ LATAM Pass</SelectItem>
+                                  <SelectItem value="Smiles">✈️ Smiles (GOL)</SelectItem>
+                                  <SelectItem value="TudoAzul">✈️ TudoAzul (Azul)</SelectItem>
+                                  <SelectItem value="Multiplus">✈️ Multiplus</SelectItem>
+                                  <SelectItem value="American Airlines">✈️ American Airlines</SelectItem>
+                                  <SelectItem value="United">✈️ United MileagePlus</SelectItem>
+                                  <SelectItem value="Delta">✈️ Delta SkyMiles</SelectItem>
+                                  <SelectItem value="Outros">📋 Outros</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
 
                 {/* Financial Details */}
