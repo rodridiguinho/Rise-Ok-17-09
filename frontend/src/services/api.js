@@ -118,6 +118,11 @@ export const reportsAPI = {
   exportExcel: async (params = {}) => {
     const response = await api.post('/reports/export/excel', params);
     return response.data;
+  },
+
+  generateExpenses: async (transactionId) => {
+    const response = await api.post(`/transactions/${transactionId}/generate-expenses`);
+    return response.data;
   }
 };
 
