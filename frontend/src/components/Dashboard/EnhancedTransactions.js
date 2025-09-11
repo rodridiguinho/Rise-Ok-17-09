@@ -51,15 +51,18 @@ const EnhancedTransactions = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
 
   const [revenueCategories, setRevenueCategories] = useState([
-    'Vendas de Passagens',
-    'Comissões',
-    'Taxas de Serviço',
-    'Seguros',
-    'Pacotes Turísticos',
-    'Transfers',
+    'Passagens Aéreas',
+    'Pacotes',
+    'Seguro Viagem', 
+    'Transfer',
     'Hospedagem',
+    'Airbnb',
+    'Ingressos',
+    'Parques',
+    'Passeios',
     'Consultoria',
-    'Vendas Online',
+    'Saldo mês anterior',
+    'Cash Back',
     'Outros'
   ]);
 
