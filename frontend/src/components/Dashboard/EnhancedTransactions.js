@@ -467,10 +467,15 @@ const EnhancedTransactions = () => {
         supplierMilesQuantity: newTransaction.supplierMilesQuantity ? parseFloat(newTransaction.supplierMilesQuantity) : null,
         supplierMilesValue: newTransaction.supplierMilesValue ? parseFloat(newTransaction.supplierMilesValue) : null,
         products: newTransaction.products.filter(p => p.name && p.cost),
-        suppliers: newTransaction.suppliers.filter(s => s.name && s.value)
+        suppliers: newTransaction.suppliers.filter(s => s.name || s.value).map(s => ({
+          ...s,
+          value: s.value ? parseFloat(s.value) : 0,
+          milesQuantity: s.milesQuantity ? parseFloat(s.milesQuantity) : null,
+          milesValue: s.milesValue ? parseFloat(s.milesValue) : null
+        }))
       };
 
-      console.log('🔍 Transaction data being sent:', transactionData); // Debug log
+      console.log('🔍 Update transaction data being sent:', transactionData); // Debug log
 
       const response = await transactionsAPI.createTransaction(transactionData);
       
