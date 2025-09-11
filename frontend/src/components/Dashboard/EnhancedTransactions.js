@@ -658,22 +658,13 @@ const EnhancedTransactions = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 gap-4 mt-4">
                   <div className="space-y-2">
                     <Label>Descrição *</Label>
                     <Input
                       placeholder="Descrição da transação"
                       value={newTransaction.description}
                       onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Localizador da Reserva</Label>
-                    <Input
-                      placeholder="Ex: ABC123"
-                      value={newTransaction.clientReservationCode}
-                      onChange={(e) => setNewTransaction({...newTransaction, clientReservationCode: e.target.value})}
                     />
                   </div>
                 </div>
