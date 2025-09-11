@@ -442,10 +442,23 @@ const EnhancedTransactions = () => {
       // Reset form COMPLETAMENTE usando a função dedicada
       resetForm();
       
+      // Show success message with expense generation info
+      const toastMessage = response.expenseMessage 
+        ? `Transação criada com sucesso! ${response.expenseMessage}`
+        : "A transação foi criada com sucesso.";
+      
       toast({
         title: "Transação adicionada",
-        description: "A transação foi criada com sucesso.",
+        description: toastMessage,
+        variant: response.generatedExpenses ? "default" : "default"
       });
+      
+      // If expenses were generated, refresh the list to show them
+      if (response.generatedExpenses > 0) {
+        setTimeout(() => {
+          fetchData();
+        }, 1000);
+      }
     } catch (error) {
       console.error('❌ Error creating transaction:', error);
       console.error('❌ Error response:', error.response?.data);
