@@ -469,7 +469,7 @@ const EnhancedTransactions = () => {
     setSelectedTransaction(transaction);
     setNewTransaction({
       ...transaction,
-      products: transaction.products || [{ name: '', cost: '', clientValue: '' }]
+      products: transaction.products || [{ name: '', cost: '', supplier: '' }]
     });
     setIsEditModalOpen(true);
   };
