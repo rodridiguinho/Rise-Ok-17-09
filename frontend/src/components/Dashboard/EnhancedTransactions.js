@@ -305,6 +305,17 @@ const EnhancedTransactions = () => {
       paymentMethod: '',
       client: '',
       supplier: '',
+      // Multiple suppliers system (up to 6)
+      suppliers: [{ 
+        name: '', 
+        value: '', 
+        paymentDate: '', 
+        paymentStatus: 'Pendente',
+        usedMiles: false,
+        milesQuantity: '',
+        milesValue: '',
+        milesProgram: ''
+      }],
       seller: '',
       saleValue: '',
       supplierValue: '',
