@@ -33,6 +33,7 @@ import {
   MapPin,
   Clock,
   Calendar,
+  DollarSign,
   Users,
   Briefcase,
   Heart
