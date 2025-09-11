@@ -637,8 +637,8 @@ const EnhancedTransactions = () => {
       
       console.log('📥 API response:', response);
       
-      // Extrair a transação atualizada da resposta (o backend pode retornar {message, ...transaction})
-      const updatedTransaction = response.message ? { ...response, message: undefined } : response;
+      // Extrair a transação atualizada da resposta (o backend retorna {message, ...transaction})
+      const { message, ...updatedTransaction } = response;
       
       console.log('✅ Updated transaction processed:', updatedTransaction);
       
