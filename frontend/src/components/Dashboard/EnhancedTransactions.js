@@ -526,10 +526,27 @@ const EnhancedTransactions = () => {
 
   const handleEditTransaction = (transaction) => {
     setSelectedTransaction(transaction);
-    setNewTransaction({
-      ...transaction,
-      products: transaction.products || [{ name: '', cost: '', supplier: 'none' }],
-      suppliers: transaction.suppliers || [{ 
+    
+    // Handle backward compatibility for suppliers
+    let suppliersArray = [];
+    if (transaction.suppliers && Array.isArray(transaction.suppliers) && transaction.suppliers.length > 0) {
+      // New format: use existing suppliers array
+      suppliersArray = transaction.suppliers;
+    } else if (transaction.supplier || transaction.supplierValue) {
+      // Old format: convert old supplier fields to new array format
+      suppliersArray = [{
+        name: transaction.supplier || '',
+        value: transaction.supplierValue || '',
+        paymentDate: transaction.supplierPaymentDate || '',
+        paymentStatus: transaction.supplierPaymentStatus || 'Pendente',
+        usedMiles: transaction.supplierUsedMiles || false,
+        milesQuantity: transaction.supplierMilesQuantity || '',
+        milesValue: transaction.supplierMilesValue || '',
+        milesProgram: transaction.supplierMilesProgram || ''
+      }];
+    } else {
+      // No supplier data: create empty supplier
+      suppliersArray = [{ 
         name: '', 
         value: '', 
         paymentDate: '', 
@@ -538,7 +555,13 @@ const EnhancedTransactions = () => {
         milesQuantity: '',
         milesValue: '',
         milesProgram: ''
-      }]
+      }];
+    }
+    
+    setNewTransaction({
+      ...transaction,
+      products: transaction.products || [{ name: '', cost: '', supplier: 'none' }],
+      suppliers: suppliersArray
     });
     setIsEditModalOpen(true);
   };
