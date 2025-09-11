@@ -1628,14 +1628,20 @@ const EnhancedTransactions = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Valor Cliente (R$)</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="0,00"
-                          value={product.clientValue}
-                          onChange={(e) => updateProduct(index, 'clientValue', e.target.value)}
-                        />
+                        <Label>Fornecedor</Label>
+                        <Select value={product.supplier || ''} onValueChange={(value) => updateProduct(index, 'supplier', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o fornecedor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Nenhum</SelectItem>
+                            {suppliers.map(supplier => (
+                              <SelectItem key={supplier.id} value={supplier.name}>
+                                {supplier.name} - {supplier.supplierCode}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex items-end">
                         {index > 0 && (
