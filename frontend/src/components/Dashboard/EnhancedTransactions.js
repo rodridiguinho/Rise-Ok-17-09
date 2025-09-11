@@ -1985,6 +1985,31 @@ const EnhancedTransactions = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label>Status Pagamento Comissão</Label>
+                      <Select value={newTransaction.commissionPaymentStatus} onValueChange={(value) => setNewTransaction({...newTransaction, commissionPaymentStatus: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pendente">🕐 Pendente</SelectItem>
+                          <SelectItem value="Pago">✅ Pago</SelectItem>
+                          <SelectItem value="Cancelado">❌ Cancelado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {newTransaction.commissionPaymentStatus === 'Pago' && (
+                      <div className="space-y-2">
+                        <Label>Data Pagamento Comissão</Label>
+                        <Input
+                          type="date"
+                          value={newTransaction.commissionPaymentDate}
+                          onChange={(e) => setNewTransaction({...newTransaction, commissionPaymentDate: e.target.value})}
+                        />
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
                       <Label>Valor Total *</Label>
                       <Input
                         type="number"
