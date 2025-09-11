@@ -1592,7 +1592,7 @@ const EnhancedTransactions = () => {
                             <SelectValue placeholder="Selecione o fornecedor" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Nenhum</SelectItem>
+                            <SelectItem value="none">Nenhum</SelectItem>
                             {suppliers.map(supplier => (
                               <SelectItem key={supplier.id} value={supplier.name}>
                                 {supplier.name} - {supplier.supplierCode}
