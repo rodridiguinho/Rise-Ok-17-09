@@ -743,6 +743,8 @@ async def create_transaction(transaction: TransactionCreate):
             "saleReference": transaction.saleReference,
             "productPurchased": transaction.productPurchased,
             "additionalInfo": transaction.additionalInfo,
+            # Multiple suppliers support
+            "suppliers": transaction.suppliers or [],
             "status": "Confirmado",
             "transactionDate": transaction_date,  # Store the actual transaction date
             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
