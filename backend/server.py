@@ -128,6 +128,8 @@ class TransactionCreate(BaseModel):
     saleReference: Optional[str] = None
     productPurchased: Optional[str] = None
     additionalInfo: Optional[str] = None
+    # Multiple suppliers support
+    suppliers: Optional[list] = []
 
 # Create API router
 from fastapi import APIRouter
