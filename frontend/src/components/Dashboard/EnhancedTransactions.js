@@ -470,7 +470,7 @@ const EnhancedTransactions = () => {
     setSelectedTransaction(transaction);
     setNewTransaction({
       ...transaction,
-      products: transaction.products || [{ name: '', cost: '', supplier: '' }]
+      products: transaction.products || [{ name: '', cost: '', supplier: 'none' }]
     });
     setIsEditModalOpen(true);
   };
