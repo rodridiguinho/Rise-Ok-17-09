@@ -281,7 +281,7 @@ const EnhancedTransactions = () => {
   const addProduct = () => {
     setNewTransaction({
       ...newTransaction,
-      products: [...newTransaction.products, { name: '', cost: '', clientValue: '' }]
+      products: [...newTransaction.products, { name: '', cost: '', supplier: '' }]
     });
   };
 
