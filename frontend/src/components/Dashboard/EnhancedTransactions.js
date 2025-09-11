@@ -192,21 +192,40 @@ const EnhancedTransactions = () => {
 
   const calculateProfit = () => {
     const saleValue = parseFloat(newTransaction.saleValue) || 0;
-    const supplierValue = parseFloat(newTransaction.supplierValue) || 0;
-    const airportTaxes = parseFloat(newTransaction.airportTaxes) || 0;
     const commissionValue = parseFloat(newTransaction.commissionValue) || 0;
     
-    // Total supplier cost includes value + taxes
-    const totalSupplierCost = supplierValue + airportTaxes;
+    // Calculate total supplier costs from multiple suppliers
+    let totalSupplierCost = 0;
+    if (newTransaction.suppliers && newTransaction.suppliers.length > 0) {
+      totalSupplierCost = newTransaction.suppliers.reduce((total, supplier) => {
+        const supplierValue = parseFloat(supplier.value) || 0;
+        return total + supplierValue;
+      }, 0);
+    }
+    
+    // Calculate total product costs
+    let totalProductCost = 0;
+    if (newTransaction.products && newTransaction.products.length > 0) {
+      totalProductCost = newTransaction.products.reduce((total, product) => {
+        const productCost = parseFloat(product.cost) || 0;
+        return total + productCost;
+      }, 0);
+    }
+    
+    // Add old supplier fields for backward compatibility
+    const oldSupplierValue = parseFloat(newTransaction.supplierValue) || 0;
+    const airportTaxes = parseFloat(newTransaction.airportTaxes) || 0;
+    const backwardCompatibilityCost = oldSupplierValue + airportTaxes;
     
     // If using miles, add miles costs
-    let totalCost = totalSupplierCost;
+    let milesCost = 0;
     if (newTransaction.supplierUsedMiles) {
       const milesValue = calculateMilesTotal();
       const milesTaxes = parseFloat(newTransaction.milesTaxes) || 0;
-      totalCost += milesValue + milesTaxes;
+      milesCost = milesValue + milesTaxes;
     }
     
+    const totalCost = totalSupplierCost + totalProductCost + backwardCompatibilityCost + milesCost;
     const profit = saleValue - totalCost - commissionValue;
     return profit;
   };
