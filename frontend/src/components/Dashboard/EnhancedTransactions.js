@@ -2079,6 +2079,17 @@ const EnhancedTransactions = () => {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
+                            {transaction.type === 'entrada' && transaction.suppliers && transaction.suppliers.length > 0 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => generateExpensesManually(transaction.id)}
+                                className="text-green-600 hover:text-green-800 p-1"
+                                title="Gerar despesas para fornecedores pagos"
+                              >
+                                <DollarSign className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
