@@ -1189,55 +1189,48 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             logging.info("🤖 Processing auto-generated expense transaction update")
             # If this is an auto-generated expense, sync with original transaction
             original_id = existing_transaction.get('originalTransactionId')
+            supplier_name = existing_transaction.get('supplier')  # Get supplier name from expense transaction
             logging.info(f"📄 Original transaction ID: {original_id}")
+            logging.info(f"👤 Supplier name: {supplier_name}")
             
-            if original_id and transaction.suppliers and len(transaction.suppliers) > 0:
-                supplier_data = transaction.suppliers[0]  # Should only have one supplier for expenses
-                logging.info(f"👤 Supplier data: {supplier_data}")
-                
-                # Also update the amount field of this expense transaction to match supplier value
-                new_amount = float(supplier_data.get('value', 0))
-                logging.info(f"💰 Updating expense amount to: {new_amount}")
-                
-                # Update the expense transaction amount
-                await db.transactions.update_one(
-                    {"_id": ObjectId(transaction_id)},
-                    {"$set": {"amount": new_amount}}
-                )
+            if original_id and supplier_name:
+                # Use the updated amount from the transaction data
+                new_amount = float(transaction.amount)
+                logging.info(f"💰 New amount from update: {new_amount}")
                 
                 # Update the corresponding supplier in the original transaction
                 original_transaction = await db.transactions.find_one({"_id": ObjectId(original_id)})
                 if original_transaction and original_transaction.get('suppliers'):
+                    logging.info(f"📋 Found original transaction with {len(original_transaction['suppliers'])} suppliers")
+                    
                     updated_suppliers = []
+                    supplier_found = False
+                    
                     for orig_supplier in original_transaction['suppliers']:
-                        if orig_supplier['name'] == supplier_data['name']:
+                        if orig_supplier['name'] == supplier_name:
                             # Update this supplier's data
                             updated_suppliers.append({
                                 **orig_supplier,
                                 'value': str(new_amount),
-                                'paymentDate': supplier_data.get('paymentDate', orig_supplier.get('paymentDate', '')),
-                                'paymentStatus': supplier_data.get('paymentStatus', orig_supplier.get('paymentStatus', 'Pago'))
+                                'paymentDate': orig_supplier.get('paymentDate', ''),
+                                'paymentStatus': 'Pago'  # Mark as paid since expense was updated
                             })
-                            logging.info(f"✅ Updated supplier in original transaction: {orig_supplier['name']}")
+                            logging.info(f"✅ Updated supplier in original transaction: {supplier_name} -> {new_amount}")
+                            supplier_found = True
                         else:
                             updated_suppliers.append(orig_supplier)
                     
-                    # Update the original transaction with new supplier data
-                    await db.transactions.update_one(
-                        {"_id": ObjectId(original_id)},
-                        {"$set": {"suppliers": updated_suppliers, "updatedAt": datetime.utcnow()}}
-                    )
-                    logging.info("🔄 Original transaction updated with new supplier data")
-                
-                # Refresh the updated transaction with the new amount
-                updated_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
-                if updated_transaction:
-                    updated_transaction["id"] = str(updated_transaction["_id"])
-                    updated_transaction["_id"] = str(updated_transaction["_id"])
-                    if "createdAt" in updated_transaction:
-                        updated_transaction["createdAt"] = updated_transaction["createdAt"].isoformat()
-                    if "updatedAt" in updated_transaction:
-                        updated_transaction["updatedAt"] = updated_transaction["updatedAt"].isoformat()
+                    if supplier_found:
+                        # Update the original transaction with new supplier data
+                        result = await db.transactions.update_one(
+                            {"_id": ObjectId(original_id)},
+                            {"$set": {"suppliers": updated_suppliers, "updatedAt": datetime.utcnow()}}
+                        )
+                        logging.info(f"🔄 Original transaction update result: {result.modified_count} documents modified")
+                    else:
+                        logging.warning(f"⚠️ Supplier {supplier_name} not found in original transaction")
+                else:
+                    logging.warning("⚠️ Original transaction not found or has no suppliers")
         
         # Auto-generate expense transactions for newly paid suppliers (only if not already generated)
         expense_transactions = []
