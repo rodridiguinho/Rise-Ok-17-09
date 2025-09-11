@@ -598,6 +598,10 @@ const EnhancedTransactions = () => {
   const handleUpdateTransaction = async (e) => {
     e.preventDefault();
     
+    console.log('🔄 Starting transaction update...');
+    console.log('📋 Selected transaction:', selectedTransaction);
+    console.log('📝 New transaction data:', newTransaction);
+    
     if (!newTransaction.type || !newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.paymentMethod) {
       toast({
         variant: "destructive",
@@ -627,10 +631,16 @@ const EnhancedTransactions = () => {
         }))
       };
 
+      console.log('📤 Transaction data being sent to API:', transactionData);
+
       const response = await transactionsAPI.updateTransaction(selectedTransaction.id, transactionData);
+      
+      console.log('📥 API response:', response);
       
       // Extrair a transação atualizada da resposta (o backend pode retornar {message, ...transaction})
       const updatedTransaction = response.message ? { ...response, message: undefined } : response;
+      
+      console.log('✅ Updated transaction processed:', updatedTransaction);
       
       setTransactions(transactions.map(t => 
         t.id === selectedTransaction.id ? updatedTransaction : t
