@@ -334,6 +334,31 @@ const EnhancedTransactions = () => {
     setNewTransaction({ ...newTransaction, suppliers: newSuppliers });
   };
 
+  // Manual expense generation
+  const generateExpensesManually = async (transactionId) => {
+    try {
+      const response = await transactionsAPI.generateExpenses(transactionId);
+      
+      toast({
+        title: "Despesas geradas",
+        description: response.expenseMessage || response.message,
+        variant: response.generatedExpenses > 0 ? "default" : "secondary"
+      });
+      
+      // Refresh the transaction list to show new expenses
+      if (response.generatedExpenses > 0) {
+        fetchData();
+      }
+    } catch (error) {
+      console.error('Error generating expenses:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao gerar despesas. Tente novamente.",
+      });
+    }
+  };
+
   const resetForm = () => {
     setNewTransaction({
       type: 'entrada',
