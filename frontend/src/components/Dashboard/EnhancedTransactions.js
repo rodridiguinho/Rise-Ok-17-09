@@ -296,6 +296,44 @@ const EnhancedTransactions = () => {
     setNewTransaction({ ...newTransaction, products: newProducts });
   };
 
+  // Multiple suppliers management functions
+  const addSupplier = () => {
+    if (newTransaction.suppliers.length < 6) {
+      setNewTransaction({
+        ...newTransaction,
+        suppliers: [...newTransaction.suppliers, { 
+          name: '', 
+          value: '', 
+          paymentDate: '', 
+          paymentStatus: 'Pendente',
+          usedMiles: false,
+          milesQuantity: '',
+          milesValue: '',
+          milesProgram: ''
+        }]
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Limite atingido",
+        description: "Máximo de 6 fornecedores por transação.",
+      });
+    }
+  };
+
+  const removeSupplier = (index) => {
+    if (newTransaction.suppliers.length > 1) {
+      const newSuppliers = newTransaction.suppliers.filter((_, i) => i !== index);
+      setNewTransaction({ ...newTransaction, suppliers: newSuppliers });
+    }
+  };
+
+  const updateSupplier = (index, field, value) => {
+    const newSuppliers = [...newTransaction.suppliers];
+    newSuppliers[index][field] = value;
+    setNewTransaction({ ...newTransaction, suppliers: newSuppliers });
+  };
+
   const resetForm = () => {
     setNewTransaction({
       type: 'entrada',
