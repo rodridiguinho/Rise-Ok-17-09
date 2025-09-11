@@ -649,6 +649,11 @@ const EnhancedTransactions = () => {
       setIsEditModalOpen(false);
       setSelectedTransaction(null);
       
+      // Force refresh to ensure synchronization
+      setTimeout(() => {
+        fetchData();
+      }, 500);
+      
       // Reset form
       setNewTransaction({
         type: 'entrada',
