@@ -585,9 +585,14 @@ const EnhancedTransactions = () => {
         additionalInfo: ''
       });
 
+      // Show success message with expense generation info
+      const toastMessage = response.expenseMessage 
+        ? `Transação atualizada com sucesso! ${response.expenseMessage}`
+        : "A transação foi atualizada com sucesso.";
+
       toast({
         title: "Transação atualizada",
-        description: "A transação foi atualizada com sucesso.",
+        description: toastMessage,
       });
     } catch (error) {
       console.error('Error updating transaction:', error);
