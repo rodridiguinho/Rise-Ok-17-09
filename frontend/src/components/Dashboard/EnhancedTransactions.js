@@ -528,7 +528,17 @@ const EnhancedTransactions = () => {
     setSelectedTransaction(transaction);
     setNewTransaction({
       ...transaction,
-      products: transaction.products || [{ name: '', cost: '', supplier: 'none' }]
+      products: transaction.products || [{ name: '', cost: '', supplier: 'none' }],
+      suppliers: transaction.suppliers || [{ 
+        name: '', 
+        value: '', 
+        paymentDate: '', 
+        paymentStatus: 'Pendente',
+        usedMiles: false,
+        milesQuantity: '',
+        milesValue: '',
+        milesProgram: ''
+      }]
     });
     setIsEditModalOpen(true);
   };
