@@ -498,7 +498,8 @@ const EnhancedTransactions = () => {
         milesTaxes: newTransaction.milesTaxes ? parseFloat(newTransaction.milesTaxes) : null,
         supplierMilesQuantity: newTransaction.supplierMilesQuantity ? parseFloat(newTransaction.supplierMilesQuantity) : null,
         supplierMilesValue: newTransaction.supplierMilesValue ? parseFloat(newTransaction.supplierMilesValue) : null,
-        products: newTransaction.products.filter(p => p.name && p.cost)
+        products: newTransaction.products.filter(p => p.name && p.cost),
+        suppliers: newTransaction.suppliers.filter(s => s.name && s.value)
       };
 
       const response = await transactionsAPI.updateTransaction(selectedTransaction.id, transactionData);
