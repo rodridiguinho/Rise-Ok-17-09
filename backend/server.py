@@ -1082,6 +1082,8 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             "saleReference": transaction.saleReference,
             "productPurchased": transaction.productPurchased,
             "additionalInfo": transaction.additionalInfo,
+            # Multiple suppliers support
+            "suppliers": transaction.suppliers or [],
             "status": "Confirmado",
             "transactionDate": transaction_date,
             "updatedAt": datetime.utcnow(),
