@@ -1153,7 +1153,7 @@ async def save_company_settings(settings: CompanySettings):
         raise HTTPException(status_code=500, detail=f"Erro ao salvar configurações da empresa: {str(e)}")
 
 # Clear test data endpoint
-@app.post("/api/admin/clear-test-data")
+@api_router.post("/admin/clear-test-data")
 async def clear_test_data():
     try:
         # Count documents before deletion for reporting
