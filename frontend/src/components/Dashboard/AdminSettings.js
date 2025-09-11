@@ -330,7 +330,7 @@ const AdminSettings = () => {
 
   const handleClearAllData = async () => {
     try {
-      const response = await api.post('/api/admin/clear-test-data');
+      const response = await api.post('/admin/clear-test-data');
       
       if (response.status === 200) {
         // Limpar dados locais também
