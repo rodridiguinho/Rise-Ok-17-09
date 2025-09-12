@@ -649,74 +649,7 @@ const EnhancedTransactions = () => {
       setIsEditModalOpen(false);
       setSelectedTransaction(null);
       
-      // Immediate refresh of data to show backend synchronization changes
-      fetchData();
-      
-      // Additional refresh after delay to ensure all related transactions are updated
-      setTimeout(() => {
-        fetchData();
-        console.log('🔄 Second data refresh to ensure all synced transactions are loaded');
-      }, 1000);
-      
-      // Reset form
-      setNewTransaction({
-        type: 'entrada',
-        category: '',
-        description: '',
-        amount: '',
-        paymentMethod: '',
-        client: '',
-        supplier: '',
-        // Multiple suppliers system (up to 6)
-        suppliers: [{ 
-          name: '', 
-          value: '', 
-          paymentDate: '', 
-          paymentStatus: 'Pendente',
-          usedMiles: false,
-          milesQuantity: '',
-          milesValue: '',
-          milesProgram: ''
-        }],
-        seller: '',
-        saleValue: '',
-        supplierValue: '',
-        supplierPaymentDate: '',
-        supplierPaymentStatus: 'Pendente',
-        commissionValue: '',
-        commissionPaymentDate: '',
-        commissionPaymentStatus: 'Pendente',
-        customCategory: '',
-        transactionDate: new Date().toISOString().split('T')[0],
-        clientNumber: '',
-        reservationLocator: '',
-        departureDate: '',
-        returnDate: '',
-        departureTime: '',
-        arrivalTime: '',
-        hasStops: false,
-        originAirport: '',
-        destinationAirport: '',
-        tripType: 'Lazer',
-        products: [{ name: '', cost: '', supplier: 'none' }],
-        clientReservationCode: '',
-        departureCity: '',
-        arrivalCity: '',
-        productType: 'Passagem',
-        supplierUsedMiles: false,
-        supplierMilesQuantity: '',
-        supplierMilesValue: '',
-        supplierMilesProgram: '',
-        airportTaxes: '',
-        outboundStops: '',
-        returnStops: '',
-        // Additional fields for expenses
-        saleReference: '',
-        productPurchased: '',
-        additionalInfo: ''
-      });
-
-      // Show success message with expense generation info
+      // Show success message first
       const toastMessage = response.expenseMessage 
         ? `Transação atualizada com sucesso! ${response.expenseMessage}`
         : "A transação foi atualizada com sucesso.";
@@ -724,6 +657,12 @@ const EnhancedTransactions = () => {
       toast({
         title: "Transação atualizada",
         description: toastMessage,
+      });
+      
+      // Force page reload to show all changes (backend sync works, but frontend cache issues)
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       });
     } catch (error) {
       console.error('Error updating transaction:', error);
