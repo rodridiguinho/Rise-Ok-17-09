@@ -1204,6 +1204,17 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             
             # Use supplier name from existing transaction (not from update data)
             supplier_name = existing_transaction.get('supplier')
+            
+            # If supplier name is missing, try to extract from description
+            if not supplier_name and 'Pagamento a ' in existing_transaction.get('description', ''):
+                try:
+                    # Extract supplier name from description like "Pagamento a Luiz Oliveira Milheiro - Ref: ..."
+                    desc = existing_transaction.get('description', '')
+                    supplier_name = desc.split('Pagamento a ')[1].split(' - Ref:')[0].strip()
+                    logging.info(f"🔍 Extracted supplier name from description: {supplier_name}")
+                except:
+                    logging.warning("⚠️ Failed to extract supplier name from description")
+            
             logging.info(f"📄 Original transaction ID: {original_id}")
             logging.info(f"👤 Supplier name: {supplier_name}")
             
