@@ -123,6 +123,11 @@ export const reportsAPI = {
   generateExpenses: async (transactionId) => {
     const response = await api.post(`/transactions/${transactionId}/generate-expenses`);
     return response.data;
+  },
+
+  getAirports: async () => {
+    const response = await api.get('/travel/airports');
+    return response.data;
   }
 };
 
