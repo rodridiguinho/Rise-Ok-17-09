@@ -1436,6 +1436,11 @@ AIRPORTS_DATABASE = [
     {"code": "MEL", "city": "Melbourne", "name": "Melbourne - MEL", "country": "Austrália"},
 ]
 
+# Airports endpoint
+@api_router.get("/travel/airports")
+async def get_airports():
+    return AIRPORTS_DATABASE
+
 # Clear test data endpoint
 @api_router.post("/admin/clear-test-data")
 async def clear_test_data():
