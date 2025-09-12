@@ -649,11 +649,14 @@ const EnhancedTransactions = () => {
       setIsEditModalOpen(false);
       setSelectedTransaction(null);
       
-      // Force refresh to ensure synchronization with backend changes
+      // Immediate refresh of data to show backend synchronization changes
+      fetchData();
+      
+      // Additional refresh after delay to ensure all related transactions are updated
       setTimeout(() => {
         fetchData();
-        console.log('🔄 Forced data refresh after transaction update');
-      }, 500);
+        console.log('🔄 Second data refresh to ensure all synced transactions are loaded');
+      }, 1000);
       
       // Reset form
       setNewTransaction({
