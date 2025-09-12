@@ -1001,20 +1001,34 @@ const EnhancedTransactions = () => {
 
                   <div className="space-y-2">
                     <Label>Cidade de Saída</Label>
-                    <Input
-                      placeholder="Ex: São Paulo"
-                      value={newTransaction.departureCity}
-                      onChange={(e) => setNewTransaction({...newTransaction, departureCity: e.target.value})}
-                    />
+                    <Select value={newTransaction.departureCity} onValueChange={(value) => setNewTransaction({...newTransaction, departureCity: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a cidade de saída" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {airports.map(airport => (
+                          <SelectItem key={airport.code} value={`${airport.city} (${airport.code})`}>
+                            {airport.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
                     <Label>Cidade de Chegada</Label>
-                    <Input
-                      placeholder="Ex: Rio de Janeiro"
-                      value={newTransaction.arrivalCity}
-                      onChange={(e) => setNewTransaction({...newTransaction, arrivalCity: e.target.value})}
-                    />
+                    <Select value={newTransaction.arrivalCity} onValueChange={(value) => setNewTransaction({...newTransaction, arrivalCity: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a cidade de chegada" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {airports.map(airport => (
+                          <SelectItem key={airport.code} value={`${airport.city} (${airport.code})`}>
+                            {airport.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
