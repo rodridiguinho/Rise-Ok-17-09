@@ -663,7 +663,6 @@ const EnhancedTransactions = () => {
       setTimeout(() => {
         window.location.reload();
       }, 1500);
-      });
     } catch (error) {
       console.error('Error updating transaction:', error);
       toast({
