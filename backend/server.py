@@ -1356,6 +1356,87 @@ async def generate_expenses_manually(transaction_id: str):
         logging.error(f"Generate expenses error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao gerar despesas: {str(e)}")
 
+# Airports database with IATA codes
+AIRPORTS_DATABASE = [
+    # Major Brazilian Airports
+    {"code": "GRU", "city": "São Paulo", "name": "Guarulhos - GRU", "country": "Brasil"},
+    {"code": "CGH", "city": "São Paulo", "name": "Congonhas - CGH", "country": "Brasil"},
+    {"code": "SDU", "city": "Rio de Janeiro", "name": "Santos Dumont - SDU", "country": "Brasil"},
+    {"code": "GIG", "city": "Rio de Janeiro", "name": "Galeão - GIG", "country": "Brasil"},
+    {"code": "BSB", "city": "Brasília", "name": "Brasília - BSB", "country": "Brasil"},
+    {"code": "CNF", "city": "Belo Horizonte", "name": "Confins - CNF", "country": "Brasil"},
+    {"code": "PLU", "city": "Belo Horizonte", "name": "Pampulha - PLU", "country": "Brasil"},
+    {"code": "SSA", "city": "Salvador", "name": "Salvador - SSA", "country": "Brasil"},
+    {"code": "REC", "city": "Recife", "name": "Recife - REC", "country": "Brasil"},
+    {"code": "FOR", "city": "Fortaleza", "name": "Fortaleza - FOR", "country": "Brasil"},
+    {"code": "CWB", "city": "Curitiba", "name": "Curitiba - CWB", "country": "Brasil"},
+    {"code": "POA", "city": "Porto Alegre", "name": "Porto Alegre - POA", "country": "Brasil"},
+    {"code": "FLN", "city": "Florianópolis", "name": "Florianópolis - FLN", "country": "Brasil"},
+    {"code": "VIX", "city": "Vitória", "name": "Vitória - VIX", "country": "Brasil"},
+    {"code": "CGB", "city": "Cuiabá", "name": "Cuiabá - CGB", "country": "Brasil"},
+    {"code": "CGR", "city": "Campo Grande", "name": "Campo Grande - CGR", "country": "Brasil"},
+    {"code": "MAO", "city": "Manaus", "name": "Manaus - MAO", "country": "Brasil"},
+    {"code": "BEL", "city": "Belém", "name": "Belém - BEL", "country": "Brasil"},
+    {"code": "SLZ", "city": "São Luís", "name": "São Luís - SLZ", "country": "Brasil"},
+    {"code": "THE", "city": "Teresina", "name": "Teresina - THE", "country": "Brasil"},
+    {"code": "NAT", "city": "Natal", "name": "Natal - NAT", "country": "Brasil"},
+    {"code": "JPA", "city": "João Pessoa", "name": "João Pessoa - JPA", "country": "Brasil"},
+    {"code": "MCZ", "city": "Maceió", "name": "Maceió - MCZ", "country": "Brasil"},
+    {"code": "AJU", "city": "Aracaju", "name": "Aracaju - AJU", "country": "Brasil"},
+    {"code": "GYN", "city": "Goiânia", "name": "Goiânia - GYN", "country": "Brasil"},
+    
+    # Major International Airports - North America
+    {"code": "JFK", "city": "New York", "name": "JFK - New York", "country": "EUA"},
+    {"code": "LGA", "city": "New York", "name": "LaGuardia - LGA", "country": "EUA"},
+    {"code": "EWR", "city": "New York", "name": "Newark - EWR", "country": "EUA"},
+    {"code": "LAX", "city": "Los Angeles", "name": "Los Angeles - LAX", "country": "EUA"},
+    {"code": "MIA", "city": "Miami", "name": "Miami - MIA", "country": "EUA"},
+    {"code": "ORD", "city": "Chicago", "name": "O'Hare - ORD", "country": "EUA"},
+    {"code": "DFW", "city": "Dallas", "name": "Dallas/Fort Worth - DFW", "country": "EUA"},
+    {"code": "SFO", "city": "San Francisco", "name": "San Francisco - SFO", "country": "EUA"},
+    {"code": "ATL", "city": "Atlanta", "name": "Atlanta - ATL", "country": "EUA"},
+    {"code": "BOS", "city": "Boston", "name": "Boston - BOS", "country": "EUA"},
+    {"code": "YYZ", "city": "Toronto", "name": "Toronto - YYZ", "country": "Canadá"},
+    {"code": "YVR", "city": "Vancouver", "name": "Vancouver - YVR", "country": "Canadá"},
+    
+    # Europe
+    {"code": "LHR", "city": "Londres", "name": "Heathrow - LHR", "country": "Reino Unido"},
+    {"code": "LGW", "city": "Londres", "name": "Gatwick - LGW", "country": "Reino Unido"},
+    {"code": "CDG", "city": "Paris", "name": "Charles de Gaulle - CDG", "country": "França"},
+    {"code": "ORY", "city": "Paris", "name": "Orly - ORY", "country": "França"},
+    {"code": "FCO", "city": "Roma", "name": "Fiumicino - FCO", "country": "Itália"},
+    {"code": "MAD", "city": "Madrid", "name": "Madrid - MAD", "country": "Espanha"},
+    {"code": "BCN", "city": "Barcelona", "name": "Barcelona - BCN", "country": "Espanha"},
+    {"code": "LIS", "city": "Lisboa", "name": "Lisboa - LIS", "country": "Portugal"},
+    {"code": "OPO", "city": "Porto", "name": "Porto - OPO", "country": "Portugal"},
+    {"code": "FRA", "city": "Frankfurt", "name": "Frankfurt - FRA", "country": "Alemanha"},
+    {"code": "MUC", "city": "Munique", "name": "Munique - MUC", "country": "Alemanha"},
+    {"code": "AMS", "city": "Amsterdam", "name": "Amsterdam - AMS", "country": "Holanda"},
+    {"code": "ZUR", "city": "Zurich", "name": "Zurich - ZUR", "country": "Suíça"},
+    
+    # South America
+    {"code": "EZE", "city": "Buenos Aires", "name": "Ezeiza - EZE", "country": "Argentina"},
+    {"code": "AEP", "city": "Buenos Aires", "name": "Jorge Newbery - AEP", "country": "Argentina"},
+    {"code": "SCL", "city": "Santiago", "name": "Santiago - SCL", "country": "Chile"},
+    {"code": "LIM", "city": "Lima", "name": "Lima - LIM", "country": "Peru"},
+    {"code": "BOG", "city": "Bogotá", "name": "Bogotá - BOG", "country": "Colômbia"},
+    {"code": "UIO", "city": "Quito", "name": "Quito - UIO", "country": "Equador"},
+    {"code": "MVD", "city": "Montevidéu", "name": "Montevidéu - MVD", "country": "Uruguai"},
+    
+    # Asia Pacific
+    {"code": "NRT", "city": "Tóquio", "name": "Narita - NRT", "country": "Japão"},
+    {"code": "HND", "city": "Tóquio", "name": "Haneda - HND", "country": "Japão"},
+    {"code": "ICN", "city": "Seul", "name": "Incheon - ICN", "country": "Coreia do Sul"},
+    {"code": "PEK", "city": "Pequim", "name": "Capital - PEK", "country": "China"},
+    {"code": "PVG", "city": "Xangai", "name": "Pudong - PVG", "country": "China"},
+    {"code": "HKG", "city": "Hong Kong", "name": "Hong Kong - HKG", "country": "Hong Kong"},
+    {"code": "SIN", "city": "Singapura", "name": "Singapura - SIN", "country": "Singapura"},
+    {"code": "BKK", "city": "Bangkok", "name": "Suvarnabhumi - BKK", "country": "Tailândia"},
+    {"code": "SYD", "city": "Sydney", "name": "Sydney - SYD", "country": "Austrália"},
+    {"code": "MEL", "city": "Melbourne", "name": "Melbourne - MEL", "country": "Austrália"},
+]
+
+# Clear test data endpoint
 @api_router.post("/admin/clear-test-data")
 async def clear_test_data():
     try:
