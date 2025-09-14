@@ -42,7 +42,7 @@ const PassengerControl = () => {
     setLoading(true);
     try {
       // Buscar todas as transações de entrada com código interno
-      const response = await api.getTransactions();
+      const response = await transactionsAPI.getTransactions();
       
       const entryTransactions = response.filter(transaction => 
         transaction.type === 'entrada' && 
