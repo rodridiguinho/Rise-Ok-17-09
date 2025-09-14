@@ -419,6 +419,7 @@ const EnhancedTransactions = () => {
       returnDate: '',
       departureTime: '',
       arrivalTime: '',
+      returnTime: '',
       hasStops: false,
       originAirport: '',
       destinationAirport: '',
