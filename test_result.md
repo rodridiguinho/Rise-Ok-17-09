@@ -234,15 +234,18 @@ backend:
 
   - task: "User Authentication System"
     implemented: true
-    working: true
+    working: false
     file: "backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
           comment: "POST /api/auth/login working correctly. Valid credentials (rorigo@risetravel.com.br / Emily2030*) authenticate successfully and return JWT token. Invalid credentials properly rejected with 401 status."
+        - working: false
+          agent: "user"
+          comment: "User reports 'não faz login' (doesn't login) - login functionality is currently not working from user perspective despite previous testing showing it worked."
 
   - task: "Transaction Summary API"
     implemented: true
