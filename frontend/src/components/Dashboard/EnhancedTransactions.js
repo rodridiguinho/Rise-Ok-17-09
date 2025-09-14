@@ -471,8 +471,12 @@ const EnhancedTransactions = () => {
     }
 
     try {
+      // Generate internal reservation code if not exists
+      const internalCode = newTransaction.internalReservationCode || generateInternalCode();
+      
       const transactionData = {
         ...newTransaction,
+        internalReservationCode: internalCode,
         amount: parseFloat(newTransaction.amount),
         saleValue: newTransaction.saleValue ? parseFloat(newTransaction.saleValue) : null,
         supplierValue: newTransaction.supplierValue ? parseFloat(newTransaction.supplierValue) : null,
@@ -486,7 +490,8 @@ const EnhancedTransactions = () => {
           ...s,
           value: s.value ? parseFloat(s.value) : 0,
           milesQuantity: s.milesQuantity ? parseFloat(s.milesQuantity) : null,
-          milesValue: s.milesValue ? parseFloat(s.milesValue) : null
+          milesValue: s.milesValue ? parseFloat(s.milesValue) : null,
+          emissionTaxes: s.emissionTaxes ? parseFloat(s.emissionTaxes) : null
         }))
       };
 
