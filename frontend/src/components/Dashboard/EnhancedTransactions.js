@@ -97,6 +97,8 @@ const EnhancedTransactions = () => {
     paymentMethod: '',
     client: '',
     supplier: '',
+    referenceTransactionCode: '',
+    expenseNotes: '',
     // Multiple suppliers system (up to 6)
     suppliers: [{ 
       name: '', 
