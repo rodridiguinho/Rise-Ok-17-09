@@ -2627,10 +2627,11 @@ const EnhancedTransactions = () => {
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="space-y-2">
                               <Label>Cidade da Escala</Label>
-                              <Input
-                                placeholder="Ex: Lima (LIM)"
+                              <CityInput
                                 value={newTransaction.returnStopCity || ''}
-                                onChange={(e) => setNewTransaction({...newTransaction, returnStopCity: e.target.value})}
+                                onChange={(value) => setNewTransaction({...newTransaction, returnStopCity: value})}
+                                placeholder="Digite para buscar cidades..."
+                                id="return-stop-city"
                               />
                             </div>
 
