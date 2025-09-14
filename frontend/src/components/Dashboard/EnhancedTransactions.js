@@ -340,6 +340,147 @@ const EnhancedTransactions = () => {
     return `RT-${year}-${randomNum}`;
   };
 
+  // Timezone Database for major destinations
+  const timezoneDB = {
+    // BRASIL
+    "São Paulo": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Rio de Janeiro": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Salvador": { timezone: "America/Bahia", utc: -3, country: "Brasil" },
+    "Brasília": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Fortaleza": { timezone: "America/Fortaleza", utc: -3, country: "Brasil" },
+    "Recife": { timezone: "America/Recife", utc: -3, country: "Brasil" },
+    "Manaus": { timezone: "America/Manaus", utc: -4, country: "Brasil" },
+    
+    // EUROPA
+    "Lisboa": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
+    "Porto": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
+    "Madrid": { timezone: "Europe/Madrid", utc: +1, country: "Espanha" },
+    "Barcelona": { timezone: "Europe/Madrid", utc: +1, country: "Espanha" },
+    "Paris": { timezone: "Europe/Paris", utc: +1, country: "França" },
+    "Londres": { timezone: "Europe/London", utc: 0, country: "Reino Unido" },
+    "Roma": { timezone: "Europe/Rome", utc: +1, country: "Itália" },
+    "Milão": { timezone: "Europe/Rome", utc: +1, country: "Itália" },
+    "Frankfurt": { timezone: "Europe/Berlin", utc: +1, country: "Alemanha" },
+    "Amsterdam": { timezone: "Europe/Amsterdam", utc: +1, country: "Holanda" },
+    "Zurich": { timezone: "Europe/Zurich", utc: +1, country: "Suíça" },
+    
+    // AMÉRICA DO NORTE
+    "Nova York": { timezone: "America/New_York", utc: -5, country: "EUA" },
+    "Los Angeles": { timezone: "America/Los_Angeles", utc: -8, country: "EUA" },
+    "Miami": { timezone: "America/New_York", utc: -5, country: "EUA" },
+    "Orlando": { timezone: "America/New_York", utc: -5, country: "EUA" },
+    "Las Vegas": { timezone: "America/Los_Angeles", utc: -8, country: "EUA" },
+    "Toronto": { timezone: "America/Toronto", utc: -5, country: "Canadá" },
+    "Vancouver": { timezone: "America/Vancouver", utc: -8, country: "Canadá" },
+    "Cidade do México": { timezone: "America/Mexico_City", utc: -6, country: "México" },
+    "Cancún": { timezone: "America/Cancun", utc: -5, country: "México" },
+    
+    // AMÉRICA DO SUL
+    "Buenos Aires": { timezone: "America/Argentina/Buenos_Aires", utc: -3, country: "Argentina" },
+    "Santiago": { timezone: "America/Santiago", utc: -3, country: "Chile" },
+    "Lima": { timezone: "America/Lima", utc: -5, country: "Peru" },
+    "Bogotá": { timezone: "America/Bogota", utc: -5, country: "Colômbia" },
+    "Caracas": { timezone: "America/Caracas", utc: -4, country: "Venezuela" },
+    "Montevidéu": { timezone: "America/Montevideo", utc: -3, country: "Uruguai" },
+    
+    // ÁSIA
+    "Dubai": { timezone: "Asia/Dubai", utc: +4, country: "Emirados Árabes" },
+    "Doha": { timezone: "Asia/Qatar", utc: +3, country: "Qatar" },
+    "Tóquio": { timezone: "Asia/Tokyo", utc: +9, country: "Japão" },
+    "Osaka": { timezone: "Asia/Tokyo", utc: +9, country: "Japão" },
+    "Pequim": { timezone: "Asia/Shanghai", utc: +8, country: "China" },
+    "Shanghai": { timezone: "Asia/Shanghai", utc: +8, country: "China" },
+    "Hong Kong": { timezone: "Asia/Hong_Kong", utc: +8, country: "Hong Kong" },
+    "Singapura": { timezone: "Asia/Singapore", utc: +8, country: "Singapura" },
+    "Bangkok": { timezone: "Asia/Bangkok", utc: +7, country: "Tailândia" },
+    "Mumbai": { timezone: "Asia/Kolkata", utc: +5.5, country: "Índia" },
+    "Nova Delhi": { timezone: "Asia/Kolkata", utc: +5.5, country: "Índia" },
+    
+    // OCEANIA
+    "Sydney": { timezone: "Australia/Sydney", utc: +10, country: "Austrália" },
+    "Melbourne": { timezone: "Australia/Melbourne", utc: +10, country: "Austrália" },
+    "Perth": { timezone: "Australia/Perth", utc: +8, country: "Austrália" },
+    "Auckland": { timezone: "Pacific/Auckland", utc: +12, country: "Nova Zelândia" },
+    
+    // ÁFRICA
+    "Cidade do Cabo": { timezone: "Africa/Cape_Town", utc: +2, country: "África do Sul" },
+    "Joanesburgo": { timezone: "Africa/Johannesburg", utc: +2, country: "África do Sul" },
+    "Cairo": { timezone: "Africa/Cairo", utc: +2, country: "Egito" },
+    "Casablanca": { timezone: "Africa/Casablanca", utc: 0, country: "Marrocos" }
+  };
+
+  // Function to extract city name from string like "São Paulo (GRU)"
+  const extractCityName = (cityString) => {
+    if (!cityString) return null;
+    // Remove airport codes in parentheses and trim
+    return cityString.replace(/\s*\([^)]*\)/g, '').trim();
+  };
+
+  // Function to get timezone info for a city
+  const getTimezoneInfo = (cityString) => {
+    const cityName = extractCityName(cityString);
+    return timezoneDB[cityName] || null;
+  };
+
+  // Enhanced flight duration calculation with timezone support
+  const calculateFlightDuration = (departureTime, arrivalTime, departureCity, arrivalCity) => {
+    if (!departureTime || !arrivalTime) {
+      return 'Automático';
+    }
+
+    try {
+      const depTz = getTimezoneInfo(departureCity);
+      const arrTz = getTimezoneInfo(arrivalCity);
+
+      // If we have timezone info for both cities, use it
+      if (depTz && arrTz) {
+        // Create dates in respective timezones
+        const depDate = new Date(`2000-01-01T${departureTime}:00`);
+        const arrDate = new Date(`2000-01-01T${arrivalTime}:00`);
+        
+        // Adjust for timezone differences
+        const tzDiffHours = arrTz.utc - depTz.utc;
+        const tzDiffMs = tzDiffHours * 60 * 60 * 1000;
+        
+        // Calculate actual flight duration
+        let durationMs = arrDate.getTime() - depDate.getTime() - tzDiffMs;
+        
+        // Handle overnight flights (arrival next day)
+        if (durationMs < 0) {
+          durationMs += 24 * 60 * 60 * 1000; // Add 24 hours
+        }
+        
+        // Very long flights might span 2+ days, but that's rare for commercial flights
+        if (durationMs > 20 * 60 * 60 * 1000) { // More than 20 hours
+          durationMs -= 24 * 60 * 60 * 1000; // Subtract 24 hours
+        }
+
+        const hours = Math.floor(durationMs / (1000 * 60 * 60));
+        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        const countryIndicator = depTz.country !== arrTz.country ? ` 🌍` : '';
+        return `${hours}h ${minutes}m${countryIndicator}`;
+      } else {
+        // Fallback to simple calculation if cities not in database
+        const start = new Date(`2000-01-01T${departureTime}`);
+        const end = new Date(`2000-01-01T${arrivalTime}`);
+        let diff = end - start;
+        
+        // Handle overnight flights
+        if (diff < 0) {
+          diff += 24 * 60 * 60 * 1000;
+        }
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h ${minutes}m ⚠️`;
+      }
+    } catch (error) {
+      console.error('Error calculating flight duration:', error);
+      return 'Erro no cálculo';
+    }
+  };
+
   // Multiple suppliers management functions
   const addSupplier = () => {
     if (newTransaction.suppliers.length < 6) {
