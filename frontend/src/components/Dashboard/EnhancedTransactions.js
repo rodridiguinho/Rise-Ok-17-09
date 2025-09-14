@@ -320,6 +320,13 @@ const EnhancedTransactions = () => {
     setNewTransaction({ ...newTransaction, products: newProducts });
   };
 
+  // Generate internal reservation code
+  const generateInternalCode = () => {
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(Math.random() * 9000) + 1000; // 4 digit random number
+    return `RT-${year}-${randomNum}`;
+  };
+
   // Multiple suppliers management functions
   const addSupplier = () => {
     if (newTransaction.suppliers.length < 6) {
