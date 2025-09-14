@@ -177,44 +177,56 @@ const PassengerControl = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="px-3 py-1">
+          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded">
             {reservations.length} Reservas Ativas
-          </Badge>
+          </span>
         </div>
       </div>
 
+      {loading && (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Plane className="h-8 w-8 animate-bounce mx-auto mb-2" />
+            <p>Carregando reservas...</p>
+          </div>
+        </div>
+      )}
+
       {/* Reservations Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {reservations.map((reservation) => {
-          const daysUntil = getDaysUntilTravel(reservation.departureDate);
-          const reminderStatus = getReminderStatus(daysUntil);
-          
-          return (
-            <Card key={reservation.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {reservations.map((reservation) => {
+            const daysUntil = getDaysUntilTravel(reservation.departureDate);
+            const reminderStatus = getReminderStatus(daysUntil);
+            
+            return (
+              <div key={reservation.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <CardTitle className="text-lg">
+                    <h3 className="text-lg font-semibold">
                       🔗 {reservation.internalCode}
-                    </CardTitle>
-                    <CardDescription>
-                      {reservation.clientReservationCode && (
-                        <span>Cliente: {reservation.clientReservationCode}</span>
-                      )}
-                    </CardDescription>
+                    </h3>
+                    {reservation.clientReservationCode && (
+                      <p className="text-gray-600 text-sm">
+                        Cliente: {reservation.clientReservationCode}
+                      </p>
+                    )}
                   </div>
-                  <Badge 
-                    variant="outline" 
-                    className={`text-${reminderStatus.color}-600 border-${reminderStatus.color}-300`}
-                  >
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    reminderStatus.color === 'red' ? 'bg-red-100 text-red-800' :
+                    reminderStatus.color === 'orange' ? 'bg-orange-100 text-orange-800' :
+                    reminderStatus.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                    reminderStatus.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                    reminderStatus.color === 'green' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
                     {reminderStatus.text}
-                  </Badge>
+                  </span>
                 </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
+                
                 {/* Flight Info */}
-                <div className="space-y-2">
+                <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm">
                     <Plane className="h-4 w-4 mr-2 text-blue-600" />
                     <span className="font-medium">{reservation.airline || 'Companhia não informada'}</span>
@@ -246,9 +258,8 @@ const PassengerControl = () => {
                   </div>
                   
                   <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => setSelectedReservation(reservation)}
+                    className="text-sm px-3 py-1"
                   >
                     Gerenciar
                   </Button>
@@ -256,226 +267,83 @@ const PassengerControl = () => {
 
                 {/* Stopovers */}
                 {(reservation.hasOutboundStop || reservation.hasReturnStop) && (
-                  <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
+                  <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded mt-2">
                     ✈️ Voo com escala
                     {reservation.outboundStopCity && ` (Ida: ${reservation.outboundStopCity})`}
                     {reservation.returnStopCity && ` (Volta: ${reservation.returnStopCity})`}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Empty State */}
-      {reservations.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Plane className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Nenhuma reserva encontrada
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Crie transações de entrada com dados de viagem para vê-las aqui
-            </p>
-          </CardContent>
-        </Card>
+              </div>
+            );
+          })}
+        </div>
       )}
 
-      {/* Passenger Management Modal */}
+      {/* Empty State */}
+      {!loading && reservations.length === 0 && (
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <Plane className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Nenhuma reserva encontrada
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Crie transações de entrada com dados de viagem para vê-las aqui
+          </p>
+        </div>
+      )}
+
+      {/* Simple Modal for Selected Reservation */}
       {selectedReservation && (
-        <Dialog open={!!selectedReservation} onOpenChange={() => setSelectedReservation(null)}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
                 <UserCheck className="mr-2 h-5 w-5" />
-                Gerenciar Reserva: {selectedReservation.internalCode}
-              </DialogTitle>
-              <DialogDescription>
-                {selectedReservation.client} • {selectedReservation.departureCity} → {selectedReservation.arrivalCity}
-              </DialogDescription>
-            </DialogHeader>
+                Reserva: {selectedReservation.internalCode}
+              </h2>
+              <Button onClick={() => setSelectedReservation(null)} variant="ghost">
+                ✕
+              </Button>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              {selectedReservation.client} • {selectedReservation.departureCity} → {selectedReservation.arrivalCity}
+            </p>
 
-            <Tabs defaultValue="passengers" className="mt-4">
-              <TabsList>
-                <TabsTrigger value="passengers">Passageiros</TabsTrigger>
-                <TabsTrigger value="services">Serviços</TabsTrigger>
-                <TabsTrigger value="reminders">Lembretes</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="passengers" className="space-y-4">
-                {/* Add Passenger Button */}
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">
-                    Passageiros ({selectedReservation.passengers.length})
-                  </h3>
-                  <Dialog open={isAddPassengerOpen} onOpenChange={setIsAddPassengerOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Adicionar Passageiro
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Adicionar Passageiro</DialogTitle>
-                      </DialogHeader>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div className="space-y-2">
-                          <Label>Nome Completo *</Label>
-                          <Input
-                            value={newPassenger.name}
-                            onChange={(e) => setNewPassenger({...newPassenger, name: e.target.value})}
-                            placeholder="Nome como no documento"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label>CPF/Documento *</Label>
-                          <Input
-                            value={newPassenger.document}
-                            onChange={(e) => setNewPassenger({...newPassenger, document: e.target.value})}
-                            placeholder="000.000.000-00"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label>Data de Nascimento</Label>
-                          <Input
-                            type="date"
-                            value={newPassenger.birthDate}
-                            onChange={(e) => setNewPassenger({...newPassenger, birthDate: e.target.value})}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label>Tipo de Passageiro</Label>
-                          <Select value={newPassenger.type} onValueChange={(value) => setNewPassenger({...newPassenger, type: value})}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Adulto">👤 Adulto</SelectItem>
-                              <SelectItem value="Criança">👶 Criança (2-11 anos)</SelectItem>
-                              <SelectItem value="Bebê">🍼 Bebê (0-2 anos)</SelectItem>
-                              <SelectItem value="Idoso">👴 Idoso (60+ anos)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Assento Preferencial</Label>
-                          <Input
-                            value={newPassenger.seat}
-                            onChange={(e) => setNewPassenger({...newPassenger, seat: e.target.value})}
-                            placeholder="Ex: 12A, Janela, Corredor"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Bagagem</Label>
-                          <Input
-                            value={newPassenger.baggage}
-                            onChange={(e) => setNewPassenger({...newPassenger, baggage: e.target.value})}
-                            placeholder="Ex: 23kg, Bagagem extra"
-                          />
-                        </div>
-
-                        <div className="space-y-2 md:col-span-2">
-                          <Label>Necessidades Especiais</Label>
-                          <Input
-                            value={newPassenger.specialNeeds}
-                            onChange={(e) => setNewPassenger({...newPassenger, specialNeeds: e.target.value})}
-                            placeholder="Ex: Cadeira de rodas, Dieta especial, Medicamentos"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-end space-x-2 mt-6">
-                        <Button variant="outline" onClick={() => setIsAddPassengerOpen(false)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={addPassenger} disabled={!newPassenger.name || !newPassenger.document}>
-                          Adicionar Passageiro
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+            <div className="space-y-4">
+              <h3 className="font-medium text-lg">
+                Passageiros ({selectedReservation.passengers.length})
+              </h3>
+              
+              {selectedReservation.passengers.map((passenger, index) => (
+                <div key={index} className="bg-gray-50 p-4 rounded">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium">{passenger.name}</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                      {passenger.type}
+                    </span>
+                  </div>
+                  
+                  {passenger.document && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Documento: {passenger.document}
+                    </p>
+                  )}
                 </div>
-
-                {/* Passengers List */}
-                <div className="space-y-3">
-                  {selectedReservation.passengers.map((passenger, index) => (
-                    <Card key={index}>
-                      <CardContent className="pt-4">
-                        <div className="flex justify-between items-start">
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              {passenger.type === 'Adulto' && <User className="h-4 w-4 text-blue-600" />}
-                              {passenger.type === 'Criança' && <Baby className="h-4 w-4 text-green-600" />}
-                              {passenger.type === 'Bebê' && <Baby className="h-4 w-4 text-pink-600" />}
-                              {passenger.type === 'Idoso' && <User className="h-4 w-4 text-purple-600" />}
-                              <h4 className="font-medium">{passenger.name}</h4>
-                              <Badge variant="secondary">{passenger.type}</Badge>
-                            </div>
-                            
-                            <div className="text-sm text-gray-600 space-y-1">
-                              {passenger.document && <div>Documento: {passenger.document}</div>}
-                              {passenger.birthDate && <div>Nascimento: {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}</div>}
-                              {passenger.seat && (
-                                <div className="flex items-center">
-                                  <Seat className="h-3 w-3 mr-1" />
-                                  Assento: {passenger.seat}
-                                </div>
-                              )}
-                              {passenger.baggage && (
-                                <div className="flex items-center">
-                                  <Luggage className="h-3 w-3 mr-1" />
-                                  Bagagem: {passenger.baggage}
-                                </div>
-                              )}
-                              {passenger.specialNeeds && (
-                                <div className="text-orange-600">
-                                  <AlertTriangle className="h-3 w-3 mr-1 inline" />
-                                  {passenger.specialNeeds}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center">
-                            {passenger.status === 'Confirmado' && <CheckCircle className="h-5 w-5 text-green-500" />}
-                            {passenger.status === 'Pendente' && <Clock className="h-5 w-5 text-yellow-500" />}
-                            {passenger.status === 'Cancelado' && <XCircle className="h-5 w-5 text-red-500" />}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="services" className="space-y-4">
-                <h3 className="text-lg font-medium">Serviços Extras</h3>
-                <div className="text-center py-8 text-gray-500">
-                  <Luggage className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                  <p>Funcionalidade em desenvolvimento</p>
-                  <p className="text-sm">Em breve: bagagem extra, assentos, refeições especiais</p>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="reminders" className="space-y-4">
-                <h3 className="text-lg font-medium">Sistema de Lembretes</h3>
-                <div className="text-center py-8 text-gray-500">
-                  <Bell className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                  <p>Funcionalidade em desenvolvimento</p>
-                  <p className="text-sm">Em breve: lembretes automáticos 30d, 15d, 7d, 48h, 36h, 24h antes da viagem</p>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </DialogContent>
-        </Dialog>
+              ))}
+              
+              <div className="pt-4">
+                <p className="text-sm text-gray-500 text-center">
+                  🚧 Funcionalidades avançadas em desenvolvimento:<br/>
+                  • Adicionar passageiros<br/>
+                  • Serviços extras (bagagem, assentos)<br/>
+                  • Sistema de lembretes automáticos
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
