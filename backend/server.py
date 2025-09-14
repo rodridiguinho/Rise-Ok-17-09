@@ -748,6 +748,21 @@ async def create_transaction(transaction: TransactionCreate):
             "departureCity": transaction.departureCity,
             "arrivalCity": transaction.arrivalCity,
             "productType": transaction.productType or "Passagem",
+            
+            # Enhanced flight schedule fields with timezone support
+            "outboundDepartureTime": transaction.outboundDepartureTime,
+            "outboundArrivalTime": transaction.outboundArrivalTime,
+            "returnDepartureTime": transaction.returnDepartureTime,
+            "returnArrivalTime": transaction.returnArrivalTime,
+            "hasOutboundStop": transaction.hasOutboundStop,
+            "hasReturnStop": transaction.hasReturnStop,
+            "outboundStopCity": transaction.outboundStopCity,
+            "outboundStopArrival": transaction.outboundStopArrival,
+            "outboundStopDeparture": transaction.outboundStopDeparture,
+            "returnStopCity": transaction.returnStopCity,
+            "returnStopArrival": transaction.returnStopArrival,
+            "returnStopDeparture": transaction.returnStopDeparture,
+            
             "supplierUsedMiles": transaction.supplierUsedMiles or False,
             "supplierMilesQuantity": transaction.supplierMilesQuantity,
             "supplierMilesValue": transaction.supplierMilesValue,
