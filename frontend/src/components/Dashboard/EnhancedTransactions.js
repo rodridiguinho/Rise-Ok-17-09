@@ -1398,7 +1398,7 @@ const EnhancedTransactions = () => {
                       </div>
 
                       {supplier.usedMiles && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-blue-50 rounded-md">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-3 bg-blue-50 rounded-md">
                           <div className="space-y-2">
                             <Label>Quantidade de Milhas</Label>
                             <Input
@@ -1417,6 +1417,31 @@ const EnhancedTransactions = () => {
                               placeholder="Ex: 26,00"
                               value={supplier.milesValue}
                               onChange={(e) => updateSupplier(index, 'milesValue', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Valor Total das Milhas</Label>
+                            <Input
+                              type="text"
+                              readOnly
+                              value={supplier.milesQuantity && supplier.milesValue 
+                                ? formatCurrency((parseFloat(supplier.milesQuantity || 0) * parseFloat(supplier.milesValue || 0)) / 1000)
+                                : 'R$ 0,00'
+                              }
+                              className="bg-gray-100 text-blue-600 font-medium"
+                              placeholder="R$ 0,00"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Taxas de Emissão (R$)</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="Ex: 45,00"
+                              value={supplier.emissionTaxes || ''}
+                              onChange={(e) => updateSupplier(index, 'emissionTaxes', e.target.value)}
                             />
                           </div>
 
