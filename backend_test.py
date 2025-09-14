@@ -892,6 +892,227 @@ def test_review_request_complete_enhanced_transaction():
     except Exception as e:
         print_result(False, "Complete enhanced transaction creation failed", str(e))
 
+def test_login_functionality_review_request():
+    """Test Login Functionality - SPECIFIC REVIEW REQUEST"""
+    print_test_header("Login Functionality Testing - Review Request")
+    
+    # Test 1: Test POST /api/auth/login with valid credentials
+    print("\n🎯 TEST 1: LOGIN WITH VALID CREDENTIALS")
+    try:
+        valid_login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        
+        response = requests.post(f"{API_URL}/auth/login", json=valid_login_data, timeout=10)
+        print(f"Login Response Status: {response.status_code}")
+        print(f"Login Response Headers: {dict(response.headers)}")
+        print(f"Login Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verify JWT token is returned
+            if "access_token" in data:
+                token = data["access_token"]
+                print_result(True, "Valid Login - JWT Token Generation", 
+                           f"JWT token generated successfully (length: {len(token)} chars)")
+                
+                # Verify token format (JWT should have 3 parts separated by dots)
+                token_parts = token.split('.')
+                if len(token_parts) == 3:
+                    print_result(True, "Valid Login - JWT Token Format", 
+                               "JWT token has correct format (3 parts)")
+                else:
+                    print_result(False, "Valid Login - JWT Token Format", 
+                               f"JWT token has incorrect format ({len(token_parts)} parts)")
+            else:
+                print_result(False, "Valid Login - JWT Token Missing", 
+                           "access_token not found in response")
+            
+            # Verify token_type is returned
+            if data.get("token_type") == "bearer":
+                print_result(True, "Valid Login - Token Type", 
+                           f"Token type correctly set: {data.get('token_type')}")
+            else:
+                print_result(False, "Valid Login - Token Type", 
+                           f"Expected 'bearer', got: {data.get('token_type')}")
+            
+            # Verify user information is returned
+            if "user" in data:
+                user_info = data["user"]
+                expected_user_fields = ["id", "name", "email", "role"]
+                missing_fields = [f for f in expected_user_fields if f not in user_info]
+                
+                if not missing_fields:
+                    print_result(True, "Valid Login - User Information", 
+                               f"All user fields present: {expected_user_fields}")
+                    print_result(True, "Valid Login - User Details", 
+                               f"User: {user_info.get('name')}, Email: {user_info.get('email')}, Role: {user_info.get('role')}")
+                else:
+                    print_result(False, "Valid Login - User Information", 
+                               f"Missing user fields: {missing_fields}")
+            else:
+                print_result(False, "Valid Login - User Information Missing", 
+                           "User information not found in response")
+            
+            # Store token for potential future use
+            global auth_token
+            auth_token = data.get("access_token")
+            
+        elif response.status_code == 401:
+            print_result(False, "Valid Login - Authentication Failed", 
+                       f"Login failed with valid credentials: {response.text}")
+        else:
+            print_result(False, f"Valid Login - HTTP {response.status_code}", 
+                       f"Unexpected response: {response.text}")
+            
+    except requests.exceptions.Timeout:
+        print_result(False, "Valid Login - Request Timeout", 
+                   "Login request timed out after 10 seconds")
+    except requests.exceptions.ConnectionError:
+        print_result(False, "Valid Login - Connection Error", 
+                   f"Could not connect to {API_URL}/auth/login")
+    except Exception as e:
+        print_result(False, "Valid Login - Exception", str(e))
+    
+    # Test 2: Test POST /api/auth/login with invalid credentials
+    print("\n🎯 TEST 2: LOGIN WITH INVALID CREDENTIALS")
+    try:
+        invalid_login_data = {
+            "email": INVALID_EMAIL,  # invalid@test.com
+            "password": INVALID_PASSWORD  # wrongpassword
+        }
+        
+        response = requests.post(f"{API_URL}/auth/login", json=invalid_login_data, timeout=10)
+        print(f"Invalid Login Response Status: {response.status_code}")
+        print(f"Invalid Login Response Text: {response.text}")
+        
+        if response.status_code == 401:
+            print_result(True, "Invalid Login - Proper Error Handling", 
+                       "Invalid credentials correctly rejected with 401 status")
+            
+            # Verify error message
+            try:
+                error_data = response.json()
+                if "detail" in error_data:
+                    print_result(True, "Invalid Login - Error Message", 
+                               f"Error message provided: {error_data['detail']}")
+                else:
+                    print_result(False, "Invalid Login - Error Message Missing", 
+                               "No error message in response")
+            except:
+                print_result(False, "Invalid Login - Response Format", 
+                           "Response is not valid JSON")
+                
+        elif response.status_code == 200:
+            print_result(False, "Invalid Login - Security Issue", 
+                       "Invalid credentials were accepted (security vulnerability)")
+        else:
+            print_result(False, f"Invalid Login - Unexpected Status {response.status_code}", 
+                       f"Expected 401, got {response.status_code}: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Invalid Login - Exception", str(e))
+    
+    # Test 3: Test with malformed email
+    print("\n🎯 TEST 3: LOGIN WITH MALFORMED EMAIL")
+    try:
+        malformed_email_data = {
+            "email": "not-an-email",
+            "password": VALID_PASSWORD
+        }
+        
+        response = requests.post(f"{API_URL}/auth/login", json=malformed_email_data, timeout=10)
+        print(f"Malformed Email Response Status: {response.status_code}")
+        
+        if response.status_code in [400, 401, 422]:
+            print_result(True, "Malformed Email - Proper Validation", 
+                       f"Malformed email correctly rejected with status {response.status_code}")
+        else:
+            print_result(False, f"Malformed Email - Validation Issue", 
+                       f"Expected 400/401/422, got {response.status_code}")
+            
+    except Exception as e:
+        print_result(False, "Malformed Email - Exception", str(e))
+    
+    # Test 4: Test with missing fields
+    print("\n🎯 TEST 4: LOGIN WITH MISSING FIELDS")
+    try:
+        # Test with missing password
+        missing_password_data = {
+            "email": VALID_EMAIL
+        }
+        
+        response = requests.post(f"{API_URL}/auth/login", json=missing_password_data, timeout=10)
+        print(f"Missing Password Response Status: {response.status_code}")
+        
+        if response.status_code in [400, 422]:
+            print_result(True, "Missing Password - Proper Validation", 
+                       f"Missing password correctly rejected with status {response.status_code}")
+        else:
+            print_result(False, f"Missing Password - Validation Issue", 
+                       f"Expected 400/422, got {response.status_code}")
+        
+        # Test with missing email
+        missing_email_data = {
+            "password": VALID_PASSWORD
+        }
+        
+        response = requests.post(f"{API_URL}/auth/login", json=missing_email_data, timeout=10)
+        print(f"Missing Email Response Status: {response.status_code}")
+        
+        if response.status_code in [400, 422]:
+            print_result(True, "Missing Email - Proper Validation", 
+                       f"Missing email correctly rejected with status {response.status_code}")
+        else:
+            print_result(False, f"Missing Email - Validation Issue", 
+                       f"Expected 400/422, got {response.status_code}")
+            
+    except Exception as e:
+        print_result(False, "Missing Fields - Exception", str(e))
+    
+    # Test 5: Test endpoint accessibility
+    print("\n🎯 TEST 5: ENDPOINT ACCESSIBILITY")
+    try:
+        # Test if the endpoint is reachable
+        response = requests.get(f"{API_URL}/auth/login", timeout=5)
+        print(f"Endpoint Accessibility Response Status: {response.status_code}")
+        
+        # GET should return 405 (Method Not Allowed) since it's a POST endpoint
+        if response.status_code == 405:
+            print_result(True, "Endpoint Accessibility - Endpoint Reachable", 
+                       "Login endpoint is accessible (returns 405 for GET as expected)")
+        elif response.status_code == 404:
+            print_result(False, "Endpoint Accessibility - Endpoint Not Found", 
+                       "Login endpoint returns 404 - endpoint may not be properly configured")
+        else:
+            print_result(True, "Endpoint Accessibility - Endpoint Reachable", 
+                       f"Login endpoint is accessible (status: {response.status_code})")
+            
+    except requests.exceptions.Timeout:
+        print_result(False, "Endpoint Accessibility - Timeout", 
+                   "Login endpoint is not responding (timeout)")
+    except requests.exceptions.ConnectionError:
+        print_result(False, "Endpoint Accessibility - Connection Error", 
+                   f"Cannot connect to login endpoint at {API_URL}/auth/login")
+    except Exception as e:
+        print_result(False, "Endpoint Accessibility - Exception", str(e))
+    
+    # Test 6: Backend URL verification
+    print("\n🎯 TEST 6: BACKEND URL VERIFICATION")
+    print_result(True, "Backend URL Configuration", 
+               f"Using backend URL: {BASE_URL}")
+    print_result(True, "API URL Configuration", 
+               f"Testing API at: {API_URL}")
+    
+    if "travelflow-7.preview.emergentagent.com" in BASE_URL:
+        print_result(True, "Backend URL - Correct Domain", 
+                   "Using correct production domain as specified in review request")
+    else:
+        print_result(False, "Backend URL - Domain Mismatch", 
+                   f"Expected travelflow-7.preview.emergentagent.com, got: {BASE_URL}")
+
 def test_specific_transaction_creation_bug():
     """Test Specific Transaction Creation Bug - REVIEW REQUEST"""
     print_test_header("Specific Transaction Creation Bug - Review Request Testing")
