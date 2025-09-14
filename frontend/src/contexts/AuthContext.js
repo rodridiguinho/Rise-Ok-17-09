@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
         
         return { success: true };
       } else {
-        return { success: false, error: 'Credenciais inválidas' };
+        return { success: false, error: response.error || 'Credenciais inválidas' };
       }
     } catch (error) {
       console.error('Login error:', error);
