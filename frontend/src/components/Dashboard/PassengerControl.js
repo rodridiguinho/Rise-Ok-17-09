@@ -152,17 +152,6 @@ const PassengerControl = () => {
     return { status: 'future', color: 'gray', text: `${daysUntil} dias` };
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Plane className="h-8 w-8 animate-bounce mx-auto mb-2" />
-          <p>Carregando reservas...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
