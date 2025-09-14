@@ -729,6 +729,7 @@ async def create_transaction(transaction: TransactionCreate):
             "products": transaction.products or [],
             # Enhanced fields for client reservation and supplier miles
             "clientReservationCode": transaction.clientReservationCode,
+            "internalReservationCode": transaction.internalReservationCode,
             "departureCity": transaction.departureCity,
             "arrivalCity": transaction.arrivalCity,
             "productType": transaction.productType or "Passagem",
