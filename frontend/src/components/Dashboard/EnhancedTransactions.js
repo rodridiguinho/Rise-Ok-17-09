@@ -1918,21 +1918,27 @@ const EnhancedTransactions = () => {
 
                             <div className="space-y-2">
                               <Label>Programa de Milhas</Label>
-                              <Select value={supplier.milesProgram || ''} onValueChange={(value) => updateSupplier(index, 'milesProgram', value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o programa" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="LATAM Pass">✈️ LATAM Pass</SelectItem>
-                                  <SelectItem value="Smiles">✈️ Smiles (GOL)</SelectItem>
-                                  <SelectItem value="TudoAzul">✈️ TudoAzul (Azul)</SelectItem>
-                                  <SelectItem value="Multiplus">✈️ Multiplus</SelectItem>
-                                  <SelectItem value="American Airlines">✈️ American Airlines</SelectItem>
-                                  <SelectItem value="United">✈️ United MileagePlus</SelectItem>
-                                  <SelectItem value="Delta">✈️ Delta SkyMiles</SelectItem>
-                                  <SelectItem value="Outros">📋 Outros</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <div className="relative">
+                                <Input
+                                  list={`edit-miles-programs-${index}`}
+                                  placeholder="Digite ou selecione o programa"
+                                  value={supplier.milesProgram || ''}
+                                  onChange={(e) => updateSupplier(index, 'milesProgram', e.target.value)}
+                                  className="w-full"
+                                />
+                                <datalist id={`edit-miles-programs-${index}`}>
+                                  <option value="LATAM Pass">✈️ LATAM Pass</option>
+                                  <option value="Smiles">✈️ Smiles (GOL)</option>
+                                  <option value="TudoAzul">✈️ TudoAzul (Azul)</option>
+                                  <option value="Multiplus">✈️ Multiplus</option>
+                                  <option value="American Airlines">✈️ American Airlines</option>
+                                  <option value="United MileagePlus">✈️ United MileagePlus</option>
+                                  <option value="Delta SkyMiles">✈️ Delta SkyMiles</option>
+                                  <option value="Air France Flying Blue">✈️ Air France Flying Blue</option>
+                                  <option value="Lufthansa Miles & More">✈️ Lufthansa Miles & More</option>
+                                  <option value="British Airways Executive Club">✈️ British Airways Executive Club</option>
+                                </datalist>
+                              </div>
                             </div>
                           </div>
                         )}
