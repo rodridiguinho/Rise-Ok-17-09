@@ -14,7 +14,7 @@ import {
   Users,
   User
 } from 'lucide-react';
-import { api } from '../../services/api';
+import { transactionsAPI } from '../../services/api';
 
 const PassengerControl = () => {
   const [reservations, setReservations] = useState([]);
