@@ -1507,6 +1507,7 @@ const EnhancedTransactions = () => {
                       onChange={(value) => setNewTransaction({...newTransaction, departureCity: value})}
                       placeholder="Digite para buscar cidades..."
                       id="departure-city"
+                      airportCities={airportCities}
                     />
                   </div>
 
@@ -1517,6 +1518,7 @@ const EnhancedTransactions = () => {
                       onChange={(value) => setNewTransaction({...newTransaction, arrivalCity: value})}
                       placeholder="Digite para buscar cidades..."
                       id="arrival-city"
+                      airportCities={airportCities}
                     />
                   </div>
                 </div>
