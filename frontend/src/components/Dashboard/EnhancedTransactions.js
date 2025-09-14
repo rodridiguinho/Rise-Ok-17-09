@@ -1494,19 +1494,21 @@ const EnhancedTransactions = () => {
 
                   <div className="space-y-2">
                     <Label>Cidade de Saída</Label>
-                    <Input
-                      placeholder="Ex: São Paulo (GRU)"
+                    <CityInput
                       value={newTransaction.departureCity}
-                      onChange={(e) => setNewTransaction({...newTransaction, departureCity: e.target.value})}
+                      onChange={(value) => setNewTransaction({...newTransaction, departureCity: value})}
+                      placeholder="Digite para buscar cidades..."
+                      id="departure-city"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label>Cidade de Chegada</Label>
-                    <Input
-                      placeholder="Ex: Rio de Janeiro (SDU)"
+                    <CityInput
                       value={newTransaction.arrivalCity}
-                      onChange={(e) => setNewTransaction({...newTransaction, arrivalCity: e.target.value})}
+                      onChange={(value) => setNewTransaction({...newTransaction, arrivalCity: value})}
+                      placeholder="Digite para buscar cidades..."
+                      id="arrival-city"
                     />
                   </div>
                 </div>
