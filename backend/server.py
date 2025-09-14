@@ -113,6 +113,7 @@ class TransactionCreate(BaseModel):
     products: Optional[list] = []  # Multiple products
     # Enhanced fields for client reservation and supplier miles
     clientReservationCode: Optional[str] = None
+    internalReservationCode: Optional[str] = None
     departureCity: Optional[str] = None
     arrivalCity: Optional[str] = None
     productType: Optional[str] = "Passagem"  # Passagem/Hotel/Pacote/Outros
