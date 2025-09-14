@@ -429,6 +429,8 @@ const EnhancedTransactions = () => {
       products: [{ name: '', cost: '', supplier: 'none' }],
       // Enhanced fields for client reservation and supplier miles
       clientReservationCode: '',
+      airline: '',
+      internalReservationCode: '',
       departureCity: '',
       arrivalCity: '',
       productType: 'Passagem',
