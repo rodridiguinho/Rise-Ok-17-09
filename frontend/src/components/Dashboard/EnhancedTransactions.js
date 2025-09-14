@@ -2274,10 +2274,19 @@ const EnhancedTransactions = () => {
                                   if (newTransaction.outboundStopArrival && newTransaction.outboundStopDeparture) {
                                     const arrival = new Date(`2000-01-01T${newTransaction.outboundStopArrival}`);
                                     const departure = new Date(`2000-01-01T${newTransaction.outboundStopDeparture}`);
-                                    const diff = departure - arrival;
+                                    let diff = departure - arrival;
+                                    
+                                    // Handle overnight layovers
+                                    if (diff < 0) {
+                                      diff += 24 * 60 * 60 * 1000;
+                                    }
+                                    
                                     const hours = Math.floor(diff / (1000 * 60 * 60));
                                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                    return `${hours}h ${minutes}m`;
+                                    
+                                    // Visual indicator for long layovers
+                                    const indicator = hours >= 12 ? ' 🌙' : hours >= 4 ? ' ⏰' : '';
+                                    return `${hours}h ${minutes}m${indicator}`;
                                   }
                                   return 'Automático';
                                 })()}
