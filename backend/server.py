@@ -117,6 +117,21 @@ class TransactionCreate(BaseModel):
     departureCity: Optional[str] = None
     arrivalCity: Optional[str] = None
     productType: Optional[str] = "Passagem"  # Passagem/Hotel/Pacote/Outros
+    
+    # Enhanced flight schedule fields with timezone support
+    outboundDepartureTime: Optional[str] = None
+    outboundArrivalTime: Optional[str] = None
+    returnDepartureTime: Optional[str] = None
+    returnArrivalTime: Optional[str] = None
+    hasOutboundStop: Optional[bool] = False
+    hasReturnStop: Optional[bool] = False
+    outboundStopCity: Optional[str] = None
+    outboundStopArrival: Optional[str] = None
+    outboundStopDeparture: Optional[str] = None
+    returnStopCity: Optional[str] = None
+    returnStopArrival: Optional[str] = None
+    returnStopDeparture: Optional[str] = None
+    
     supplierUsedMiles: Optional[bool] = False  # If supplier used miles
     supplierMilesQuantity: Optional[int] = None
     supplierMilesValue: Optional[float] = None
