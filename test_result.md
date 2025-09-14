@@ -249,6 +249,9 @@ backend:
         - working: true
           agent: "main"  
           comment: "Login functionality tested and confirmed working correctly. Successfully authenticated with rodrigo@risetravel.com.br / Emily2030* credentials, redirected to dashboard at /dashboard URL, shows success message 'Login realizado com sucesso!' and user profile 'Rodrigo Rise Travel'. Issue appears to be client-side (browser cache, incorrect credentials, or network connectivity)."
+        - working: true
+          agent: "testing"
+          comment: "✅ LOGIN FUNCTIONALITY COMPREHENSIVE TESTING COMPLETED - ALL TESTS PASSED: Successfully tested POST /api/auth/login endpoint with exact credentials from review request (rodrigo@risetravel.com.br / Emily2030*). ✅ VALID CREDENTIALS TEST: Login successful with HTTP 200, JWT token generated correctly (212 chars, 3-part format), token_type='bearer', complete user information returned (id, name='Rodrigo Rise Travel', email, role='Admin'). ✅ INVALID CREDENTIALS TEST: Properly rejected with HTTP 401 and error message 'Email ou senha inválidos'. ✅ MALFORMED EMAIL TEST: Correctly rejected with HTTP 401. ✅ MISSING FIELDS TEST: Both missing password and missing email properly rejected with HTTP 422. ✅ ENDPOINT ACCESSIBILITY: Login endpoint accessible and responding correctly (returns 405 for GET as expected). ✅ BACKEND URL VERIFICATION: Using correct production domain (travelflow-7.preview.emergentagent.com) as specified in review request. ✅ CONCLUSION: Backend login API is working perfectly - user's reported issue 'não faz login' is NOT a backend problem. The backend authentication system is fully functional with proper JWT token generation, error handling, and validation. Issue is likely client-side (browser cache, network, or user error)."
 
   - task: "Transaction Summary API"
     implemented: true
