@@ -5923,4 +5923,14 @@ def run_review_request_tests():
     print("="*80)
 
 if __name__ == "__main__":
-    run_review_request_tests()
+    print("🚀 Starting Backend API Tests - LOGIN FUNCTIONALITY FOCUS")
+    print(f"🔗 Backend URL: {BASE_URL}")
+    print(f"🔗 API URL: {API_URL}")
+    print(f"👤 Test User: {VALID_EMAIL}")
+    
+    # Run login functionality test as requested in review
+    test_login_functionality_review_request()
+    
+    print("\n" + "="*80)
+    print("🏁 Backend API Tests Completed - LOGIN FUNCTIONALITY TESTED")
+    print("="*80)
