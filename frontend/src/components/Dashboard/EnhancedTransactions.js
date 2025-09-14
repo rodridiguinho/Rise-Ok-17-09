@@ -1463,17 +1463,12 @@ const EnhancedTransactions = () => {
                         <Label>Duração do Voo</Label>
                         <Input
                           readOnly
-                          value={(() => {
-                            if (newTransaction.returnDepartureTime && newTransaction.returnArrivalTime) {
-                              const start = new Date(`2000-01-01T${newTransaction.returnDepartureTime}`);
-                              const end = new Date(`2000-01-01T${newTransaction.returnArrivalTime}`);
-                              const diff = end - start;
-                              const hours = Math.floor(diff / (1000 * 60 * 60));
-                              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                              return `${hours}h ${minutes}m`;
-                            }
-                            return 'Automático';
-                          })()}
+                          value={calculateFlightDuration(
+                            newTransaction.returnDepartureTime,
+                            newTransaction.returnArrivalTime,
+                            newTransaction.arrivalCity,
+                            newTransaction.departureCity
+                          )}
                           className="bg-gray-100 text-green-600 font-medium"
                           placeholder="0h 0m"
                         />
