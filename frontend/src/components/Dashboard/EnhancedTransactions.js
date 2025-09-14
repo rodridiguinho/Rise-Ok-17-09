@@ -106,7 +106,8 @@ const EnhancedTransactions = () => {
       usedMiles: false,
       milesQuantity: '',
       milesValue: '',
-      milesProgram: ''
+      milesProgram: '',
+      emissionTaxes: ''
     }],
     seller: '',
     saleValue: '',
