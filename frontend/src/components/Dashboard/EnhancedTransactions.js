@@ -2507,6 +2507,7 @@ const EnhancedTransactions = () => {
                                 onChange={(value) => setNewTransaction({...newTransaction, outboundStopCity: value})}
                                 placeholder="Digite para buscar cidades..."
                                 id="outbound-stop-city"
+                                airportCities={airportCities}
                               />
                             </div>
 
