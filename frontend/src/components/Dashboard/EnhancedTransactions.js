@@ -719,68 +719,6 @@ const EnhancedTransactions = () => {
     }
   };
 
-  // Custom CityInput component with autocomplete
-  const CityInput = ({ value, onChange, placeholder, id }) => {
-    const [suggestions, setSuggestions] = useState([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    
-    const handleInputChange = (e) => {
-      const inputValue = e.target.value;
-      onChange(inputValue);
-      
-      if (inputValue.length >= 2) {
-        const filtered = filterCities(inputValue);
-        setSuggestions(filtered);
-        setShowSuggestions(true);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    };
-    
-    const handleSuggestionClick = (city) => {
-      onChange(city);
-      setSuggestions([]);
-      setShowSuggestions(false);
-    };
-    
-    const handleBlur = () => {
-      // Delay hiding suggestions to allow clicking
-      setTimeout(() => setShowSuggestions(false), 200);
-    };
-    
-    return (
-      <div className="relative">
-        <Input
-          value={value}
-          onChange={handleInputChange}
-          onBlur={handleBlur}
-          onFocus={() => value.length >= 2 && setShowSuggestions(true)}
-          placeholder={placeholder}
-          className="w-full"
-        />
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-            {suggestions.map((city, index) => (
-              <div
-                key={index}
-                className="px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm border-b border-gray-100 last:border-b-0"
-                onClick={() => handleSuggestionClick(city)}
-              >
-                <div className="font-medium text-gray-900">
-                  {city.split(' (')[0]}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {city.includes('(') ? city.split(' (')[1].replace(')', '') : ''}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   // Multiple suppliers management functions
   const addSupplier = () => {
     if (newTransaction.suppliers.length < 6) {
