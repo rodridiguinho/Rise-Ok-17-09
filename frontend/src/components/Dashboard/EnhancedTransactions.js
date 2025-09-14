@@ -487,6 +487,93 @@ const EnhancedTransactions = () => {
     }
   };
 
+  // Function to search transaction by internal code
+  const searchTransactionByCode = async (internalCode) => {
+    if (!internalCode || internalCode.length < 3) {
+      return null;
+    }
+    
+    try {
+      // Search in current transactions list
+      const foundTransaction = transactions.find(t => 
+        t.internalReservationCode === internalCode ||
+        t.internalReservationCode?.toLowerCase().includes(internalCode.toLowerCase())
+      );
+      
+      if (foundTransaction) {
+        return foundTransaction;
+      }
+      
+      // If not found locally, could implement API search here
+      return null;
+    } catch (error) {
+      console.error('Error searching transaction:', error);
+      return null;
+    }
+  };
+
+  // Function to load data from reference transaction
+  const loadFromReferenceTransaction = async (referenceCode) => {
+    const refTransaction = await searchTransactionByCode(referenceCode);
+    
+    if (refTransaction) {
+      // Load all travel data from the reference transaction
+      setNewTransaction(prev => ({
+        ...prev,
+        // Keep the expense transaction data
+        type: 'saida',
+        category: prev.category,
+        transactionDate: prev.transactionDate,
+        description: prev.description,
+        amount: prev.amount,
+        paymentMethod: prev.paymentMethod,
+        
+        // Load reference transaction data
+        referenceTransactionCode: referenceCode,
+        client: refTransaction.client,
+        departureCity: refTransaction.departureCity,
+        arrivalCity: refTransaction.arrivalCity,
+        departureDate: refTransaction.departureDate,
+        returnDate: refTransaction.returnDate,
+        tripType: refTransaction.tripType,
+        airline: refTransaction.airline,
+        clientReservationCode: refTransaction.clientReservationCode,
+        
+        // Flight schedule data
+        outboundDepartureTime: refTransaction.outboundDepartureTime,
+        outboundArrivalTime: refTransaction.outboundArrivalTime,
+        returnDepartureTime: refTransaction.returnDepartureTime,
+        returnArrivalTime: refTransaction.returnArrivalTime,
+        hasOutboundStop: refTransaction.hasOutboundStop,
+        hasReturnStop: refTransaction.hasReturnStop,
+        outboundStopCity: refTransaction.outboundStopCity,
+        outboundStopArrival: refTransaction.outboundStopArrival,
+        outboundStopDeparture: refTransaction.outboundStopDeparture,
+        returnStopCity: refTransaction.returnStopCity,
+        returnStopArrival: refTransaction.returnStopArrival,
+        returnStopDeparture: refTransaction.returnStopDeparture,
+        
+        // Products data
+        products: refTransaction.products || []
+      }));
+      
+      toast({
+        title: "✅ Dados Carregados",
+        description: `Dados da transação ${referenceCode} carregados com sucesso!`,
+      });
+      
+      return true;
+    } else {
+      toast({
+        variant: "destructive",
+        title: "❌ Transação Não Encontrada",
+        description: `Não foi possível encontrar a transação ${referenceCode}`,
+      });
+      
+      return false;
+    }
+  };
+
   // Multiple suppliers management functions
   const addSupplier = () => {
     if (newTransaction.suppliers.length < 6) {
