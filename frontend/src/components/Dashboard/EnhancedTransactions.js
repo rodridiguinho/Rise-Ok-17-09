@@ -1172,15 +1172,6 @@ const EnhancedTransactions = () => {
                         onChange={(e) => setNewTransaction({...newTransaction, expenseNotes: e.target.value})}
                       />
                     </div>
-                        <SelectContent>
-                          {suppliers.map(supplier => (
-                            <SelectItem key={supplier.id} value={supplier.name}>
-                              {supplier.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
 
                     {/* Número da Venda Referência */}
                     <div className="space-y-2">
