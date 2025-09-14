@@ -342,6 +342,79 @@ const EnhancedTransactions = () => {
     return `RT-${year}-${randomNum}`;
   };
 
+  // Comprehensive Airport Cities Database
+  const airportCities = [
+    // BRASIL
+    "São Paulo (GRU/CGH)", "Rio de Janeiro (GIG/SDU)", "Salvador (SSA)", "Brasília (BSB)",
+    "Fortaleza (FOR)", "Recife (REC)", "Manaus (MAO)", "Belém (BEL)", "Porto Alegre (POA)",
+    "Curitiba (CWB)", "Goiânia (GYN)", "João Pessoa (JPA)", "Maceió (MCZ)", "Natal (NAT)",
+    "Vitória (VIX)", "Florianópolis (FLN)", "Campo Grande (CGR)", "Cuiabá (CGB)",
+    
+    // EUROPA
+    "Lisboa (LIS)", "Porto (OPO)", "Madrid (MAD)", "Barcelona (BCN)", "Paris (CDG/ORY)",
+    "Londres (LHR/LGW/STN)", "Roma (FCO/CIA)", "Milão (MXP/LIN)", "Frankfurt (FRA)",
+    "Amsterdam (AMS)", "Zurich (ZUR)", "Viena (VIE)", "Bruxelas (BRU)", "Copenhague (CPH)",
+    "Estocolmo (ARN)", "Oslo (OSL)", "Helsinki (HEL)", "Berlim (BER)", "Munique (MUC)",
+    "Hamburgo (HAM)", "Düsseldorf (DUS)", "Colônia (CGN)", "Atenas (ATH)", "Dublin (DUB)",
+    "Edimburgo (EDI)", "Manchester (MAN)", "Birmingham (BHX)", "Nice (NCE)", "Lyon (LYS)",
+    "Marselha (MRS)", "Toulouse (TLS)", "Nantes (NTE)", "Bordeaux (BOD)", "Veneza (VCE)",
+    "Nápoles (NAP)", "Palermo (PMO)", "Catania (CTA)", "Turim (TRN)", "Bolonha (BLQ)",
+    
+    // AMÉRICA DO NORTE
+    "Nova York (JFK/LGA/EWR)", "Los Angeles (LAX)", "Miami (MIA)", "Orlando (MCO)",
+    "Las Vegas (LAS)", "Chicago (ORD/MDW)", "San Francisco (SFO)", "Seattle (SEA)",
+    "Boston (BOS)", "Washington DC (DCA/IAD)", "Dallas (DFW/DAL)", "Houston (IAH/HOU)",
+    "Phoenix (PHX)", "Denver (DEN)", "Atlanta (ATL)", "Detroit (DTW)", "Minneapolis (MSP)",
+    "Philadelphia (PHL)", "Charlotte (CLT)", "Toronto (YYZ)", "Vancouver (YVR)",
+    "Montreal (YUL)", "Calgary (YYC)", "Cidade do México (MEX)", "Cancún (CUN)",
+    "Guadalajara (GDL)", "Monterrey (MTY)", "Puerto Vallarta (PVR)", "Los Cabos (SJD)",
+    
+    // AMÉRICA DO SUL
+    "Buenos Aires (EZE/JOR)", "Santiago (SCL)", "Lima (LIM)", "Bogotá (BOG)",
+    "Caracas (CCS)", "Montevidéu (MVD)", "Quito (UIO)", "Guayaquil (GYE)", "La Paz (LPB)",
+    "Santa Cruz (VVI)", "Asunción (ASU)", "Medellín (MDE)", "Cartagena (CTG)", "Cali (CLO)",
+    
+    // ÁSIA
+    "Dubai (DXB)", "Doha (DOH)", "Abu Dhabi (AUH)", "Kuwait City (KWI)", "Riad (RUH)",
+    "Tóquio (NRT/HND)", "Osaka (KIX/ITM)", "Pequim (PEK/PKX)", "Shanghai (PVG/SHA)",
+    "Hong Kong (HKG)", "Singapura (SIN)", "Bangkok (BKK/DMK)", "Jakarta (CGK)",
+    "Kuala Lumpur (KUL)", "Manila (MNL)", "Ho Chi Minh (SGN)", "Hanói (HAN)",
+    "Mumbai (BOM)", "Nova Delhi (DEL)", "Bangalore (BLR)", "Chennai (MAA)", "Kolkata (CCU)",
+    "Hyderabad (HYD)", "Pune (PNQ)", "Ahmedabad (AMD)", "Jaipur (JAI)", "Kochi (COK)",
+    "Seoul (ICN/GMP)", "Busan (PUS)", "Taipei (TPE/TSA)", "Kaohsiung (KHH)",
+    
+    // OCEANIA
+    "Sydney (SYD)", "Melbourne (MEL)", "Brisbane (BNE)", "Perth (PER)", "Adelaide (ADL)",
+    "Auckland (AKL)", "Wellington (WLG)", "Christchurch (CHC)", "Gold Coast (OOL)",
+    "Darwin (DRW)", "Cairns (CNS)", "Hobart (HBA)", "Canberra (CBR)",
+    
+    // ÁFRICA
+    "Cidade do Cabo (CPT)", "Joanesburgo (JNB)", "Cairo (CAI)", "Casablanca (CMN)",
+    "Lagos (LOS)", "Nairobi (NBO)", "Addis Abeba (ADD)", "Argel (ALG)", "Tunis (TUN)",
+    "Marrakech (RAK)", "Durban (DUR)", "Pretória (WDH)", "Luanda (LAD)", "Maputo (MPM)",
+    
+    // ORIENTE MÉDIO ADICIONAL
+    "Tel Aviv (TLV)", "Amã (AMM)", "Beirute (BEY)", "Damasco (DAM)", "Bagdá (BGW)",
+    "Teerã (IKA)", "Istambul (IST/SAW)", "Ancara (ESB)", "Erevan (EVN)", "Tbilisi (TBS)",
+    
+    // CARIBE E AMÉRICA CENTRAL
+    "Havana (HAV)", "San José (SJO)", "Cidade do Panamá (PTY)", "San Salvador (SAL)",
+    "Guatemala City (GUA)", "Tegucigalpa (TGU)", "Managua (MGA)", "Kingston (KIN)",
+    "Santo Domingo (SDQ)", "San Juan (SJU)", "Barbados (BGI)", "Port of Spain (POS)",
+    
+    // ÁSIA CENTRAL
+    "Almaty (ALA)", "Tashkent (TAS)", "Bishkek (FRU)", "Dushanbe (DYU)", "Ashgabat (ASB)",
+    "Baku (GYD)", "Ulaanbaatar (UBN)"
+  ];
+
+  // Function to filter cities based on input
+  const filterCities = (input) => {
+    if (!input || input.length < 2) return [];
+    return airportCities.filter(city => 
+      city.toLowerCase().includes(input.toLowerCase())
+    ).slice(0, 8); // Limit to 8 suggestions
+  };
+
   // Timezone Database for major destinations
   const timezoneDB = {
     // BRASIL
