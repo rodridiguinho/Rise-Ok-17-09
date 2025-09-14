@@ -41,6 +41,11 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
       icon: Building2,
     },
     {
+      id: 'passengers',
+      label: 'Controle de Passageiros',
+      icon: UserCheck,
+    },
+    {
       id: 'users',
       label: 'Usuários',
       icon: UserCog,
