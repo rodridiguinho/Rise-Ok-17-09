@@ -3103,6 +3103,11 @@ const EnhancedTransactions = () => {
                       {transaction.supplier && <span>Fornecedor: {transaction.supplier}</span>}
                       <span>Pagamento: {transaction.paymentMethod}</span>
                       {transaction.productType && <span>Produto: {transaction.productType}</span>}
+                      {transaction.internalReservationCode && (
+                        <span className="font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          🔗 Código: {transaction.internalReservationCode}
+                        </span>
+                      )}
                       {transaction.clientReservationCode && <span>Reserva Cliente: {transaction.clientReservationCode}</span>}
                       {transaction.departureCity && transaction.arrivalCity && (
                         <span>{transaction.departureCity} → {transaction.arrivalCity}</span>
