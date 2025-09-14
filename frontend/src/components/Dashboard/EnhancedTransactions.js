@@ -1650,10 +1650,12 @@ const EnhancedTransactions = () => {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div className="space-y-2">
                             <Label>Cidade da Escala</Label>
-                            <Input
-                              placeholder="Ex: São Paulo (GRU)"
+                            <CityInput
                               value={newTransaction.outboundStopCity || ''}
-                              onChange={(e) => setNewTransaction({...newTransaction, outboundStopCity: e.target.value})}
+                              onChange={(value) => setNewTransaction({...newTransaction, outboundStopCity: value})}
+                              placeholder="Digite para buscar cidades..."
+                              id="outbound-stop-city"
+                              airportCities={airportCities}
                             />
                           </div>
 
