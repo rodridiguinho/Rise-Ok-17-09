@@ -429,8 +429,14 @@ const EnhancedTransactions = () => {
     }
 
     try {
+      console.log('DEBUG: Calculating duration for:', {
+        departureTime, arrivalTime, departureCity, arrivalCity
+      });
+      
       const depTz = getTimezoneInfo(departureCity);
       const arrTz = getTimezoneInfo(arrivalCity);
+      
+      console.log('DEBUG: Timezone info:', { depTz, arrTz });
 
       // If we have timezone info for both cities, use it
       if (depTz && arrTz) {
