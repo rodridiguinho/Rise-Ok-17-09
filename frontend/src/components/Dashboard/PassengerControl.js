@@ -11,14 +11,8 @@ import {
   Plane, 
   Clock, 
   Bell,
-  Luggage,
-  Seat,
-  User,
-  Baby,
   Users,
-  AlertTriangle,
-  CheckCircle,
-  XCircle
+  User
 } from 'lucide-react';
 import { api } from '../../services/api';
 
