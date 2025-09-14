@@ -1034,7 +1034,6 @@ const EnhancedTransactions = () => {
                       placeholder="RT-2025-XXX"
                     />
                   </div>
-                  </div>
 
                   <div className="space-y-2">
                     <Label>Cidade de Saída</Label>
