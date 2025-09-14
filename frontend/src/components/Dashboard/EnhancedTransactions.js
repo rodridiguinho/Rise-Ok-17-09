@@ -1131,6 +1131,50 @@ const EnhancedTransactions = () => {
                         <SelectContent>
                           {suppliers.map(supplier => (
                             <SelectItem key={supplier.id} value={supplier.name}>
+                              {supplier.name} - {supplier.supplierCode}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Código de Referência - NOVA FUNCIONALIDADE */}
+                    <div className="space-y-2">
+                      <Label>🔗 Código de Referência</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ex: RT-2025-001"
+                          value={newTransaction.referenceTransactionCode || ''}
+                          onChange={(e) => setNewTransaction({...newTransaction, referenceTransactionCode: e.target.value})}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => loadFromReferenceTransaction(newTransaction.referenceTransactionCode)}
+                          disabled={!newTransaction.referenceTransactionCode}
+                          className="whitespace-nowrap"
+                        >
+                          📥 Carregar
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Digite o código de uma transação de entrada para carregar os dados automaticamente
+                      </p>
+                    </div>
+
+                    {/* Campo de Observações Livres */}
+                    <div className="space-y-2">
+                      <Label>📝 Observações</Label>
+                      <Input
+                        placeholder="Observações sobre esta despesa..."
+                        value={newTransaction.expenseNotes || ''}
+                        onChange={(e) => setNewTransaction({...newTransaction, expenseNotes: e.target.value})}
+                      />
+                    </div>
+                        <SelectContent>
+                          {suppliers.map(supplier => (
+                            <SelectItem key={supplier.id} value={supplier.name}>
                               {supplier.name}
                             </SelectItem>
                           ))}
