@@ -1002,6 +1002,41 @@ const EnhancedTransactions = () => {
                   </div>
 
                   <div className="space-y-2">
+                    <Label>Companhia Aérea</Label>
+                    <Input
+                      list="airlines-list"
+                      placeholder="Ex: LATAM, GOL, Azul..."
+                      value={newTransaction.airline || ''}
+                      onChange={(e) => setNewTransaction({...newTransaction, airline: e.target.value})}
+                    />
+                    <datalist id="airlines-list">
+                      <option value="LATAM">LATAM Airlines</option>
+                      <option value="GOL">GOL Linhas Aéreas</option>
+                      <option value="Azul">Azul Linhas Aéreas</option>
+                      <option value="American Airlines">American Airlines</option>
+                      <option value="United Airlines">United Airlines</option>
+                      <option value="Delta">Delta Air Lines</option>
+                      <option value="Air France">Air France</option>
+                      <option value="Lufthansa">Lufthansa</option>
+                      <option value="British Airways">British Airways</option>
+                      <option value="Emirates">Emirates</option>
+                      <option value="Qatar Airways">Qatar Airways</option>
+                      <option value="TAP">TAP Air Portugal</option>
+                    </datalist>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Código Interno Sistema</Label>
+                    <Input
+                      readOnly
+                      value={newTransaction.internalReservationCode || 'Será gerado automaticamente'}
+                      className="bg-gray-100 text-blue-600 font-medium"
+                      placeholder="RT-2025-XXX"
+                    />
+                  </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label>Cidade de Saída</Label>
                     <Input
                       placeholder="Ex: São Paulo (GRU)"
