@@ -1436,6 +1436,237 @@ AIRPORTS_DATABASE = [
     {"code": "MEL", "city": "Melbourne", "name": "Melbourne - MEL", "country": "Austrália"},
 ]
 
+# Settings endpoints
+@api_router.get("/settings")
+async def get_settings():
+    """Get company settings and categories"""
+    try:
+        # Get company settings
+        company_settings = await db.settings.find_one({"type": "company"})
+        if not company_settings:
+            # Create default company settings
+            default_settings = {
+                "type": "company",
+                "name": "Rise Travel",
+                "email": "rodrigo@risetravel.com",
+                "phone": "",
+                "address": "",
+                "cnpj": "",
+                "website": "",
+                "createdAt": datetime.utcnow(),
+                "updatedAt": datetime.utcnow()
+            }
+            await db.settings.insert_one(default_settings)
+            company_settings = default_settings
+        
+        # Get custom categories
+        revenue_categories_doc = await db.settings.find_one({"type": "revenueCategories"})
+        expense_categories_doc = await db.settings.find_one({"type": "expenseCategories"})
+        
+        # Default categories
+        default_revenue_categories = [
+            'Passagens Aéreas',
+            'Pacotes',
+            'Seguro Viagem', 
+            'Transfer',
+            'Hospedagem',
+            'Airbnb',
+            'Ingressos',
+            'Parques',
+            'Passeios',
+            'Consultoria',
+            'Saldo mês anterior',
+            'Cash Back',
+            'Outros'
+        ]
+        
+        default_expense_categories = [
+            "Salários",
+            "Aluguel",
+            "Conta de Água",
+            "Conta de Luz",
+            "Internet",
+            "Telefone",
+            "Condomínio",
+            "Marketing",
+            "Material de Escritório",
+            "Combustível",
+            "Manutenção",
+            "Impostos",
+            "Pagamento a Fornecedor",
+            "Comissão de Vendedor"
+        ]
+        
+        revenue_categories = revenue_categories_doc.get("categories", default_revenue_categories) if revenue_categories_doc else default_revenue_categories
+        expense_categories = expense_categories_doc.get("categories", default_expense_categories) if expense_categories_doc else default_expense_categories
+        
+        return {
+            "companySettings": {
+                "name": company_settings.get("name", "Rise Travel"),
+                "email": company_settings.get("email", "rodrigo@risetravel.com"),
+                "phone": company_settings.get("phone", ""),
+                "address": company_settings.get("address", ""),
+                "cnpj": company_settings.get("cnpj", ""),
+                "website": company_settings.get("website", "")
+            },
+            "revenueCategories": revenue_categories,
+            "expenseCategories": expense_categories
+        }
+    except Exception as e:
+        logging.error(f"Get settings error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao obter configurações: {str(e)}")
+
+@api_router.put("/settings")
+async def update_settings(settings: dict):
+    """Update company settings"""
+    try:
+        company_data = settings.get("companySettings", {})
+        
+        # Update company settings
+        if company_data:
+            await db.settings.update_one(
+                {"type": "company"},
+                {"$set": {**company_data, "updatedAt": datetime.utcnow()}},
+                upsert=True
+            )
+        
+        return {"message": "Configurações atualizadas com sucesso"}
+    except Exception as e:
+        logging.error(f"Update settings error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao atualizar configurações: {str(e)}")
+
+@api_router.post("/settings/categories/revenue")
+async def add_revenue_category(category_data: dict):
+    """Add new revenue category"""
+    try:
+        category_name = category_data.get("name", "").strip()
+        if not category_name:
+            raise HTTPException(status_code=400, detail="Nome da categoria é obrigatório")
+        
+        # Get existing categories
+        doc = await db.settings.find_one({"type": "revenueCategories"})
+        current_categories = doc.get("categories", []) if doc else [
+            'Passagens Aéreas', 'Pacotes', 'Seguro Viagem', 'Transfer', 'Hospedagem',
+            'Airbnb', 'Ingressos', 'Parques', 'Passeios', 'Consultoria', 
+            'Saldo mês anterior', 'Cash Back', 'Outros'
+        ]
+        
+        # Check if category already exists
+        if category_name in current_categories:
+            raise HTTPException(status_code=400, detail="Categoria já existe")
+        
+        # Add new category
+        current_categories.append(category_name)
+        
+        # Save to database
+        await db.settings.update_one(
+            {"type": "revenueCategories"},
+            {"$set": {"categories": current_categories, "updatedAt": datetime.utcnow()}},
+            upsert=True
+        )
+        
+        return {"message": "Categoria de receita adicionada com sucesso", "categories": current_categories}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Add revenue category error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao adicionar categoria: {str(e)}")
+
+@api_router.post("/settings/categories/expense")
+async def add_expense_category(category_data: dict):
+    """Add new expense category"""
+    try:
+        category_name = category_data.get("name", "").strip()
+        if not category_name:
+            raise HTTPException(status_code=400, detail="Nome da categoria é obrigatório")
+        
+        # Get existing categories
+        doc = await db.settings.find_one({"type": "expenseCategories"})
+        current_categories = doc.get("categories", []) if doc else [
+            "Salários", "Aluguel", "Conta de Água", "Conta de Luz", "Internet",
+            "Telefone", "Condomínio", "Marketing", "Material de Escritório",
+            "Combustível", "Manutenção", "Impostos", "Pagamento a Fornecedor", "Comissão de Vendedor"
+        ]
+        
+        # Check if category already exists
+        if category_name in current_categories:
+            raise HTTPException(status_code=400, detail="Categoria já existe")
+        
+        # Add new category
+        current_categories.append(category_name)
+        
+        # Save to database
+        await db.settings.update_one(
+            {"type": "expenseCategories"},
+            {"$set": {"categories": current_categories, "updatedAt": datetime.utcnow()}},
+            upsert=True
+        )
+        
+        return {"message": "Categoria de despesa adicionada com sucesso", "categories": current_categories}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Add expense category error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao adicionar categoria: {str(e)}")
+
+@api_router.delete("/settings/categories/revenue/{category_name}")
+async def remove_revenue_category(category_name: str):
+    """Remove revenue category"""
+    try:
+        # Get existing categories
+        doc = await db.settings.find_one({"type": "revenueCategories"})
+        if not doc:
+            raise HTTPException(status_code=404, detail="Categorias não encontradas")
+        
+        current_categories = doc.get("categories", [])
+        if category_name not in current_categories:
+            raise HTTPException(status_code=404, detail="Categoria não encontrada")
+        
+        # Remove category
+        current_categories.remove(category_name)
+        
+        # Save to database
+        await db.settings.update_one(
+            {"type": "revenueCategories"},
+            {"$set": {"categories": current_categories, "updatedAt": datetime.utcnow()}}
+        )
+        
+        return {"message": "Categoria removida com sucesso", "categories": current_categories}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Remove revenue category error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao remover categoria: {str(e)}")
+
+@api_router.delete("/settings/categories/expense/{category_name}")
+async def remove_expense_category(category_name: str):
+    """Remove expense category"""
+    try:
+        # Get existing categories
+        doc = await db.settings.find_one({"type": "expenseCategories"})
+        if not doc:
+            raise HTTPException(status_code=404, detail="Categorias não encontradas")
+        
+        current_categories = doc.get("categories", [])
+        if category_name not in current_categories:
+            raise HTTPException(status_code=404, detail="Categoria não encontrada")
+        
+        # Remove category
+        current_categories.remove(category_name)
+        
+        # Save to database
+        await db.settings.update_one(
+            {"type": "expenseCategories"},
+            {"$set": {"categories": current_categories, "updatedAt": datetime.utcnow()}}
+        )
+        
+        return {"message": "Categoria removida com sucesso", "categories": current_categories}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Remove expense category error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao remover categoria: {str(e)}")
+
 # Airports endpoint
 @api_router.get("/travel/airports")
 async def get_airports():
