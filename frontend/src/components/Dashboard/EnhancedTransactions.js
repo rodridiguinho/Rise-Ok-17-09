@@ -1054,8 +1054,8 @@ const EnhancedTransactions = () => {
                   </div>
                 </div>
 
-                {/* Segunda linha - Datas e tipo de viagem */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Segunda linha - Datas, horários e tipo de viagem */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                   <div className="space-y-2">
                     <Label>Tipo de Viagem</Label>
                     <Select value={newTransaction.tripType} onValueChange={(value) => setNewTransaction({...newTransaction, tripType: value})}>
@@ -1081,20 +1081,28 @@ const EnhancedTransactions = () => {
 
                   <div className="space-y-2">
                     <Label>Data de Partida</Label>
-                    <Input
-                      type="date"
-                      value={newTransaction.departureDate}
-                      onChange={(e) => setNewTransaction({...newTransaction, departureDate: e.target.value})}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="date"
+                        value={newTransaction.departureDate}
+                        onChange={(e) => setNewTransaction({...newTransaction, departureDate: e.target.value})}
+                        className="pr-8"
+                      />
+                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">📅</span>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label>Data de Retorno</Label>
-                    <Input
-                      type="date"
-                      value={newTransaction.returnDate}
-                      onChange={(e) => setNewTransaction({...newTransaction, returnDate: e.target.value})}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="date"
+                        value={newTransaction.returnDate}
+                        onChange={(e) => setNewTransaction({...newTransaction, returnDate: e.target.value})}
+                        className="pr-8"
+                      />
+                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">📅</span>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -1108,6 +1116,68 @@ const EnhancedTransactions = () => {
                       />
                       <Label htmlFor="hasStops">Possui escalas</Label>
                     </div>
+                  </div>
+                </div>
+
+                {/* Terceira linha - Horários dos voos */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  <div className="space-y-2">
+                    <Label>Horário Partida</Label>
+                    <div className="relative">
+                      <Input
+                        type="time"
+                        value={newTransaction.departureTime || ''}
+                        onChange={(e) => setNewTransaction({...newTransaction, departureTime: e.target.value})}
+                        className="pr-8"
+                      />
+                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Horário Chegada</Label>
+                    <div className="relative">
+                      <Input
+                        type="time"
+                        value={newTransaction.arrivalTime || ''}
+                        onChange={(e) => setNewTransaction({...newTransaction, arrivalTime: e.target.value})}
+                        className="pr-8"
+                      />
+                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Horário Retorno</Label>
+                    <div className="relative">
+                      <Input
+                        type="time"
+                        value={newTransaction.returnTime || ''}
+                        onChange={(e) => setNewTransaction({...newTransaction, returnTime: e.target.value})}
+                        className="pr-8"
+                      />
+                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Duração Estimada</Label>
+                    <Input
+                      readOnly
+                      value={(() => {
+                        if (newTransaction.departureTime && newTransaction.arrivalTime) {
+                          const start = new Date(`2000-01-01T${newTransaction.departureTime}`);
+                          const end = new Date(`2000-01-01T${newTransaction.arrivalTime}`);
+                          const diff = end - start;
+                          const hours = Math.floor(diff / (1000 * 60 * 60));
+                          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                          return `${hours}h ${minutes}m`;
+                        }
+                        return 'Automático';
+                      })()}
+                      className="bg-gray-100 text-blue-600 font-medium"
+                      placeholder="0h 0m"
+                    />
                   </div>
                 </div>
 
