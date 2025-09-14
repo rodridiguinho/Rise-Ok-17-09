@@ -1077,8 +1077,8 @@ const EnhancedTransactions = () => {
                   </div>
                 </div>
 
-                {/* Segunda linha - Datas, horários e tipo de viagem */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                {/* Segunda linha - Datas e tipo de viagem */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="space-y-2">
                     <Label>Tipo de Viagem</Label>
                     <Select value={newTransaction.tripType} onValueChange={(value) => setNewTransaction({...newTransaction, tripType: value})}>
@@ -1127,80 +1127,272 @@ const EnhancedTransactions = () => {
                       <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">📅</span>
                     </div>
                   </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 mt-6">
-                      <input
-                        type="checkbox"
-                        id="hasStops"
-                        checked={newTransaction.hasStops}
-                        onChange={(e) => setNewTransaction({...newTransaction, hasStops: e.target.checked})}
-                        className="rounded border-gray-300"
-                      />
-                      <Label htmlFor="hasStops">Possui escalas</Label>
-                    </div>
-                  </div>
                 </div>
 
-                {/* Terceira linha - Horários dos voos */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                  <div className="space-y-2">
-                    <Label>Horário Partida</Label>
-                    <div className="relative">
-                      <Input
-                        type="time"
-                        value={newTransaction.departureTime || ''}
-                        onChange={(e) => setNewTransaction({...newTransaction, departureTime: e.target.value})}
-                        className="pr-8"
-                      />
-                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                {/* Seção de Horários dos Voos */}
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 mb-6">
+                  <h4 className="text-lg font-semibold mb-4 text-blue-800 flex items-center">
+                    ✈️ Horários dos Voos
+                  </h4>
+
+                  {/* HORÁRIOS DE IDA */}
+                  <div className="mb-6">
+                    <h5 className="font-medium text-blue-700 mb-3 flex items-center">
+                      🛫 Voo de Ida
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+                      <div className="space-y-2">
+                        <Label>Horário Saída</Label>
+                        <div className="relative">
+                          <Input
+                            type="time"
+                            value={newTransaction.outboundDepartureTime || ''}
+                            onChange={(e) => setNewTransaction({...newTransaction, outboundDepartureTime: e.target.value})}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Horário Chegada</Label>
+                        <div className="relative">
+                          <Input
+                            type="time"
+                            value={newTransaction.outboundArrivalTime || ''}
+                            onChange={(e) => setNewTransaction({...newTransaction, outboundArrivalTime: e.target.value})}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Duração do Voo</Label>
+                        <Input
+                          readOnly
+                          value={(() => {
+                            if (newTransaction.outboundDepartureTime && newTransaction.outboundArrivalTime) {
+                              const start = new Date(`2000-01-01T${newTransaction.outboundDepartureTime}`);
+                              const end = new Date(`2000-01-01T${newTransaction.outboundArrivalTime}`);
+                              const diff = end - start;
+                              const hours = Math.floor(diff / (1000 * 60 * 60));
+                              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                              return `${hours}h ${minutes}m`;
+                            }
+                            return 'Automático';
+                          })()}
+                          className="bg-gray-100 text-green-600 font-medium"
+                          placeholder="0h 0m"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 mt-6">
+                          <input
+                            type="checkbox"
+                            id="hasOutboundStop"
+                            checked={newTransaction.hasOutboundStop || false}
+                            onChange={(e) => setNewTransaction({...newTransaction, hasOutboundStop: e.target.checked})}
+                            className="rounded border-gray-300"
+                          />
+                          <Label htmlFor="hasOutboundStop" className="text-sm">Tem escala na ida</Label>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Campos de Escala na Ida */}
+                    {newTransaction.hasOutboundStop && (
+                      <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <h6 className="font-medium text-yellow-800 mb-3">✈️ Escala na Ida</h6>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="space-y-2">
+                            <Label>Cidade da Escala</Label>
+                            <Input
+                              placeholder="Ex: São Paulo (GRU)"
+                              value={newTransaction.outboundStopCity || ''}
+                              onChange={(e) => setNewTransaction({...newTransaction, outboundStopCity: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Chegada na Escala</Label>
+                            <div className="relative">
+                              <Input
+                                type="time"
+                                value={newTransaction.outboundStopArrival || ''}
+                                onChange={(e) => setNewTransaction({...newTransaction, outboundStopArrival: e.target.value})}
+                                className="pr-8"
+                              />
+                              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Saída da Escala</Label>
+                            <div className="relative">
+                              <Input
+                                type="time"
+                                value={newTransaction.outboundStopDeparture || ''}
+                                onChange={(e) => setNewTransaction({...newTransaction, outboundStopDeparture: e.target.value})}
+                                className="pr-8"
+                              />
+                              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Tempo de Escala</Label>
+                            <Input
+                              readOnly
+                              value={(() => {
+                                if (newTransaction.outboundStopArrival && newTransaction.outboundStopDeparture) {
+                                  const arrival = new Date(`2000-01-01T${newTransaction.outboundStopArrival}`);
+                                  const departure = new Date(`2000-01-01T${newTransaction.outboundStopDeparture}`);
+                                  const diff = departure - arrival;
+                                  const hours = Math.floor(diff / (1000 * 60 * 60));
+                                  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                  return `${hours}h ${minutes}m`;
+                                }
+                                return 'Automático';
+                              })()}
+                              className="bg-gray-100 text-orange-600 font-medium"
+                              placeholder="0h 0m"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Horário Chegada</Label>
-                    <div className="relative">
-                      <Input
-                        type="time"
-                        value={newTransaction.arrivalTime || ''}
-                        onChange={(e) => setNewTransaction({...newTransaction, arrivalTime: e.target.value})}
-                        className="pr-8"
-                      />
-                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
-                    </div>
-                  </div>
+                  {/* HORÁRIOS DE VOLTA */}
+                  <div className="mb-4">
+                    <h5 className="font-medium text-blue-700 mb-3 flex items-center">
+                      🛬 Voo de Volta
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+                      <div className="space-y-2">
+                        <Label>Horário Saída</Label>
+                        <div className="relative">
+                          <Input
+                            type="time"
+                            value={newTransaction.returnDepartureTime || ''}
+                            onChange={(e) => setNewTransaction({...newTransaction, returnDepartureTime: e.target.value})}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>Horário Retorno</Label>
-                    <div className="relative">
-                      <Input
-                        type="time"
-                        value={newTransaction.returnTime || ''}
-                        onChange={(e) => setNewTransaction({...newTransaction, returnTime: e.target.value})}
-                        className="pr-8"
-                      />
-                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label>Horário Chegada</Label>
+                        <div className="relative">
+                          <Input
+                            type="time"
+                            value={newTransaction.returnArrivalTime || ''}
+                            onChange={(e) => setNewTransaction({...newTransaction, returnArrivalTime: e.target.value})}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>Duração Estimada</Label>
-                    <Input
-                      readOnly
-                      value={(() => {
-                        if (newTransaction.departureTime && newTransaction.arrivalTime) {
-                          const start = new Date(`2000-01-01T${newTransaction.departureTime}`);
-                          const end = new Date(`2000-01-01T${newTransaction.arrivalTime}`);
-                          const diff = end - start;
-                          const hours = Math.floor(diff / (1000 * 60 * 60));
-                          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                          return `${hours}h ${minutes}m`;
-                        }
-                        return 'Automático';
-                      })()}
-                      className="bg-gray-100 text-blue-600 font-medium"
-                      placeholder="0h 0m"
-                    />
+                      <div className="space-y-2">
+                        <Label>Duração do Voo</Label>
+                        <Input
+                          readOnly
+                          value={(() => {
+                            if (newTransaction.returnDepartureTime && newTransaction.returnArrivalTime) {
+                              const start = new Date(`2000-01-01T${newTransaction.returnDepartureTime}`);
+                              const end = new Date(`2000-01-01T${newTransaction.returnArrivalTime}`);
+                              const diff = end - start;
+                              const hours = Math.floor(diff / (1000 * 60 * 60));
+                              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                              return `${hours}h ${minutes}m`;
+                            }
+                            return 'Automático';
+                          })()}
+                          className="bg-gray-100 text-green-600 font-medium"
+                          placeholder="0h 0m"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 mt-6">
+                          <input
+                            type="checkbox"
+                            id="hasReturnStop"
+                            checked={newTransaction.hasReturnStop || false}
+                            onChange={(e) => setNewTransaction({...newTransaction, hasReturnStop: e.target.checked})}
+                            className="rounded border-gray-300"
+                          />
+                          <Label htmlFor="hasReturnStop" className="text-sm">Tem escala na volta</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Campos de Escala na Volta */}
+                    {newTransaction.hasReturnStop && (
+                      <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <h6 className="font-medium text-yellow-800 mb-3">✈️ Escala na Volta</h6>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="space-y-2">
+                            <Label>Cidade da Escala</Label>
+                            <Input
+                              placeholder="Ex: Lima (LIM)"
+                              value={newTransaction.returnStopCity || ''}
+                              onChange={(e) => setNewTransaction({...newTransaction, returnStopCity: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Chegada na Escala</Label>
+                            <div className="relative">
+                              <Input
+                                type="time"
+                                value={newTransaction.returnStopArrival || ''}
+                                onChange={(e) => setNewTransaction({...newTransaction, returnStopArrival: e.target.value})}
+                                className="pr-8"
+                              />
+                              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Saída da Escala</Label>
+                            <div className="relative">
+                              <Input
+                                type="time"
+                                value={newTransaction.returnStopDeparture || ''}
+                                onChange={(e) => setNewTransaction({...newTransaction, returnStopDeparture: e.target.value})}
+                                className="pr-8"
+                              />
+                              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🕐</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Tempo de Escala</Label>
+                            <Input
+                              readOnly
+                              value={(() => {
+                                if (newTransaction.returnStopArrival && newTransaction.returnStopDeparture) {
+                                  const arrival = new Date(`2000-01-01T${newTransaction.returnStopArrival}`);
+                                  const departure = new Date(`2000-01-01T${newTransaction.returnStopDeparture}`);
+                                  const diff = departure - arrival;
+                                  const hours = Math.floor(diff / (1000 * 60 * 60));
+                                  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                  return `${hours}h ${minutes}m`;
+                                }
+                                return 'Automático';
+                              })()}
+                              className="bg-gray-100 text-orange-600 font-medium"
+                              placeholder="0h 0m"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
