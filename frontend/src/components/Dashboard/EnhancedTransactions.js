@@ -2643,6 +2643,7 @@ const EnhancedTransactions = () => {
                                 onChange={(value) => setNewTransaction({...newTransaction, returnStopCity: value})}
                                 placeholder="Digite para buscar cidades..."
                                 id="return-stop-city"
+                                airportCities={airportCities}
                               />
                             </div>
 
