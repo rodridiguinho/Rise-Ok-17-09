@@ -38,6 +38,13 @@ const PassengerControl = () => {
   });
   const [reservationNotes, setReservationNotes] = useState('');
   const [editableAirline, setEditableAirline] = useState('');
+  
+  // Estados para informações do fornecedor
+  const [selectedSupplier, setSelectedSupplier] = useState('');
+  const [suppliersList, setSuppliersList] = useState([]);
+  const [emissionType, setEmissionType] = useState('');
+  const [supplierPhone, setSupplierPhone] = useState('');
+  
   const { toast } = useToast();
 
   // Carregar reservas das transações de entrada
