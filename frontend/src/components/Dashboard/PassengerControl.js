@@ -364,6 +364,7 @@ const PassengerControlDirect = () => {
                     onClick={() => {
                       setSelectedReservation(reservation);
                       setEditableAirline(reservation.airline || '');
+                      setReservationNumber(reservation.reservationNumber || '');
                       setReservationNotes(reservation.travelNotes || '');
                       setSelectedSupplier(reservation.supplier || '');
                       setEmissionType(reservation.emissionType || 'E-ticket');
