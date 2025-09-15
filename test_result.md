@@ -100,7 +100,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "I need to investigate two issues in the passenger control system: 1. **Missing passenger persistence**: When a passenger is added to a reservation in the frontend, it's not being saved to the backend database. The data disappears when navigating between tabs. 2. **Missing supplier display**: The supplier field from transactions is not appearing in the passenger control modal, even though it should be loaded from transaction.supplier. Current models in transaction_model.py don't seem to include a 'passengers' field, which might be the root cause."
+user_problem_statement: "Layout improvements requested for Passenger Control system: 1. **Enhanced passenger layout**: Create a more beautiful and organized layout for passenger details in the 'Gerenciar' modal with better visual hierarchy, colors, and modern design. 2. **Timezone fix**: Guarulhos airport not recognizing timezone while Campinas works - need to add all missing cities from airport list to timezone database for accurate flight duration calculations."
 
 backend:
   - task: "Passenger Field Persistence Fixes"
