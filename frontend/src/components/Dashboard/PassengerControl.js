@@ -774,7 +774,7 @@ const PassengerControlDirect = () => {
                   </div>
                   
                   {hasStopover && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-3">
                       <div>
                         <Label className="text-sm font-medium text-gray-700 mb-2 block">
                           🏙️ Cidade da Escala:
@@ -788,13 +788,36 @@ const PassengerControlDirect = () => {
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          🛬 Chegada na Escala:
+                        </Label>
+                        <Input
+                          type="time"
+                          value={stopoverArrivalTime}
+                          onChange={(e) => setStopoverArrivalTime(e.target.value)}
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          🛫 Saída da Escala:
+                        </Label>
+                        <Input
+                          type="time"
+                          value={stopoverDepartureTime}
+                          onChange={(e) => setStopoverDepartureTime(e.target.value)}
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
                           ⏱️ Tempo de Conexão:
                         </Label>
                         <Input
-                          value={stopoverTime}
-                          onChange={(e) => setStopoverTime(e.target.value)}
+                          value={connectionDuration}
+                          onChange={(e) => setConnectionDuration(e.target.value)}
                           placeholder="Ex: 2h 30min"
                           className="text-sm"
+                          readOnly
                         />
                       </div>
                     </div>
