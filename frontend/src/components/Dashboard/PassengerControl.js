@@ -194,6 +194,7 @@ const PassengerControlDirect = () => {
         travelNotes: reservationNotes,
         emissionType: emissionType,
         supplierPhone: supplierPhone,
+        reservationNumber: reservationNumber,
         departureCity: selectedReservation.departureCity,
         arrivalCity: selectedReservation.arrivalCity,
         departureDate: selectedReservation.departureDate,
