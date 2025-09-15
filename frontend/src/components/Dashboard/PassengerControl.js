@@ -168,7 +168,20 @@ const PassengerControlDirect = () => {
         travelNotes: reservationNotes,
         emissionType: emissionType,
         supplierPhone: supplierPhone,
-        reservationNumber: reservationNumber
+        reservationNumber: reservationNumber,
+        // Novos campos de detalhes da viagem
+        productType: productType,
+        clientReservationCode: clientReservationCode,
+        departureCity: departureCity,
+        arrivalCity: arrivalCity,
+        tripType: tripType,
+        departureDate: departureDate,
+        returnDate: returnDate,
+        outboundFlightTime: outboundFlightTime,
+        returnFlightTime: returnFlightTime,
+        hasStopover: hasStopover,
+        stopoverCity: stopoverCity,
+        stopoverTime: stopoverTime
       });
 
       setReservations(prev => 
