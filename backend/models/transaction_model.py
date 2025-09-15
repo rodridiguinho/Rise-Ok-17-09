@@ -1,7 +1,19 @@
 from pydantic import BaseModel, Field, validator
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime, date
 from enum import Enum
+
+# Passenger model for travel transactions
+class Passenger(BaseModel):
+    name: str
+    document: Optional[str] = None
+    birthDate: Optional[str] = None
+    type: str = "Adulto"  # Adulto, Criança, Bebê, Idoso
+    nationality: str = "Brasileira"
+    passportNumber: Optional[str] = None
+    passportExpiry: Optional[str] = None
+    specialNeeds: Optional[str] = None
+    status: str = "Confirmado"
 
 
 class TransactionType(str, Enum):
