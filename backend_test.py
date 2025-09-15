@@ -1248,6 +1248,221 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_sales_performance_endpoint_corrections():
+    """Test Sales Performance Endpoint Corrections - SPECIFIC REVIEW REQUEST"""
+    print_test_header("SALES PERFORMANCE ENDPOINT CORRECTIONS - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for sales performance testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for sales performance testing failed", str(e))
+        return
+    
+    # Test 2: Create test transactions with supplier costs for current month
+    print("\n🎯 TEST 1: CREATE TEST TRANSACTIONS WITH SUPPLIER COSTS")
+    current_month = "2025-01"  # January 2025 for testing
+    test_transactions = []
+    
+    try:
+        # Create entrada transaction with supplierValue (direct supplier cost)
+        entrada_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Venda com custo fornecedor direto",
+            "amount": 2000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Performance",
+            "supplier": "Fornecedor Direto",
+            "supplierValue": 1200.00,  # Direct supplier cost
+            "commissionValue": 200.00,
+            "transactionDate": f"{current_month}-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=entrada_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            test_transactions.append(data.get("id"))
+            print_result(True, "Test Transaction 1 - Entrada with supplierValue", 
+                       f"Created transaction with direct supplier cost: R$ 1200.00")
+        else:
+            print_result(False, f"Test Transaction 1 creation failed - HTTP {response.status_code}", response.text)
+        
+        # Create saida transaction (supplier payment)
+        saida_transaction = {
+            "type": "saida",
+            "category": "Pagamento a Fornecedor",
+            "description": "Pagamento a Fornecedor ABC - Ref: Passagem Internacional",
+            "amount": 800.00,
+            "paymentMethod": "Transferência",
+            "supplier": "Fornecedor ABC",
+            "transactionDate": f"{current_month}-20"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=saida_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            test_transactions.append(data.get("id"))
+            print_result(True, "Test Transaction 2 - Saida supplier payment", 
+                       f"Created supplier payment transaction: R$ 800.00")
+        else:
+            print_result(False, f"Test Transaction 2 creation failed - HTTP {response.status_code}", response.text)
+        
+        # Create another entrada with supplierValue
+        entrada_transaction2 = {
+            "type": "entrada",
+            "category": "Hotel/Hospedagem",
+            "description": "Reserva hotel com custo fornecedor",
+            "amount": 1500.00,
+            "paymentMethod": "Cartão de Crédito",
+            "client": "Cliente Teste 2",
+            "supplier": "Hotel Partner",
+            "supplierValue": 900.00,  # Another direct supplier cost
+            "commissionValue": 150.00,
+            "transactionDate": f"{current_month}-25"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=entrada_transaction2, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            test_transactions.append(data.get("id"))
+            print_result(True, "Test Transaction 3 - Entrada with supplierValue", 
+                       f"Created second transaction with direct supplier cost: R$ 900.00")
+        else:
+            print_result(False, f"Test Transaction 3 creation failed - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Test transaction creation failed", str(e))
+        return
+    
+    # Test 3: Test /api/reports/sales-performance endpoint with current month parameters
+    print("\n🎯 TEST 2: TEST SALES-PERFORMANCE ENDPOINT WITH CURRENT MONTH")
+    try:
+        start_date = f"{current_month}-01"
+        end_date = f"{current_month}-31"
+        
+        response = requests.get(f"{API_URL}/reports/sales-performance", 
+                              params={"start_date": start_date, "end_date": end_date}, 
+                              timeout=10)
+        
+        print(f"Sales Performance Response Status: {response.status_code}")
+        print(f"Sales Performance Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Sales Performance Endpoint - Accessibility", 
+                       "Endpoint is accessible and returns 200 status")
+            
+            # Test 4: Verify response structure
+            if "sales" in data:
+                sales_data = data["sales"]
+                required_fields = ["total_sales", "total_supplier_payments", "total_commissions", "net_sales_profit"]
+                missing_fields = [f for f in required_fields if f not in sales_data]
+                
+                if not missing_fields:
+                    print_result(True, "Sales Performance - Response Structure", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Extract values for verification
+                    total_sales = sales_data.get("total_sales", 0)
+                    total_supplier_payments = sales_data.get("total_supplier_payments", 0)
+                    total_commissions = sales_data.get("total_commissions", 0)
+                    net_sales_profit = sales_data.get("net_sales_profit", 0)
+                    
+                    print_result(True, "Sales Performance - Values Retrieved", 
+                               f"Total Sales: R$ {total_sales}, Supplier Payments: R$ {total_supplier_payments}, Commissions: R$ {total_commissions}, Net Profit: R$ {net_sales_profit}")
+                    
+                    # Test 5: Verify supplier costs include both entrada (supplierValue) and saida (supplier payments)
+                    print("\n🎯 TEST 3: VERIFY SUPPLIER COSTS CALCULATION")
+                    
+                    # Expected supplier costs:
+                    # From entrada transactions: 1200.00 + 900.00 = 2100.00 (supplierValue fields)
+                    # From saida transactions: 800.00 (supplier payment)
+                    # Total expected: 2100.00 + 800.00 = 2900.00
+                    expected_supplier_payments = 2900.00
+                    
+                    if total_supplier_payments >= expected_supplier_payments:
+                        print_result(True, "✅ Supplier Costs Calculation - INCLUDES BOTH SOURCES", 
+                                   f"total_supplier_payments (R$ {total_supplier_payments}) includes costs from both entrada transactions (supplierValue) and saida transactions (supplier payments)")
+                    else:
+                        print_result(False, "❌ Supplier Costs Calculation - INCOMPLETE", 
+                                   f"total_supplier_payments (R$ {total_supplier_payments}) is less than expected (R$ {expected_supplier_payments}). May not include all supplier-related costs.")
+                    
+                    # Test 6: Verify calculation formula: net_sales_profit = total_sales - total_commissions - total_supplier_payments
+                    print("\n🎯 TEST 4: VERIFY CALCULATION FORMULA")
+                    expected_net_profit = total_sales - total_commissions - total_supplier_payments
+                    
+                    if abs(net_sales_profit - expected_net_profit) < 0.01:  # Allow for small floating point differences
+                        print_result(True, "✅ Calculation Formula - CORRECT", 
+                                   f"net_sales_profit = total_sales - total_commissions - total_supplier_payments: R$ {total_sales} - R$ {total_commissions} - R$ {total_supplier_payments} = R$ {net_sales_profit}")
+                    else:
+                        print_result(False, "❌ Calculation Formula - INCORRECT", 
+                                   f"Expected: R$ {expected_net_profit}, Got: R$ {net_sales_profit}")
+                    
+                    # Test 7: Compare with before - verify supplier payments are more comprehensive
+                    print("\n🎯 TEST 5: COMPREHENSIVE SUPPLIER COSTS VERIFICATION")
+                    
+                    # Check if supplier payments include both direct costs and separate payments
+                    if total_supplier_payments > 2100.00:  # More than just direct supplierValue costs
+                        print_result(True, "✅ Comprehensive Supplier Costs - ENHANCED CALCULATION", 
+                                   f"total_supplier_payments (R$ {total_supplier_payments}) is higher than just direct supplier costs, indicating it includes both entrada (supplierValue) and saida (supplier payments) transactions")
+                    else:
+                        print_result(False, "❌ Comprehensive Supplier Costs - LIMITED CALCULATION", 
+                                   f"total_supplier_payments (R$ {total_supplier_payments}) may only include direct supplier costs, not separate supplier payments")
+                    
+                    # Final summary
+                    print("\n🎯 FINAL VERIFICATION SUMMARY")
+                    if (total_supplier_payments >= expected_supplier_payments and 
+                        abs(net_sales_profit - expected_net_profit) < 0.01):
+                        print_result(True, "🎉 SALES PERFORMANCE CORRECTIONS - FULLY IMPLEMENTED", 
+                                   "✅ Endpoint includes supplier costs from both entrada and saida transactions\n✅ Calculation formula is correct\n✅ More comprehensive supplier cost calculation implemented")
+                    else:
+                        print_result(False, "⚠️ SALES PERFORMANCE CORRECTIONS - PARTIALLY IMPLEMENTED", 
+                                   "Some aspects of the supplier cost corrections may not be fully implemented")
+                    
+                else:
+                    print_result(False, "Sales Performance - Response Structure", 
+                               f"Missing required fields: {missing_fields}")
+            else:
+                print_result(False, "Sales Performance - Response Structure", 
+                           "Response missing 'sales' object")
+                
+        elif response.status_code == 404:
+            print_result(False, "Sales Performance Endpoint - NOT FOUND", 
+                       "Endpoint returns 404 - may not be properly implemented or registered")
+        else:
+            print_result(False, f"Sales Performance Endpoint - HTTP {response.status_code}", 
+                       f"Unexpected response: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Sales Performance endpoint testing failed", str(e))
+    
+    # Cleanup: Delete test transactions
+    print("\n🧹 CLEANUP: Removing test transactions")
+    for transaction_id in test_transactions:
+        try:
+            if transaction_id:
+                delete_response = requests.delete(f"{API_URL}/transactions/{transaction_id}", timeout=5)
+                if delete_response.status_code == 200:
+                    print_result(True, f"Cleanup - Transaction {transaction_id}", "Successfully deleted")
+                else:
+                    print_result(False, f"Cleanup - Transaction {transaction_id}", f"Delete failed: {delete_response.status_code}")
+        except Exception as e:
+            print_result(False, f"Cleanup - Transaction {transaction_id}", f"Delete error: {str(e)}")
+
 def test_sales_performance_endpoint_investigation():
     """URGENT: Test /api/reports/sales-performance endpoint - REVIEW REQUEST"""
     print_test_header("SALES PERFORMANCE ENDPOINT TESTING - Review Request")
