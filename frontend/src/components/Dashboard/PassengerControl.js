@@ -956,6 +956,17 @@ const PassengerControlDirect = () => {
                           </span>
                         )}
                       </div>
+                      {/* Botão Eliminar Passageiro (não permite eliminar o principal) */}
+                      {index > 0 && (
+                        <button
+                          onClick={() => removePassenger(index)}
+                          className="flex items-center space-x-1 px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs transition-colors"
+                          title="Eliminar passageiro"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          <span>Eliminar</span>
+                        </button>
+                      )}
                     </div>
                     
                     {/* Mostrar dados dos passageiros */}
