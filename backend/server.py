@@ -1130,6 +1130,16 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
         # Get ALL transactions in period (both entrada and saida)
         all_transactions = await db.transactions.find(date_filter).to_list(None)
         
+        # Convert ObjectIds to strings for JSON serialization
+        for transaction in all_transactions:
+            transaction["id"] = str(transaction["_id"])
+            transaction["_id"] = str(transaction["_id"])
+            # Convert datetime objects to strings
+            if "createdAt" in transaction:
+                transaction["createdAt"] = transaction["createdAt"].isoformat()
+            if "updatedAt" in transaction:
+                transaction["updatedAt"] = transaction["updatedAt"].isoformat()
+        
         # Separate entrada and saida transactions
         entrada_transactions = [t for t in all_transactions if t.get('type') == 'entrada']
         saida_transactions = [t for t in all_transactions if t.get('type') == 'saida']
