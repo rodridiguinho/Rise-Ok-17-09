@@ -15,7 +15,7 @@ import FinancialAnalytics from './Dashboard/FinancialAnalytics';
 import SalesReports from './Dashboard/SalesReports';
 import AdminSettings from './Dashboard/AdminSettings';
 import SalesRanking from './Dashboard/SalesRanking';
-import PassengerControl from './Dashboard/PassengerControl';
+import PassengerControl from './Dashboard/PassengerControlNew';
 
 const Dashboard = () => {
   const { user } = useAuth();
