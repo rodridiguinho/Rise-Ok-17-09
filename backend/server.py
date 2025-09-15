@@ -721,9 +721,9 @@ async def delete_supplier(supplier_id: str):
 # Transactions API endpoints
 @api_router.get("/transactions")
 async def get_transactions():
-    """Obter transações"""
+    """Obter transações ordenadas por data e hora (mais recente primeiro)"""
     try:
-        transactions = await db.transactions.find({}).to_list(None)
+        transactions = await db.transactions.find({}).sort([("date", -1), ("time", -1)]).to_list(None)
         for transaction in transactions:
             transaction["id"] = str(transaction["_id"])
             transaction["_id"] = str(transaction["_id"])
