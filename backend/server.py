@@ -1113,6 +1113,84 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
         logging.error(f"Complete analysis error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting complete analysis")
 
+@reports_router.get("/sales-performance")
+async def get_sales_performance(start_date: str = None, end_date: str = None):
+    """Analytics específico de vendas (sem despesas da empresa)"""
+    try:
+        # Build date filter
+        date_filter = {}
+        if start_date and end_date:
+            date_filter = {
+                "$or": [
+                    {"date": {"$gte": start_date, "$lte": end_date}},
+                    {"transactionDate": {"$gte": start_date, "$lte": end_date}}
+                ]
+            }
+        
+        # Get ONLY entrada transactions (sales)
+        entrada_transactions = await db.transactions.find({
+            **date_filter,
+            "type": "entrada"
+        }).to_list(None)
+        
+        # Get saida transactions for commissions and supplier payments
+        saida_transactions = await db.transactions.find({
+            **date_filter,
+            "type": "saida"
+        }).to_list(None)
+        
+        # Sales totals
+        total_sales = sum(t.get("amount", 0) for t in entrada_transactions)
+        total_quantity = len(entrada_transactions)
+        
+        # Calculate commissions from sales (from saida transactions)
+        total_commissions = 0
+        for transaction in saida_transactions:
+            description = transaction.get("description", "").lower()
+            category = transaction.get("category", "").lower()
+            if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
+                total_commissions += transaction.get("amount", 0)
+        
+        # Calculate supplier payments (from saida transactions)
+        total_supplier_payments = 0
+        for transaction in saida_transactions:
+            description = transaction.get("description", "").lower()
+            category = transaction.get("category", "").lower()
+            supplier = transaction.get("supplier", "")
+            if ("fornecedor" in description or "fornecedor" in category or 
+                "pagamento a fornecedor" in category.lower() or
+                supplier):
+                total_supplier_payments += transaction.get("amount", 0)
+        
+        # Net profit from sales
+        net_sales_profit = total_sales - total_commissions - total_supplier_payments
+        
+        # Average ticket
+        average_ticket = total_sales / total_quantity if total_quantity > 0 else 0
+        
+        # Sales margin
+        sales_margin = (net_sales_profit / total_sales * 100) if total_sales > 0 else 0
+        
+        return {
+            "sales": {
+                "total_sales": total_sales,
+                "total_quantity": total_quantity,
+                "total_commissions": total_commissions,
+                "total_supplier_payments": total_supplier_payments,
+                "net_sales_profit": net_sales_profit,
+                "average_ticket": average_ticket,
+                "sales_margin": sales_margin
+            },
+            "period": {
+                "start_date": start_date,
+                "end_date": end_date
+            }
+        }
+        
+    except Exception as e:
+        logging.error(f"Error getting sales performance: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error getting sales performance")
+
 class CompanySettings(BaseModel):
     name: str
     email: str
