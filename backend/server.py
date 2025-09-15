@@ -1149,7 +1149,7 @@ async def get_company_settings():
         raise HTTPException(status_code=500, detail=f"Erro ao buscar configurações da empresa: {str(e)}")
 
 @api_router.put("/transactions/{transaction_id}")
-async def update_transaction(transaction_id: str, transaction: TransactionCreate):
+async def update_transaction(transaction_id: str, transaction: TransactionCreate, current_user: dict = Depends(get_current_user)):
     print(f"🔄 UPDATE REQUEST - Transaction ID: {transaction_id}")
     print(f"📝 Transaction data received: amount={transaction.amount}")
     
