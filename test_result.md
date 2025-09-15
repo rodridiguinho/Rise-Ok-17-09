@@ -103,9 +103,9 @@
 user_problem_statement: "I need to investigate two issues in the passenger control system: 1. **Missing passenger persistence**: When a passenger is added to a reservation in the frontend, it's not being saved to the backend database. The data disappears when navigating between tabs. 2. **Missing supplier display**: The supplier field from transactions is not appearing in the passenger control modal, even though it should be loaded from transaction.supplier. Current models in transaction_model.py don't seem to include a 'passengers' field, which might be the root cause."
 
 backend:
-  - task: "Passenger Control System Investigation"
-    implemented: false
-    working: false
+  - task: "Passenger Field Persistence Fixes"
+    implemented: true
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -114,6 +114,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "🚨 CRITICAL PASSENGER CONTROL SYSTEM ISSUES CONFIRMED - COMPREHENSIVE INVESTIGATION COMPLETED: Successfully investigated both reported issues using rodrigo@risetravel.com.br / Emily2030* authentication. ❌ MISSING PASSENGERS FIELD CONFIRMED: Database analysis of 24 transactions shows 0/24 transactions contain 'passengers' field - this confirms the user's report that passenger data disappears when navigating between tabs. ✅ SUPPLIER FIELD STATUS: Found 7/24 transactions with supplier field populated, supplier data is available in transaction structure and GET /api/transactions endpoint returns supplier information correctly. ❌ PUT ENDPOINT PASSENGER SUPPORT: Tested PUT /api/transactions/{id} with passenger data - while the endpoint works for other fields (supplier updated correctly), the 'passengers' field is NOT saved, confirming the persistence issue. ❌ TRANSACTION MODEL MISSING PASSENGERS: TransactionCreate model does NOT support 'passengers' field - when creating transaction with passengers data, the field is silently ignored (HTTP 200 but passengers not saved). 🎯 ROOT CAUSE IDENTIFIED: The TransactionCreate Pydantic model in backend/server.py is missing the 'passengers' field definition, causing all passenger data to be ignored during transaction creation and updates. 🎯 SUPPLIER DISPLAY ISSUE: Supplier field is properly available in transaction data, so if it's not appearing in passenger control modal, the issue is frontend-side, not backend."
+        - working: true
+          agent: "testing"
+          comment: "🎯 PASSENGER FIELD PERSISTENCE FIXES COMPLETELY VALIDATED - ALL REVIEW REQUEST REQUIREMENTS MET: Successfully tested all passenger field persistence fixes using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ POST /api/transactions WITH PASSENGERS FIELD: Created transaction with comprehensive passenger data (2 passengers with full details: João Silva Santos and Maria Oliveira Costa) and verified all passenger information saves correctly to database. Transaction ID: 68c7c7b9bcb79ebdcc0fe9e6. All passenger fields (name, document, birthDate, phone, email, emergencyContact) persist correctly. ✅ AIRLINE AND TRAVEL NOTES FIELDS: Both airline field ('LATAM Airlines') and travelNotes field ('Viagem de negócios para São Paulo') save and persist correctly in database. ✅ GET /api/transactions PASSENGER PERSISTENCE: Verified passengers data persists correctly in database via GET request - all 2 passengers found with complete details intact. No data loss detected when navigating between API calls. ✅ PUT /api/transactions/{id} WITH PASSENGERS FIELD: Successfully updated transaction with modified passenger data (updated email for passenger 1, added new passenger 3: Carlos Roberto Lima). All passenger updates persist correctly including new passenger addition. ✅ SUPPLIER FIELD RETURNS CORRECTLY: Confirmed supplier field ('Companhia Aérea Teste UPDATED') returns correctly in GET requests and updates properly via PUT requests. ✅ COMPREHENSIVE FIELD UPDATES: All field updates (amount: 2500→3000, supplier, airline: LATAM→GOL, passengers array: 2→3 passengers) persist correctly after PUT operation. 🎯 FINAL RESULT: ALL PASSENGER FIELD PERSISTENCE ISSUES ARE NOW COMPLETELY FIXED. The backend now supports passengers: Optional[list] = [], airline: Optional[str] = None, and travelNotes: Optional[str] = None fields with full CRUD functionality and database persistence."
 
   - task: "Company Settings API"
     implemented: true
