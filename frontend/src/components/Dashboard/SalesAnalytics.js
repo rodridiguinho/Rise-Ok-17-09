@@ -234,7 +234,7 @@ const SalesAnalytics = () => {
             {prevSales && (
               <div className="text-sm">
                 {(() => {
-                  const comparison = formatPercentage(analytics.sales.net_profit, prevSales.net_profit);
+                  const comparison = formatPercentage(analytics.sales.net_sales_profit, prevSales.net_sales_profit);
                   return (
                     <span className={`flex items-center ${comparison.isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
                       {comparison.isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
