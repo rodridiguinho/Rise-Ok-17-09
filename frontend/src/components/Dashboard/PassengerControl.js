@@ -635,6 +635,16 @@ const PassengerControl = () => {
                   <span>Adicionar Novo Passageiro</span>
                 </Button>
               </div>
+
+              {/* Save Changes Button */}
+              <div className="flex justify-end pt-4 border-t">
+                <Button
+                  onClick={saveReservationChanges}
+                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  💾 Salvar Alterações
+                </Button>
+              </div>
             </div>
           </div>
         </div>
