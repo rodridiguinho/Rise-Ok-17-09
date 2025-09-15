@@ -6218,14 +6218,14 @@ def run_review_request_tests():
     print("="*80)
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Tests - LOGIN FUNCTIONALITY FOCUS")
+    print("🚀 Starting Backend API Tests - PASSENGER CONTROL SYSTEM INVESTIGATION")
     print(f"🔗 Backend URL: {BASE_URL}")
     print(f"🔗 API URL: {API_URL}")
     print(f"👤 Test User: {VALID_EMAIL}")
     
-    # Run login functionality test as requested in review
-    test_login_functionality_review_request()
+    # Run passenger control system investigation as requested in review
+    test_passenger_control_system_investigation()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Tests Completed - LOGIN FUNCTIONALITY TESTED")
+    print("🏁 Backend API Tests Completed - PASSENGER CONTROL SYSTEM INVESTIGATED")
     print("="*80)
