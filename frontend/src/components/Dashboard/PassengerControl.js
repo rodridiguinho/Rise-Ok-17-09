@@ -102,6 +102,7 @@ const PassengerControlDirect = () => {
         travelNotes: transaction.travelNotes || '',
         emissionType: transaction.emissionType || '',
         supplierPhone: transaction.supplierPhone || '',
+        reservationNumber: transaction.reservationNumber || '',
         status: 'Ativa'
       }));
 
