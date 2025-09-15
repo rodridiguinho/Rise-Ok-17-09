@@ -57,10 +57,10 @@ const SalesAnalytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      // Get current month data
+      // Get current month data - from day 1 to today
       const now = new Date();
       const currentStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      const currentEnd = now.toISOString().split('T')[0]; // Today's date
       
       // Get previous month data for comparison
       const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
