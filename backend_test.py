@@ -1249,8 +1249,8 @@ def test_specific_transaction_creation_bug():
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
 def test_sales_performance_endpoint_investigation():
-    """URGENT: Investigate /reports/sales-performance endpoint returning zeros - REVIEW REQUEST"""
-    print_test_header("SALES PERFORMANCE ENDPOINT INVESTIGATION - Review Request")
+    """URGENT: Test /api/reports/sales-performance endpoint - REVIEW REQUEST"""
+    print_test_header("SALES PERFORMANCE ENDPOINT TESTING - Review Request")
     
     # Test 1: Authenticate first
     global auth_token
@@ -1263,14 +1263,185 @@ def test_sales_performance_endpoint_investigation():
         if response.status_code == 200:
             data = response.json()
             auth_token = data.get("access_token")
-            print_result(True, "Authentication for sales performance investigation", 
+            print_result(True, "Authentication for sales performance testing", 
                        f"Successfully logged in as {VALID_EMAIL}")
         else:
             print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
             return
     except Exception as e:
-        print_result(False, "Authentication for sales performance investigation failed", str(e))
+        print_result(False, "Authentication for sales performance testing failed", str(e))
         return
+    
+    # Test 2: Test /api/reports/sales-performance endpoint without date parameters
+    print("\n🎯 TEST 1: GET /api/reports/sales-performance WITHOUT DATE PARAMETERS")
+    try:
+        response = requests.get(f"{API_URL}/reports/sales-performance", timeout=10)
+        print(f"Sales Performance Response Status: {response.status_code}")
+        print(f"Sales Performance Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Sales Performance Endpoint - Accessible", 
+                       "Endpoint returns 200 status (not 404 as before)")
+            
+            # Verify response structure
+            if "sales" in data:
+                sales_data = data["sales"]
+                expected_fields = ["total_sales", "total_quantity", "total_commissions", 
+                                 "total_supplier_payments", "net_sales_profit", "average_ticket", "sales_margin"]
+                
+                missing_fields = [f for f in expected_fields if f not in sales_data]
+                if not missing_fields:
+                    print_result(True, "Sales Performance - Response Structure", 
+                               f"All expected fields present: {expected_fields}")
+                    
+                    # Display the analytics data
+                    print_result(True, "Sales Performance - Analytics Data", 
+                               f"Total Sales: R$ {sales_data.get('total_sales', 0):.2f}")
+                    print_result(True, "Sales Performance - Analytics Data", 
+                               f"Total Commissions: R$ {sales_data.get('total_commissions', 0):.2f}")
+                    print_result(True, "Sales Performance - Analytics Data", 
+                               f"Total Supplier Payments: R$ {sales_data.get('total_supplier_payments', 0):.2f}")
+                    print_result(True, "Sales Performance - Analytics Data", 
+                               f"Net Sales Profit: R$ {sales_data.get('net_sales_profit', 0):.2f}")
+                    print_result(True, "Sales Performance - Analytics Data", 
+                               f"Average Ticket: R$ {sales_data.get('average_ticket', 0):.2f}")
+                    print_result(True, "Sales Performance - Analytics Data", 
+                               f"Sales Margin: {sales_data.get('sales_margin', 0):.2f}%")
+                else:
+                    print_result(False, "Sales Performance - Response Structure", 
+                               f"Missing expected fields: {missing_fields}")
+            else:
+                print_result(False, "Sales Performance - Response Structure", 
+                           "Response missing 'sales' object")
+                
+        elif response.status_code == 404:
+            print_result(False, "Sales Performance Endpoint - Still Not Found", 
+                       "Endpoint still returns 404 - route not properly included")
+        else:
+            print_result(False, f"Sales Performance Endpoint - HTTP {response.status_code}", 
+                       f"Unexpected status: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Sales Performance Endpoint test failed", str(e))
+    
+    # Test 3: Test /api/reports/sales-performance endpoint WITH date parameters
+    print("\n🎯 TEST 2: GET /api/reports/sales-performance WITH DATE PARAMETERS")
+    try:
+        # Test with current month dates
+        start_date = "2025-01-01"
+        end_date = "2025-01-31"
+        
+        response = requests.get(f"{API_URL}/reports/sales-performance?start_date={start_date}&end_date={end_date}", timeout=10)
+        print(f"Sales Performance with Dates Response Status: {response.status_code}")
+        print(f"Sales Performance with Dates Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Sales Performance with Dates - Accessible", 
+                       "Endpoint works with date parameters")
+            
+            # Verify period information is included
+            if "period" in data:
+                period_data = data["period"]
+                if (period_data.get("start_date") == start_date and 
+                    period_data.get("end_date") == end_date):
+                    print_result(True, "Sales Performance with Dates - Period Filtering", 
+                               f"Date filtering working: {start_date} to {end_date}")
+                else:
+                    print_result(False, "Sales Performance with Dates - Period Filtering", 
+                               f"Date filtering not working correctly")
+            else:
+                print_result(False, "Sales Performance with Dates - Period Information", 
+                           "Response missing period information")
+                
+        else:
+            print_result(False, f"Sales Performance with Dates - HTTP {response.status_code}", 
+                       f"Failed with date parameters: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Sales Performance with dates test failed", str(e))
+    
+    # Test 4: Create test transactions with supplier costs to verify calculation
+    print("\n🎯 TEST 3: CREATE TEST TRANSACTIONS TO VERIFY CALCULATIONS")
+    try:
+        # Create a test transaction with supplier costs
+        test_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Test Sales Performance Calculation",
+            "amount": 2000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Sales Performance Test",
+            "supplier": "Fornecedor Sales Test",
+            "saleValue": 2000.00,
+            "supplierValue": 1200.00,  # This should appear in supplier costs
+            "commissionValue": 200.00,  # This should appear in commissions
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=test_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            test_transaction_id = data.get("id")
+            print_result(True, "Test Transaction Creation", 
+                       f"Created test transaction with ID: {test_transaction_id}")
+            
+            # Now test the sales-performance endpoint again to see if it picks up the data
+            response = requests.get(f"{API_URL}/reports/sales-performance?start_date=2025-01-01&end_date=2025-01-31", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                sales_data = data.get("sales", {})
+                
+                total_sales = sales_data.get("total_sales", 0)
+                total_supplier_payments = sales_data.get("total_supplier_payments", 0)
+                total_commissions = sales_data.get("total_commissions", 0)
+                net_profit = sales_data.get("net_sales_profit", 0)
+                
+                print_result(True, "Sales Performance Calculation Verification", 
+                           f"After test transaction - Sales: R$ {total_sales}, Supplier: R$ {total_supplier_payments}, Commission: R$ {total_commissions}, Profit: R$ {net_profit}")
+                
+                # Check if our test data is reflected
+                if total_sales >= 2000.00:
+                    print_result(True, "Sales Performance - Sales Calculation", 
+                               f"Sales calculation includes test transaction: R$ {total_sales}")
+                else:
+                    print_result(False, "Sales Performance - Sales Calculation", 
+                               f"Sales calculation may not include test transaction: R$ {total_sales}")
+                
+            else:
+                print_result(False, f"Sales Performance verification - HTTP {response.status_code}", 
+                           response.text)
+        else:
+            print_result(False, f"Test Transaction Creation - HTTP {response.status_code}", 
+                       response.text)
+            
+    except Exception as e:
+        print_result(False, "Test transaction creation and verification failed", str(e))
+    
+    # Test 5: Test different date ranges
+    print("\n🎯 TEST 4: TEST DIFFERENT DATE RANGES")
+    try:
+        date_ranges = [
+            ("2024-12-01", "2024-12-31", "December 2024"),
+            ("2025-01-01", "2025-01-15", "First half January 2025"),
+            ("2025-01-16", "2025-01-31", "Second half January 2025")
+        ]
+        
+        for start_date, end_date, description in date_ranges:
+            response = requests.get(f"{API_URL}/reports/sales-performance?start_date={start_date}&end_date={end_date}", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                sales_data = data.get("sales", {})
+                total_sales = sales_data.get("total_sales", 0)
+                print_result(True, f"Date Range Test - {description}", 
+                           f"Period {start_date} to {end_date}: R$ {total_sales:.2f} in sales")
+            else:
+                print_result(False, f"Date Range Test - {description}", 
+                           f"Failed for period {start_date} to {end_date}: HTTP {response.status_code}")
+                
+    except Exception as e:
+        print_result(False, "Date range testing failed", str(e))
     
     # Test 2: Check if /reports/sales-performance endpoint exists
     print("\n🎯 TEST 1: CHECK IF /api/reports/sales-performance ENDPOINT EXISTS")
