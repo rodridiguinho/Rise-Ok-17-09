@@ -175,6 +175,38 @@ def create_jwt_token(user_id: str, email: str) -> str:
     }
     return jwt.encode(payload, "your-secret-key", algorithm="HS256")
 
+# Security scheme
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Get current user from JWT token"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, "your-secret-key", algorithms=["HS256"])
+        user_id = payload.get("user_id")
+        email = payload.get("email")
+        
+        if user_id is None or email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        # Verify user exists in database
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        
+        return {
+            "id": str(user["_id"]),
+            "email": user["email"],
+            "name": user["name"],
+            "role": user["role"]
+        }
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
 # Authentication routes
 @api_router.post("/auth/register")
 async def register(user_data: UserCreate):
