@@ -116,38 +116,62 @@ const PassengerControl = () => {
     }
   };
 
-  const addPassenger = () => {
+  const addPassenger = async () => {
     if (!selectedReservation) return;
 
-    const updatedReservation = {
-      ...selectedReservation,
-      passengers: [...selectedReservation.passengers, { ...newPassenger, id: Date.now() }]
-    };
+    try {
+      const updatedReservation = {
+        ...selectedReservation,
+        passengers: [...selectedReservation.passengers, { ...newPassenger, id: Date.now() }]
+      };
 
-    setReservations(prev => 
-      prev.map(res => res.id === selectedReservation.id ? updatedReservation : res)
-    );
+      // Save to backend
+      await transactionsAPI.updateTransaction(selectedReservation.id, {
+        type: 'entrada',
+        category: 'Passagem Aérea',
+        description: selectedReservation.client,
+        amount: selectedReservation.amount,
+        paymentMethod: 'PIX',
+        supplier: selectedReservation.supplier,
+        client: selectedReservation.client,
+        passengers: updatedReservation.passengers,
+        airline: selectedReservation.airline,
+        travelNotes: selectedReservation.travelNotes
+      });
 
-    setSelectedReservation(updatedReservation);
-    setNewPassenger({
-      name: '',
-      document: '',
-      birthDate: '',
-      type: 'Adulto',
-      nationality: 'Brasileira',
-      passportNumber: '',
-      passportExpiry: '',
-      seat: '',
-      baggage: '',
-      specialNeeds: '',
-      status: 'Confirmado'
-    });
-    setIsAddPassengerOpen(false);
+      setReservations(prev => 
+        prev.map(res => res.id === selectedReservation.id ? updatedReservation : res)
+      );
 
-    toast({
-      title: "✅ Passageiro Adicionado",
-      description: `${newPassenger.name} foi adicionado à reserva`,
-    });
+      setSelectedReservation(updatedReservation);
+      setNewPassenger({
+        name: '',
+        document: '',
+        birthDate: '',
+        type: 'Adulto',
+        nationality: 'Brasileira',
+        passportNumber: '',
+        passportExpiry: '',
+        seat: '',
+        baggage: '',
+        specialNeeds: '',
+        status: 'Confirmado'
+      });
+      setIsAddPassengerOpen(false);
+
+      toast({
+        title: "✅ Passageiro Adicionado",
+        description: `${newPassenger.name} foi adicionado à reserva e salvo no sistema`,
+      });
+
+    } catch (error) {
+      console.error('Erro ao adicionar passageiro:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível adicionar o passageiro"
+      });
+    }
   };
 
   const updateMainPassenger = (field, value) => {
