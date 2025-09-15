@@ -359,8 +359,8 @@ const PassengerControlDirect = () => {
                       setEditableAirline(reservation.airline || '');
                       setReservationNotes(reservation.travelNotes || '');
                       setSelectedSupplier(reservation.supplier || '');
-                      setEmissionType('E-ticket');
-                      setSupplierPhone('');
+                      setEmissionType(reservation.emissionType || 'E-ticket');
+                      setSupplierPhone(reservation.supplierPhone || '');
                     }}
                     className="text-sm px-3 py-1"
                   >
