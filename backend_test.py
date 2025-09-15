@@ -3247,6 +3247,301 @@ def test_emission_type_supplier_phone_persistence():
     except Exception as e:
         print_result(False, "Direct GET by ID verification failed", str(e))
 
+def test_supplier_costs_analytics_investigation():
+    """Test Supplier Costs Analytics Investigation - SPECIFIC REVIEW REQUEST"""
+    print_test_header("Supplier Costs Analytics Investigation - Review Request")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for supplier costs investigation", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for supplier costs investigation failed", str(e))
+        return
+    
+    # Test 2: Check current transactions in database
+    print("\n🎯 TEST 1: CHECK CURRENT TRANSACTIONS IN DATABASE")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "Database transactions retrieval", 
+                       f"Successfully retrieved {len(transactions)} transactions from database")
+            
+            # Analyze supplier cost fields in existing transactions
+            transactions_with_supplier_value = 0
+            transactions_with_supplier = 0
+            total_supplier_costs = 0
+            september_transactions = []
+            
+            for transaction in transactions:
+                # Check for supplier fields
+                if transaction.get('supplier'):
+                    transactions_with_supplier += 1
+                
+                if transaction.get('supplierValue'):
+                    transactions_with_supplier_value += 1
+                    total_supplier_costs += float(transaction.get('supplierValue', 0))
+                
+                # Check for September 2025 transactions
+                transaction_date = transaction.get('transactionDate') or transaction.get('date')
+                if transaction_date and transaction_date.startswith('2025-09'):
+                    september_transactions.append(transaction)
+            
+            print_result(True, "Supplier fields analysis", 
+                       f"Transactions with supplier: {transactions_with_supplier}, with supplierValue: {transactions_with_supplier_value}")
+            print_result(True, "Total supplier costs calculation", 
+                       f"Total supplier costs from existing transactions: R$ {total_supplier_costs:.2f}")
+            print_result(True, "September 2025 transactions", 
+                       f"Found {len(september_transactions)} transactions for September 2025")
+            
+            # Display sample transactions with supplier data
+            print("\n📊 SAMPLE TRANSACTIONS WITH SUPPLIER DATA:")
+            supplier_transactions = [t for t in transactions if t.get('supplier') or t.get('supplierValue')][:5]
+            for i, transaction in enumerate(supplier_transactions):
+                print(f"   Transaction {i+1}: ID={transaction.get('id', 'N/A')[:8]}..., "
+                      f"supplier='{transaction.get('supplier', 'None')}', "
+                      f"supplierValue={transaction.get('supplierValue', 'None')}, "
+                      f"date={transaction.get('transactionDate') or transaction.get('date', 'None')}")
+            
+        else:
+            print_result(False, f"Database transactions retrieval failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Database transactions retrieval failed", str(e))
+        return
+    
+    # Test 3: Test sales analysis for current month (September 2025)
+    print("\n🎯 TEST 2: TEST SALES ANALYSIS FOR SEPTEMBER 2025")
+    try:
+        # Call sales analysis for September 2025
+        start_date = "2025-09-01"
+        end_date = "2025-09-30"
+        
+        response = requests.get(f"{API_URL}/reports/sales-analysis", 
+                              params={"start_date": start_date, "end_date": end_date}, 
+                              timeout=10)
+        
+        if response.status_code == 200:
+            sales_data = response.json()
+            print_result(True, "Sales analysis API call", 
+                       f"Successfully called /api/reports/sales-analysis for September 2025")
+            
+            # Extract key metrics
+            sales_info = sales_data.get('sales', {})
+            total_sales = sales_info.get('total_sales', 0)
+            total_supplier_costs = sales_info.get('total_supplier_costs', 0)
+            total_commissions = sales_info.get('total_commissions', 0)
+            net_profit = sales_info.get('net_profit', 0)
+            sales_count = sales_info.get('sales_count', 0)
+            
+            print_result(True, "Sales analysis metrics", 
+                       f"Total sales: R$ {total_sales:.2f}, Supplier costs: R$ {total_supplier_costs:.2f}, "
+                       f"Commissions: R$ {total_commissions:.2f}, Net profit: R$ {net_profit:.2f}")
+            print_result(True, "Sales analysis transaction count", 
+                       f"Sales transactions found: {sales_count}")
+            
+            # Check if supplier costs are zero (the reported issue)
+            if total_supplier_costs == 0:
+                print_result(False, "🚨 SUPPLIER COSTS ISSUE CONFIRMED", 
+                           f"Supplier costs showing R$ 0,00 as reported - this is the bug!")
+                
+                # Investigate why supplier costs are zero
+                transactions_in_analysis = sales_data.get('transactions', [])
+                print(f"\n🔍 INVESTIGATING {len(transactions_in_analysis)} TRANSACTIONS IN SALES ANALYSIS:")
+                
+                for i, transaction in enumerate(transactions_in_analysis[:10]):  # Show first 10
+                    supplier_value = transaction.get('supplierValue')
+                    supplier = transaction.get('supplier')
+                    amount = transaction.get('amount')
+                    sale_value = transaction.get('saleValue')
+                    
+                    print(f"   Transaction {i+1}: supplier='{supplier}', "
+                          f"supplierValue={supplier_value}, amount={amount}, saleValue={sale_value}")
+                
+                # Check if transactions have supplier data but it's not being calculated
+                transactions_with_supplier_data = [t for t in transactions_in_analysis 
+                                                 if t.get('supplier') or t.get('supplierValue')]
+                
+                if transactions_with_supplier_data:
+                    print_result(False, "Supplier costs calculation bug", 
+                               f"Found {len(transactions_with_supplier_data)} transactions with supplier data, "
+                               f"but total_supplier_costs is still 0 - calculation logic issue!")
+                else:
+                    print_result(True, "No supplier data in September transactions", 
+                               "No transactions in September 2025 have supplier data - this explains the R$ 0,00")
+            else:
+                print_result(True, "Supplier costs calculation working", 
+                           f"Supplier costs correctly calculated: R$ {total_supplier_costs:.2f}")
+            
+        else:
+            print_result(False, f"Sales analysis API call failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Sales analysis API call failed", str(e))
+    
+    # Test 4: Create test transactions with supplier costs for September 2025
+    print("\n🎯 TEST 3: CREATE TEST TRANSACTIONS WITH SUPPLIER COSTS FOR SEPTEMBER 2025")
+    try:
+        test_transactions = [
+            {
+                "type": "entrada",
+                "category": "Passagem Aérea",
+                "description": "Teste Supplier Cost 1 - Setembro",
+                "amount": 1500.00,
+                "paymentMethod": "PIX",
+                "supplier": "Fornecedor Teste A",
+                "supplierValue": 1200.00,
+                "saleValue": 1500.00,
+                "commissionValue": 150.00,
+                "transactionDate": "2025-09-15"
+            },
+            {
+                "type": "entrada", 
+                "category": "Hotel/Hospedagem",
+                "description": "Teste Supplier Cost 2 - Setembro",
+                "amount": 800.00,
+                "paymentMethod": "Cartão de Crédito",
+                "supplier": "Fornecedor Teste B", 
+                "supplierValue": 600.00,
+                "saleValue": 800.00,
+                "commissionValue": 80.00,
+                "transactionDate": "2025-09-20"
+            },
+            {
+                "type": "entrada",
+                "category": "Pacote Turístico", 
+                "description": "Teste Supplier Cost 3 - Setembro",
+                "amount": 2000.00,
+                "paymentMethod": "PIX",
+                "supplier": "Fornecedor Teste C",
+                "supplierValue": 1500.00,
+                "saleValue": 2000.00,
+                "commissionValue": 200.00,
+                "transactionDate": "2025-09-25"
+            }
+        ]
+        
+        created_transaction_ids = []
+        total_test_supplier_costs = 0
+        
+        for i, transaction_data in enumerate(test_transactions):
+            response = requests.post(f"{API_URL}/transactions", json=transaction_data, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                transaction_id = data.get('id')
+                created_transaction_ids.append(transaction_id)
+                total_test_supplier_costs += transaction_data['supplierValue']
+                
+                print_result(True, f"Test transaction {i+1} creation", 
+                           f"Created transaction with supplier cost R$ {transaction_data['supplierValue']:.2f}")
+            else:
+                print_result(False, f"Test transaction {i+1} creation failed", 
+                           f"HTTP {response.status_code}: {response.text}")
+        
+        print_result(True, "Test transactions summary", 
+                   f"Created {len(created_transaction_ids)} test transactions with total supplier costs: R$ {total_test_supplier_costs:.2f}")
+        
+    except Exception as e:
+        print_result(False, "Test transactions creation failed", str(e))
+    
+    # Test 5: Re-test sales analysis after creating test transactions
+    print("\n🎯 TEST 4: RE-TEST SALES ANALYSIS AFTER CREATING TEST TRANSACTIONS")
+    try:
+        response = requests.get(f"{API_URL}/reports/sales-analysis", 
+                              params={"start_date": "2025-09-01", "end_date": "2025-09-30"}, 
+                              timeout=10)
+        
+        if response.status_code == 200:
+            sales_data = response.json()
+            sales_info = sales_data.get('sales', {})
+            new_total_supplier_costs = sales_info.get('total_supplier_costs', 0)
+            new_sales_count = sales_info.get('sales_count', 0)
+            
+            print_result(True, "Updated sales analysis", 
+                       f"After test transactions - Supplier costs: R$ {new_total_supplier_costs:.2f}, "
+                       f"Sales count: {new_sales_count}")
+            
+            if new_total_supplier_costs > 0:
+                print_result(True, "✅ SUPPLIER COSTS CALCULATION WORKING", 
+                           f"Supplier costs now showing R$ {new_total_supplier_costs:.2f} - calculation logic is working!")
+                print_result(True, "Root cause identified", 
+                           "Issue was lack of transactions with supplier costs in September 2025, not a calculation bug")
+            else:
+                print_result(False, "❌ SUPPLIER COSTS STILL ZERO", 
+                           "Supplier costs still showing R$ 0,00 even after creating test transactions - calculation bug confirmed!")
+                
+                # Deep dive into the calculation logic
+                transactions_in_analysis = sales_data.get('transactions', [])
+                print(f"\n🔍 DEEP DIVE - ANALYZING {len(transactions_in_analysis)} TRANSACTIONS:")
+                
+                manual_supplier_total = 0
+                for transaction in transactions_in_analysis:
+                    supplier_value = transaction.get('supplierValue', 0)
+                    if supplier_value:
+                        manual_supplier_total += float(supplier_value)
+                        print(f"   Found supplierValue: R$ {supplier_value}")
+                
+                print_result(True, "Manual calculation", 
+                           f"Manual total of supplierValue fields: R$ {manual_supplier_total:.2f}")
+                
+                if manual_supplier_total > 0 and new_total_supplier_costs == 0:
+                    print_result(False, "🚨 CALCULATION BUG CONFIRMED", 
+                               "Transactions have supplierValue but API calculation returns 0 - bug in calculation logic!")
+        else:
+            print_result(False, f"Updated sales analysis failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Updated sales analysis failed", str(e))
+    
+    # Test 6: Check field variations (supplierCosts vs supplierValue)
+    print("\n🎯 TEST 5: CHECK FIELD VARIATIONS AND NAMING")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            
+            # Check for different supplier cost field names
+            field_variations = {
+                'supplierValue': 0,
+                'supplierCosts': 0, 
+                'supplierCost': 0,
+                'supplier_value': 0,
+                'supplier_costs': 0,
+                'supplier': 0
+            }
+            
+            for transaction in transactions:
+                for field in field_variations.keys():
+                    if transaction.get(field) is not None:
+                        field_variations[field] += 1
+            
+            print_result(True, "Field variations analysis", 
+                       f"Field usage: {field_variations}")
+            
+            # Check if the API is looking for the wrong field name
+            if field_variations['supplierValue'] > 0 and field_variations['supplierCosts'] == 0:
+                print_result(True, "Field naming analysis", 
+                           "Transactions use 'supplierValue' field, not 'supplierCosts' - API should look for 'supplierValue'")
+            elif field_variations['supplierCosts'] > 0:
+                print_result(True, "Field naming analysis", 
+                           "Some transactions use 'supplierCosts' field - API might need to check both fields")
+            
+        else:
+            print_result(False, f"Field variations check failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Field variations check failed", str(e))
+
 def print_test_header(test_name):
     print(f"\n{'='*60}")
     print(f"🧪 TESTING: {test_name}")
