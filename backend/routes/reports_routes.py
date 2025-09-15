@@ -164,21 +164,8 @@ async def get_sales_analysis(
             if supplier_value:
                 total_supplier_costs += supplier_value
         
-        # Calcular comissões
-        total_commissions = 0
-        
-        # Primeiro, verificar commissionValue nas transações de entrada
-        for transaction in entrada_transactions:
-            commission_value = transaction.get("commissionValue", 0) or transaction.get("commission", 0)
-            if commission_value:
-                total_commissions += commission_value
-        
-        # Se não encontrou, buscar nas transações de saída relacionadas a comissões
-        if total_commissions == 0:
-            for transaction in saida_transactions:
-                # Verificar se é transação de comissão
-                if transaction.get("category") == "Comissão" or "comissão" in transaction.get("description", "").lower() or "comissao" in transaction.get("description", "").lower():
-                    total_commissions += transaction.get("amount", 0)
+        # Calcular comissões (assumindo campo commission nas transações)
+        total_commissions = sum(t.get("commission", 0) for t in entrada_transactions)
         
         # Calcular lucro líquido
         net_profit = total_sales - total_supplier_costs - total_commissions
