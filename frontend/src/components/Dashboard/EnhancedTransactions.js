@@ -415,14 +415,14 @@ const EnhancedTransactions = () => {
   // Comprehensive Airport Cities Database - Individual airports
   const airportCities = [
     // BRASIL - Aeroportos separados
-    "São Paulo (GRU)", "São Paulo (CGH)", "Rio de Janeiro (GIG)", "Rio de Janeiro (SDU)", 
-    "Salvador (SSA)", "Brasília (BSB)", "Fortaleza (FOR)", "Recife (REC)", "Manaus (MAO)", 
-    "Belém (BEL)", "Porto Alegre (POA)", "Curitiba (CWB)", "Goiânia (GYN)", "João Pessoa (JPA)", 
-    "Maceió (MCZ)", "Natal (NAT)", "Vitória (VIX)", "Florianópolis (FLN)", "Campo Grande (CGR)", 
-    "Cuiabá (CGB)", "Foz do Iguaçu (IGU)", "Uberlândia (UDI)", "Ribeirão Preto (RAO)",
+    "Sao Paulo (GRU)", "Sao Paulo (CGH)", "Rio de Janeiro (GIG)", "Rio de Janeiro (SDU)", 
+    "Salvador (SSA)", "Brasilia (BSB)", "Fortaleza (FOR)", "Recife (REC)", "Manaus (MAO)", 
+    "Belem (BEL)", "Porto Alegre (POA)", "Curitiba (CWB)", "Goiania (GYN)", "Joao Pessoa (JPA)", 
+    "Maceio (MCZ)", "Natal (NAT)", "Vitoria (VIX)", "Florianopolis (FLN)", "Campo Grande (CGR)", 
+    "Cuiaba (CGB)", "Foz do Iguacu (IGU)", "Uberlandia (UDI)", "Ribeirao Preto (RAO)",
     // Aeroportos brasileiros adicionais
-    "Campinas (VCP)", "Viracopos (VCP)", "Londrina (LDB)", "Maringá (MGF)", "São José do Rio Preto (SJP)",
-    "Bauru (BAU)", "Presidente Prudente (PPB)", "Araçatuba (ARU)", "Marília (MII)",
+    "Campinas (VCP)", "Viracopos (VCP)", "Londrina (LDB)", "Maringa (MGF)", "Sao Jose do Rio Preto (SJP)",
+    "Bauru (BAU)", "Presidente Prudente (PPB)", "Aracatuba (ARU)", "Marilia (MII)",
     "Santos Dumont (SDU)", "Congonhas (CGH)", "Guarulhos (GRU)",
     
     // EUROPA - Aeroportos separados
