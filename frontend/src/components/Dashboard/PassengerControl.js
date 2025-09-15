@@ -505,6 +505,183 @@ const PassengerControlDirect = () => {
                 </div>
               </div>
 
+              {/* Nova Seção: Detalhes da Viagem do Passageiro */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl">
+                <h3 className="font-bold text-xl text-blue-900 flex items-center mb-6">
+                  <Plane className="mr-3 h-6 w-6 text-blue-600" />
+                  ✈️ Detalhes da Viagem do Passageiro
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Tipo de Produto */}
+                  <div className="bg-white p-3 rounded border-l-4 border-blue-500">
+                    <Label className="text-sm font-medium text-blue-700 mb-2 block">
+                      🎫 Tipo de Produto:
+                    </Label>
+                    <Input
+                      value={productType}
+                      onChange={(e) => setProductType(e.target.value)}
+                      placeholder="Passagem aérea, pacote, etc."
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Código da Reserva do Cliente */}
+                  <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                    <Label className="text-sm font-medium text-green-700 mb-2 block">
+                      🏷️ Código Reserva Cliente:
+                    </Label>
+                    <Input
+                      value={clientReservationCode}
+                      onChange={(e) => setClientReservationCode(e.target.value)}
+                      placeholder="Código fornecido pelo cliente"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Tipo de Viagem */}
+                  <div className="bg-white p-3 rounded border-l-4 border-purple-500">
+                    <Label className="text-sm font-medium text-purple-700 mb-2 block">
+                      🔄 Tipo de Viagem:
+                    </Label>
+                    <select
+                      value={tripType}
+                      onChange={(e) => setTripType(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    >
+                      <option value="ida-volta">Ida e Volta</option>
+                      <option value="ida">Somente Ida</option>
+                      <option value="multiplos-destinos">Múltiplos Destinos</option>
+                    </select>
+                  </div>
+                  
+                  {/* Cidade de Saída */}
+                  <div className="bg-white p-3 rounded border-l-4 border-orange-500">
+                    <Label className="text-sm font-medium text-orange-700 mb-2 block">
+                      🛫 Cidade de Saída:
+                    </Label>
+                    <Input
+                      value={departureCity}
+                      onChange={(e) => setDepartureCity(e.target.value)}
+                      placeholder="São Paulo (GRU)"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Cidade de Chegada */}
+                  <div className="bg-white p-3 rounded border-l-4 border-teal-500">
+                    <Label className="text-sm font-medium text-teal-700 mb-2 block">
+                      🛬 Cidade de Chegada:
+                    </Label>
+                    <Input
+                      value={arrivalCity}
+                      onChange={(e) => setArrivalCity(e.target.value)}
+                      placeholder="Lisboa (LIS)"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Data de Partida */}
+                  <div className="bg-white p-3 rounded border-l-4 border-pink-500">
+                    <Label className="text-sm font-medium text-pink-700 mb-2 block">
+                      📅 Data de Partida:
+                    </Label>
+                    <Input
+                      type="date"
+                      value={departureDate}
+                      onChange={(e) => setDepartureDate(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Data de Retorno (se ida e volta) */}
+                  {tripType === 'ida-volta' && (
+                    <div className="bg-white p-3 rounded border-l-4 border-cyan-500">
+                      <Label className="text-sm font-medium text-cyan-700 mb-2 block">
+                        📅 Data de Retorno:
+                      </Label>
+                      <Input
+                        type="date"
+                        value={returnDate}
+                        onChange={(e) => setReturnDate(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Horário Voo Ida */}
+                  <div className="bg-white p-3 rounded border-l-4 border-yellow-500">
+                    <Label className="text-sm font-medium text-yellow-700 mb-2 block">
+                      🕐 Horário Voo Ida:
+                    </Label>
+                    <Input
+                      type="time"
+                      value={outboundFlightTime}
+                      onChange={(e) => setOutboundFlightTime(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Horário Voo Volta (se ida e volta) */}
+                  {tripType === 'ida-volta' && (
+                    <div className="bg-white p-3 rounded border-l-4 border-red-500">
+                      <Label className="text-sm font-medium text-red-700 mb-2 block">
+                        🕐 Horário Voo Volta:
+                      </Label>
+                      <Input
+                        type="time"
+                        value={returnFlightTime}
+                        onChange={(e) => setReturnFlightTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Seção de Escalas */}
+                <div className="mt-4 bg-white p-4 rounded-lg border border-gray-200">
+                  <div className="flex items-center mb-3">
+                    <input
+                      type="checkbox"
+                      id="hasStopover"
+                      checked={hasStopover}
+                      onChange={(e) => setHasStopover(e.target.checked)}
+                      className="mr-2"
+                    />
+                    <Label htmlFor="hasStopover" className="text-sm font-medium text-gray-700">
+                      🔄 Possui escalas/conexões
+                    </Label>
+                  </div>
+                  
+                  {hasStopover && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          🏙️ Cidade da Escala:
+                        </Label>
+                        <Input
+                          value={stopoverCity}
+                          onChange={(e) => setStopoverCity(e.target.value)}
+                          placeholder="Ex: Paris (CDG)"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          ⏱️ Tempo de Conexão:
+                        </Label>
+                        <Input
+                          value={stopoverTime}
+                          onChange={(e) => setStopoverTime(e.target.value)}
+                          placeholder="Ex: 2h 30min"
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Observações */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-lg flex items-center mb-3">
