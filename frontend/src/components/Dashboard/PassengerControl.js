@@ -395,7 +395,7 @@ const PassengerControlDirect = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold flex items-center">
                 <UserCheck className="mr-2 h-5 w-5" />
-                🎯 Gerenciar Reserva: {selectedReservation.internalCode}
+                🎯 MODAL CORRETO FUNCIONANDO - Gerenciar Reserva: {selectedReservation.internalCode}
               </h2>
               <button 
                 onClick={() => setSelectedReservation(null)}
