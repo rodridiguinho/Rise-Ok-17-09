@@ -256,7 +256,9 @@ const AdminSettings = () => {
       return;
     }
 
-    setExpenseCategories([...expenseCategories, newExpenseCategory]);
+    const updatedCategories = [...expenseCategories, newExpenseCategory.trim()];
+    setExpenseCategories(updatedCategories);
+    localStorage.setItem('riseTravel_expenseCategories', JSON.stringify(updatedCategories));
     setNewExpenseCategory('');
     setIsExpenseCategoryModalOpen(false);
     
