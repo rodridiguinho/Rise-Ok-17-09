@@ -323,12 +323,19 @@ const PassengerControl = () => {
               
               {selectedReservation.passengers.map((passenger, index) => (
                 <div key={index} className="bg-gray-50 p-4 rounded">
-                  <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium">{passenger.name}</span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                      {passenger.type}
-                    </span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium">{passenger.name}</span>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                        {passenger.type}
+                      </span>
+                      {index === 0 && (
+                        <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">
+                          Principal
+                        </span>
+                      )}
+                    </div>
                   </div>
                   
                   {passenger.document && (
@@ -336,17 +343,30 @@ const PassengerControl = () => {
                       Documento: {passenger.document}
                     </p>
                   )}
+                  
+                  {passenger.birthDate && (
+                    <p className="text-sm text-gray-600">
+                      Nascimento: {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}
+                    </p>
+                  )}
+                  
+                  {passenger.specialNeeds && (
+                    <p className="text-sm text-orange-600">
+                      Necessidades especiais: {passenger.specialNeeds}
+                    </p>
+                  )}
                 </div>
               ))}
               
-              <div className="pt-4">
-                <p className="text-sm text-gray-500 text-center">
-                  🚧 Funcionalidades avançadas em desenvolvimento:<br/>
-                  • Adicionar passageiros<br/>
-                  • Serviços extras (bagagem, assentos)<br/>
-                  • Sistema de lembretes automáticos
-                </p>
-              </div>
+              {/* Add Passenger Button */}
+              <Button
+                onClick={() => setIsAddPassengerOpen(true)}
+                className="w-full flex items-center justify-center space-x-2 border-2 border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600"
+                variant="outline"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Adicionar Novo Passageiro</span>
+              </Button>
             </div>
           </div>
         </div>
