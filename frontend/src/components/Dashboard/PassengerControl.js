@@ -50,7 +50,38 @@ const PassengerControl = () => {
   // Carregar reservas das transações de entrada
   useEffect(() => {
     loadReservations();
+    loadSuppliers();
   }, []);
+
+  const loadSuppliers = async () => {
+    try {
+      // Carregar lista de fornecedores do backend
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/suppliers`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSuppliersList(data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar fornecedores:', error);
+      // Lista de fornecedores padrão se não conseguir carregar do backend
+      setSuppliersList([
+        'CVC',
+        'Decolar',
+        'Latam Travel',
+        'Azul Viagens',
+        'TAM Viagens',
+        'Expedia',
+        'Booking.com',
+        'Agência Local',
+        'Outros'
+      ]);
+    }
+  };
 
   const loadReservations = async () => {
     setLoading(true);
