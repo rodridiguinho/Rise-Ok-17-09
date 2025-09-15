@@ -214,14 +214,21 @@ const PassengerControl = () => {
                   </span>
                 </div>
                 
+                {/* Main Passenger - Prominently displayed */}
+                <div className="bg-indigo-50 p-3 rounded-lg mb-4">
+                  <div className="flex items-center">
+                    <User className="h-5 w-5 mr-2 text-indigo-600" />
+                    <div>
+                      <p className="text-xs text-indigo-600 font-medium">PASSAGEIRO PRINCIPAL</p>
+                      <p className="font-semibold text-indigo-900">
+                        {reservation.client || reservation.passengers[0]?.name || 'Nome não informado'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Flight Info */}
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm">
-                    <User className="h-4 w-4 mr-2 text-indigo-600" />
-                    <span className="font-medium text-indigo-800">
-                      {reservation.client || reservation.passengers[0]?.name || 'Passageiro não informado'}
-                    </span>
-                  </div>
                   
                   <div className="flex items-center text-sm">
                     <Plane className="h-4 w-4 mr-2 text-blue-600" />
