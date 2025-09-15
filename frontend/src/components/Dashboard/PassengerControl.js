@@ -603,6 +603,48 @@ const PassengerControlDirect = () => {
               </div>
 
               <div>
+                <Label htmlFor="passengerNationality">Nacionalidade</Label>
+                <Input
+                  id="passengerNationality"
+                  type="text"
+                  value={newPassenger.nationality}
+                  onChange={(e) => setNewPassenger({...newPassenger, nationality: e.target.value})}
+                  placeholder="Brasileira"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerBirthDate">Data de Nascimento</Label>
+                <Input
+                  id="passengerBirthDate"
+                  type="date"
+                  value={newPassenger.birthDate}
+                  onChange={(e) => setNewPassenger({...newPassenger, birthDate: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerPassportNumber">Número do Passaporte</Label>
+                <Input
+                  id="passengerPassportNumber"
+                  type="text"
+                  value={newPassenger.passportNumber}
+                  onChange={(e) => setNewPassenger({...newPassenger, passportNumber: e.target.value})}
+                  placeholder="BR123456789"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerPassportExpiry">Vencimento do Passaporte</Label>
+                <Input
+                  id="passengerPassportExpiry"
+                  type="date"
+                  value={newPassenger.passportExpiry}
+                  onChange={(e) => setNewPassenger({...newPassenger, passportExpiry: e.target.value})}
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="passengerType">Tipo de Passageiro</Label>
                 <select
                   id="passengerType"
