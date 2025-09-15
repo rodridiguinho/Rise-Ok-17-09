@@ -421,9 +421,9 @@ const EnhancedTransactions = () => {
     "Maceió (MCZ)", "Natal (NAT)", "Vitória (VIX)", "Florianópolis (FLN)", "Campo Grande (CGR)", 
     "Cuiabá (CGB)", "Foz do Iguaçu (IGU)", "Uberlândia (UDI)", "Ribeirão Preto (RAO)",
     // Aeroportos brasileiros adicionais
-    "Campinas (VCP)", "Londrina (LDB)", "Maringá (MGF)", "São José do Rio Preto (SJP)",
+    "Campinas (VCP)", "Viracopos (VCP)", "Londrina (LDB)", "Maringá (MGF)", "São José do Rio Preto (SJP)",
     "Bauru (BAU)", "Presidente Prudente (PPB)", "Araçatuba (ARU)", "Marília (MII)",
-    "Santos Dumont (SDU)", "Congonhas (CGH)", "Guarulhos (GRU)", "Viracopos (VCP)",
+    "Santos Dumont (SDU)", "Congonhas (CGH)", "Guarulhos (GRU)",
     
     // EUROPA - Aeroportos separados
     "Lisboa (LIS)", "Porto (OPO)", "Madrid (MAD)", "Barcelona (BCN)", 
