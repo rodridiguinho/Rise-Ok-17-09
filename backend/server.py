@@ -1060,7 +1060,7 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
         logging.error(f"Sales analysis error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting sales analysis")
 
-@api_router.get("/reports/complete-analysis")
+@reports_router.get("/complete-analysis")
 async def get_complete_analysis(start_date: str = None, end_date: str = None):
     """Obter análise completa por período"""
     try:
