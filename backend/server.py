@@ -1226,6 +1226,9 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             "passengers": transaction.passengers or [],
             "airline": transaction.airline,
             "travelNotes": transaction.travelNotes,
+            # Supplier contact information
+            "emissionType": transaction.emissionType,
+            "supplierPhone": transaction.supplierPhone,
             "status": "Confirmado",
             "transactionDate": transaction_date,
             "updatedAt": datetime.utcnow(),
