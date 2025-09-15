@@ -8779,13 +8779,17 @@ if __name__ == "__main__":
     print("🏁 Backend API Test Suite Complete")
     print("="*80)
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - SALES PERFORMANCE ENDPOINT CORRECTIONS")
-    print(f"🔗 Testing API at: {API_URL}")
+    print("🚀 Starting Backend API Test Suite - REVIEW REQUEST: VERIFICAR TRANSAÇÕES EXISTENTES")
+    print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"🔗 Backend URL: {BASE_URL}")
+    print(f"🔗 API URL: {API_URL}")
+    print(f"👤 Test User: {VALID_EMAIL}")
     print("="*80)
     
     # Run the specific test for the review request
-    test_sales_performance_endpoint_corrections()
+    test_review_request_transaction_verification()
     
     print("\n" + "="*80)
-    print("🏁 SALES PERFORMANCE ENDPOINT CORRECTIONS TESTING COMPLETE")
+    print("🏁 REVIEW REQUEST TESTING COMPLETE - TRANSAÇÕES VERIFICADAS")
+    print("="*80)
     print("="*80)
