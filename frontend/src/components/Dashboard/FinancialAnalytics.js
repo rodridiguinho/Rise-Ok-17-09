@@ -39,10 +39,10 @@ const FinancialAnalytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      // Get current month data
+      // Get current month data - from day 1 to today
       const now = new Date();
       const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      const endDate = now.toISOString().split('T')[0]; // Today's date
       
       const response = await api.get(`/reports/complete-analysis?start_date=${startDate}&end_date=${endDate}`);
       
