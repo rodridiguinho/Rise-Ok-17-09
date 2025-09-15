@@ -711,17 +711,48 @@ const PassengerControlDirect = () => {
                     />
                   </div>
                   
-                  {/* Horário Voo Volta (se ida e volta) */}
+                  {/* Horário Voo Volta - Partida */}
                   {tripType === 'ida-volta' && (
-                    <div className="bg-white p-3 rounded border-l-4 border-red-500">
-                      <Label className="text-sm font-medium text-red-700 mb-2 block">
-                        🕐 Horário Voo Volta:
+                    <div className="bg-white p-3 rounded border-l-4 border-purple-500">
+                      <Label className="text-sm font-medium text-purple-700 mb-2 block">
+                        🛫 Partida - Volta:
                       </Label>
                       <Input
                         type="time"
-                        value={returnFlightTime}
-                        onChange={(e) => setReturnFlightTime(e.target.value)}
+                        value={returnDepartureTime}
+                        onChange={(e) => setReturnDepartureTime(e.target.value)}
                         className="text-sm"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Horário Voo Volta - Chegada */}
+                  {tripType === 'ida-volta' && (
+                    <div className="bg-white p-3 rounded border-l-4 border-indigo-500">
+                      <Label className="text-sm font-medium text-indigo-700 mb-2 block">
+                        🛬 Chegada - Volta:
+                      </Label>
+                      <Input
+                        type="time"
+                        value={returnArrivalTime}
+                        onChange={(e) => setReturnArrivalTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Duração Voo Volta */}
+                  {tripType === 'ida-volta' && (
+                    <div className="bg-white p-3 rounded border-l-4 border-teal-500">
+                      <Label className="text-sm font-medium text-teal-700 mb-2 block">
+                        ⏱️ Duração - Volta:
+                      </Label>
+                      <Input
+                        value={returnFlightDuration}
+                        onChange={(e) => setReturnFlightDuration(e.target.value)}
+                        placeholder="Ex: 9h 15min"
+                        className="text-sm"
+                        readOnly
                       />
                     </div>
                   )}
