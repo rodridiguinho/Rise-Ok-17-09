@@ -611,6 +611,18 @@ frontend:
           agent: "testing"
           comment: "✅ CLIENT PERSISTENCE BUG INVESTIGATION COMPLETED - NO BUG DETECTED: Thoroughly tested the exact user reported scenario: 'se eu crio um novo cliente e volto para aba novamente o cliente jão não existe' (if I create a new client and go back to the tab again the client no longer exists). ✅ COMPREHENSIVE TEST EXECUTION: Successfully logged in with rodrigo@risetravel.com.br / Emily2030*, navigated to Clientes section, created new client 'Cliente Final Test 1757269869' with unique email cliente.final.test.1757269869@test.com, verified immediate appearance in list (count increased from 2 to 3), navigated away to Overview section, returned to Clientes section. ✅ PERSISTENCE VERIFICATION: Client 'Cliente Final Test 1757269869' remained visible after navigation, client count stayed at 3, no data loss detected. ✅ NETWORK MONITORING: Captured 1 successful POST /api/clients request (200 response) during creation and 2 successful GET /api/clients requests (200 responses) when returning to clients page. ✅ API INTEGRATION WORKING: Backend email validation working (prevents duplicates), MongoDB persistence confirmed, frontend-backend communication functioning correctly. ✅ FINAL CONCLUSION: CLIENT PERSISTENCE IS WORKING CORRECTLY - user reported bug cannot be reproduced. All client CRUD operations (Create, Read, Update, Delete) function properly with full data persistence across navigation. The reported issue may be environment-specific, browser-specific, or has been resolved in recent updates."
 
+  - task: "Sales Performance Endpoint Investigation"
+    implemented: true
+    working: false
+    file: "backend/routes/reports_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "🚨 SALES PERFORMANCE ENDPOINT ISSUE - ROOT CAUSE IDENTIFIED: Successfully investigated why /api/reports/sales-performance returns zeros for analytics using rodrigo@risetravel.com.br / Emily2030* authentication. ❌ ENDPOINT NOT ACCESSIBLE: GET /api/reports/sales-performance returns 404 Not Found - this is the primary issue. ✅ ENDPOINT EXISTS: Found complete implementation in /app/backend/routes/reports_routes.py with proper authentication, date filtering, and analytics calculation logic. ✅ ROOT CAUSE: Separate route files are NOT being imported into main server.py. Only the main api_router is included via app.include_router(api_router). ✅ FIELD MAPPING VERIFIED: Tested with alternative /api/reports/sales-analysis endpoint - when transactions have supplierValue fields populated, analytics correctly calculate supplier costs (R$ 1800.00 from test data). ✅ CALCULATION LOGIC WORKING: The analytics logic is sound - issue is purely that the endpoint is not accessible due to missing route imports. ✅ SOLUTION: Import reports_routes.py into server.py using app.include_router(reports_router) to make sales-performance endpoint accessible."
+
   - task: "Clear Test Data Endpoint"
     implemented: true
     working: true
