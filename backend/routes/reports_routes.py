@@ -125,6 +125,90 @@ async def get_category_analysis(
         )
 
 
+@router.get("/sales-performance")
+async def get_sales_performance(
+    payload: dict = Depends(auth_handler.auth_wrapper),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    start_date: Optional[date] = Query(None),
+    end_date: Optional[date] = Query(None)
+):
+    """Analytics específico de vendas (sem despesas da empresa)"""
+    try:
+        user_id = ObjectId(payload.get("user_id"))
+        
+        # Filtros de data
+        date_filter = {"userId": user_id}
+        if start_date or end_date:
+            date_filter["date"] = {}
+            if start_date:
+                date_filter["date"]["$gte"] = start_date
+            if end_date:
+                date_filter["date"]["$lte"] = end_date
+        
+        # Buscar SOMENTE transações de entrada (vendas)
+        entrada_transactions = await db.transactions.find({
+            **date_filter,
+            "type": "entrada"
+        }).to_list(None)
+        
+        # Buscar transações de saída relacionadas a vendas (comissões e fornecedores)
+        saida_transactions = await db.transactions.find({
+            **date_filter,
+            "type": "saida"
+        }).to_list(None)
+        
+        # Totais de vendas
+        total_sales = sum(t.get("amount", 0) for t in entrada_transactions)
+        total_quantity = len(entrada_transactions)
+        
+        # Calcular comissões das vendas (das transações de saída)
+        total_commissions = 0
+        for transaction in saida_transactions:
+            description = transaction.get("description", "").lower()
+            if "comissão" in description or "comissao" in description:
+                total_commissions += transaction.get("amount", 0)
+        
+        # Calcular pagamentos a fornecedores (das transações de saída)
+        total_supplier_payments = 0
+        for transaction in saida_transactions:
+            description = transaction.get("description", "").lower()
+            supplier = transaction.get("supplier", "").lower()
+            if "fornecedor" in description or supplier:
+                total_supplier_payments += transaction.get("amount", 0)
+        
+        # Lucro líquido das vendas
+        net_sales_profit = total_sales - total_commissions - total_supplier_payments
+        
+        # Ticket médio
+        average_ticket = total_sales / total_quantity if total_quantity > 0 else 0
+        
+        # Margem de lucro das vendas
+        sales_margin = (net_sales_profit / total_sales * 100) if total_sales > 0 else 0
+        
+        return {
+            "sales": {
+                "total_sales": total_sales,
+                "total_quantity": total_quantity,
+                "total_commissions": total_commissions,
+                "total_supplier_payments": total_supplier_payments,
+                "net_sales_profit": net_sales_profit,
+                "average_ticket": average_ticket,
+                "sales_margin": sales_margin
+            },
+            "period": {
+                "start_date": start_date.strftime("%Y-%m-%d") if start_date else None,
+                "end_date": end_date.strftime("%Y-%m-%d") if end_date else None
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting sales performance: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error getting sales performance"
+        )
+
+
 @router.post("/export/pdf")
 async def export_pdf_report(
     payload: dict = Depends(auth_handler.auth_wrapper),
