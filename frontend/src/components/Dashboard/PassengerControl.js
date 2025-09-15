@@ -240,11 +240,14 @@ const PassengerControl = () => {
         description: selectedReservation.client,
         amount: selectedReservation.amount,
         paymentMethod: 'PIX',
-        supplier: selectedReservation.supplier,
+        supplier: selectedSupplier, // Usar fornecedor selecionado manualmente
         client: selectedReservation.client,
         passengers: selectedReservation.passengers,
         airline: editableAirline,
         travelNotes: reservationNotes,
+        // Novos campos do fornecedor
+        emissionType: emissionType,
+        supplierPhone: supplierPhone,
         // Include all travel fields
         departureCity: selectedReservation.departureCity,
         arrivalCity: selectedReservation.arrivalCity,
@@ -268,8 +271,11 @@ const PassengerControl = () => {
       // Update local state
       const updatedReservation = {
         ...selectedReservation,
+        supplier: selectedSupplier,
         airline: editableAirline,
-        travelNotes: reservationNotes
+        travelNotes: reservationNotes,
+        emissionType: emissionType,
+        supplierPhone: supplierPhone
       };
 
       setReservations(prev => 
