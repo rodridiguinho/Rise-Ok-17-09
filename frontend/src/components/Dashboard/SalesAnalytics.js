@@ -228,7 +228,7 @@ const SalesAnalytics = () => {
               <Target className="h-5 w-5 text-green-600" />
               <span className="text-sm font-medium text-gray-600">LUCRO LÍQUIDO</span>
             </div>
-            <div className={`text-3xl font-bold mb-2 ${analytics.sales.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-3xl font-bold mb-2 ${analytics.sales.net_sales_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {formatCurrency(analytics.sales.net_profit)}
             </div>
             {prevSales && (
