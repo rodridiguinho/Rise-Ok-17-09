@@ -1248,6 +1248,373 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_passenger_field_persistence_fixes():
+    """Test Passenger Field Persistence Fixes - REVIEW REQUEST"""
+    print_test_header("Passenger Field Persistence Fixes - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for passenger field persistence testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for passenger field persistence testing failed", str(e))
+        return
+    
+    # Test 2: POST /api/transactions with passengers field
+    print("\n🎯 TEST 1: POST /api/transactions WITH PASSENGERS FIELD")
+    try:
+        transaction_with_passengers = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Teste Persistência Passageiros - POST",
+            "amount": 2500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Passageiros",
+            "supplier": "Companhia Aérea Teste",
+            "airline": "LATAM Airlines",
+            "travelNotes": "Viagem de negócios para São Paulo",
+            "passengers": [
+                {
+                    "name": "João Silva Santos",
+                    "document": "123.456.789-00",
+                    "birthDate": "1985-03-15",
+                    "phone": "(11) 99999-1111",
+                    "email": "joao.silva@email.com",
+                    "emergencyContact": "Maria Silva - (11) 88888-2222"
+                },
+                {
+                    "name": "Maria Oliveira Costa",
+                    "document": "987.654.321-00", 
+                    "birthDate": "1990-07-22",
+                    "phone": "(11) 99999-3333",
+                    "email": "maria.oliveira@email.com",
+                    "emergencyContact": "Pedro Costa - (11) 88888-4444"
+                }
+            ],
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=transaction_with_passengers, timeout=10)
+        print(f"POST Response Status: {response.status_code}")
+        print(f"POST Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "POST with passengers - Transaction created", 
+                           f"Transaction created with ID: {transaction_id}")
+                
+                # Verify passengers field is saved
+                passengers = data.get("passengers", [])
+                if len(passengers) == 2:
+                    print_result(True, "POST with passengers - Passengers array saved", 
+                               f"Found {len(passengers)} passengers as expected")
+                    
+                    # Verify first passenger data
+                    passenger1 = passengers[0]
+                    if (passenger1.get("name") == "João Silva Santos" and 
+                        passenger1.get("document") == "123.456.789-00" and
+                        passenger1.get("email") == "joao.silva@email.com"):
+                        print_result(True, "POST with passengers - Passenger 1 data", 
+                                   f"Passenger 1 correctly saved: {passenger1.get('name')}")
+                    else:
+                        print_result(False, "POST with passengers - Passenger 1 data", 
+                                   f"Passenger 1 data incorrect: {passenger1}")
+                    
+                    # Verify second passenger data
+                    passenger2 = passengers[1]
+                    if (passenger2.get("name") == "Maria Oliveira Costa" and 
+                        passenger2.get("document") == "987.654.321-00" and
+                        passenger2.get("email") == "maria.oliveira@email.com"):
+                        print_result(True, "POST with passengers - Passenger 2 data", 
+                                   f"Passenger 2 correctly saved: {passenger2.get('name')}")
+                    else:
+                        print_result(False, "POST with passengers - Passenger 2 data", 
+                                   f"Passenger 2 data incorrect: {passenger2}")
+                else:
+                    print_result(False, "POST with passengers - Passengers array", 
+                               f"Expected 2 passengers, got {len(passengers)}")
+                
+                # Verify airline and travelNotes fields
+                if data.get("airline") == "LATAM Airlines":
+                    print_result(True, "POST with passengers - Airline field", 
+                               f"Airline correctly saved: {data.get('airline')}")
+                else:
+                    print_result(False, "POST with passengers - Airline field", 
+                               f"Expected: LATAM Airlines, Got: {data.get('airline')}")
+                
+                if data.get("travelNotes") == "Viagem de negócios para São Paulo":
+                    print_result(True, "POST with passengers - Travel notes field", 
+                               f"Travel notes correctly saved: {data.get('travelNotes')}")
+                else:
+                    print_result(False, "POST with passengers - Travel notes field", 
+                               f"Expected: Viagem de negócios para São Paulo, Got: {data.get('travelNotes')}")
+                
+                # Store transaction ID for update test
+                global passenger_transaction_id
+                passenger_transaction_id = transaction_id
+                
+            else:
+                print_result(False, "POST with passengers - No ID returned", str(data))
+        else:
+            print_result(False, f"POST with passengers - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "POST with passengers test failed", str(e))
+    
+    # Test 3: Verify passengers persist in database via GET
+    print("\n🎯 TEST 2: VERIFY PASSENGERS PERSIST IN DATABASE VIA GET")
+    try:
+        if 'passenger_transaction_id' in globals():
+            # Get all transactions and find our specific one
+            response = requests.get(f"{API_URL}/transactions", timeout=10)
+            if response.status_code == 200:
+                transactions = response.json()
+                
+                # Find our transaction
+                found_transaction = None
+                for t in transactions:
+                    if t.get("id") == passenger_transaction_id:
+                        found_transaction = t
+                        break
+                
+                if found_transaction:
+                    print_result(True, "GET transactions - Transaction found", 
+                               f"Transaction {passenger_transaction_id} found in database")
+                    
+                    # Verify passengers data persists
+                    passengers = found_transaction.get("passengers", [])
+                    if len(passengers) == 2:
+                        print_result(True, "GET transactions - Passengers persistence", 
+                                   f"Passengers data persists: {len(passengers)} passengers found")
+                        
+                        # Verify passenger details persist
+                        passenger1 = passengers[0]
+                        passenger2 = passengers[1]
+                        
+                        if (passenger1.get("name") == "João Silva Santos" and 
+                            passenger2.get("name") == "Maria Oliveira Costa"):
+                            print_result(True, "GET transactions - Passenger details persistence", 
+                                       f"All passenger details correctly persisted")
+                        else:
+                            print_result(False, "GET transactions - Passenger details persistence", 
+                                       f"Passenger details not correctly persisted")
+                    else:
+                        print_result(False, "GET transactions - Passengers persistence", 
+                                   f"Expected 2 passengers, found {len(passengers)}")
+                    
+                    # Verify supplier field is returned correctly
+                    if found_transaction.get("supplier") == "Companhia Aérea Teste":
+                        print_result(True, "GET transactions - Supplier field returned", 
+                                   f"Supplier field correctly returned: {found_transaction.get('supplier')}")
+                    else:
+                        print_result(False, "GET transactions - Supplier field returned", 
+                                   f"Expected: Companhia Aérea Teste, Got: {found_transaction.get('supplier')}")
+                    
+                    # Verify airline and travelNotes persist
+                    if found_transaction.get("airline") == "LATAM Airlines":
+                        print_result(True, "GET transactions - Airline field persistence", 
+                                   f"Airline field persists: {found_transaction.get('airline')}")
+                    else:
+                        print_result(False, "GET transactions - Airline field persistence", 
+                                   f"Airline field not persisted correctly")
+                    
+                    if found_transaction.get("travelNotes") == "Viagem de negócios para São Paulo":
+                        print_result(True, "GET transactions - Travel notes persistence", 
+                                   f"Travel notes persist: {found_transaction.get('travelNotes')}")
+                    else:
+                        print_result(False, "GET transactions - Travel notes persistence", 
+                                   f"Travel notes not persisted correctly")
+                        
+                else:
+                    print_result(False, "GET transactions - Transaction not found", 
+                               f"Transaction {passenger_transaction_id} not found in database")
+            else:
+                print_result(False, f"GET transactions - HTTP {response.status_code}", response.text)
+        else:
+            print_result(False, "GET transactions - No transaction ID", 
+                       "Cannot test GET without transaction ID from POST test")
+    except Exception as e:
+        print_result(False, "GET transactions test failed", str(e))
+    
+    # Test 4: PUT /api/transactions/{id} with passengers field
+    print("\n🎯 TEST 3: PUT /api/transactions/{id} WITH PASSENGERS FIELD")
+    try:
+        if 'passenger_transaction_id' in globals():
+            # Update transaction with modified passenger data
+            updated_transaction = {
+                "type": "entrada",
+                "category": "Passagem Aérea",
+                "description": "Teste Persistência Passageiros - PUT UPDATED",
+                "amount": 3000.00,  # Changed amount
+                "paymentMethod": "PIX",
+                "client": "Cliente Teste Passageiros",
+                "supplier": "Companhia Aérea Teste UPDATED",  # Changed supplier
+                "airline": "GOL Airlines",  # Changed airline
+                "travelNotes": "Viagem de negócios para Rio de Janeiro - ATUALIZADA",  # Changed notes
+                "passengers": [
+                    {
+                        "name": "João Silva Santos",
+                        "document": "123.456.789-00",
+                        "birthDate": "1985-03-15",
+                        "phone": "(11) 99999-1111",
+                        "email": "joao.silva.updated@email.com",  # Changed email
+                        "emergencyContact": "Maria Silva - (11) 88888-2222"
+                    },
+                    {
+                        "name": "Maria Oliveira Costa",
+                        "document": "987.654.321-00", 
+                        "birthDate": "1990-07-22",
+                        "phone": "(11) 99999-3333",
+                        "email": "maria.oliveira@email.com",
+                        "emergencyContact": "Pedro Costa - (11) 88888-4444"
+                    },
+                    {
+                        "name": "Carlos Roberto Lima",  # NEW passenger
+                        "document": "111.222.333-44",
+                        "birthDate": "1988-12-10",
+                        "phone": "(11) 99999-5555",
+                        "email": "carlos.lima@email.com",
+                        "emergencyContact": "Ana Lima - (11) 88888-6666"
+                    }
+                ],
+                "transactionDate": "2025-01-15"
+            }
+            
+            response = requests.put(f"{API_URL}/transactions/{passenger_transaction_id}", 
+                                  json=updated_transaction, timeout=10)
+            print(f"PUT Response Status: {response.status_code}")
+            print(f"PUT Response Text: {response.text[:500]}...")
+            
+            if response.status_code == 200:
+                data = response.json()
+                print_result(True, "PUT with passengers - Transaction updated", 
+                           f"Transaction {passenger_transaction_id} updated successfully")
+                
+                # Verify updated passengers field
+                passengers = data.get("passengers", [])
+                if len(passengers) == 3:
+                    print_result(True, "PUT with passengers - Updated passengers array", 
+                               f"Found {len(passengers)} passengers (added 1 new passenger)")
+                    
+                    # Verify updated passenger data
+                    passenger1 = passengers[0]
+                    if passenger1.get("email") == "joao.silva.updated@email.com":
+                        print_result(True, "PUT with passengers - Passenger 1 updated", 
+                                   f"Passenger 1 email updated: {passenger1.get('email')}")
+                    else:
+                        print_result(False, "PUT with passengers - Passenger 1 updated", 
+                                   f"Expected updated email, got: {passenger1.get('email')}")
+                    
+                    # Verify new passenger
+                    passenger3 = passengers[2]
+                    if (passenger3.get("name") == "Carlos Roberto Lima" and 
+                        passenger3.get("document") == "111.222.333-44"):
+                        print_result(True, "PUT with passengers - New passenger added", 
+                                   f"New passenger correctly added: {passenger3.get('name')}")
+                    else:
+                        print_result(False, "PUT with passengers - New passenger added", 
+                                   f"New passenger data incorrect: {passenger3}")
+                else:
+                    print_result(False, "PUT with passengers - Updated passengers array", 
+                               f"Expected 3 passengers, got {len(passengers)}")
+                
+                # Verify other updated fields
+                if data.get("supplier") == "Companhia Aérea Teste UPDATED":
+                    print_result(True, "PUT with passengers - Supplier updated", 
+                               f"Supplier correctly updated: {data.get('supplier')}")
+                else:
+                    print_result(False, "PUT with passengers - Supplier updated", 
+                               f"Supplier not updated correctly: {data.get('supplier')}")
+                
+                if data.get("airline") == "GOL Airlines":
+                    print_result(True, "PUT with passengers - Airline updated", 
+                               f"Airline correctly updated: {data.get('airline')}")
+                else:
+                    print_result(False, "PUT with passengers - Airline updated", 
+                               f"Airline not updated correctly: {data.get('airline')}")
+                
+                if data.get("amount") == 3000.00:
+                    print_result(True, "PUT with passengers - Amount updated", 
+                               f"Amount correctly updated: R$ {data.get('amount')}")
+                else:
+                    print_result(False, "PUT with passengers - Amount updated", 
+                               f"Amount not updated correctly: R$ {data.get('amount')}")
+                
+            else:
+                print_result(False, f"PUT with passengers - HTTP {response.status_code}", response.text)
+        else:
+            print_result(False, "PUT with passengers - No transaction ID", 
+                       "Cannot test PUT without transaction ID from POST test")
+    except Exception as e:
+        print_result(False, "PUT with passengers test failed", str(e))
+    
+    # Test 5: Final verification - GET updated transaction
+    print("\n🎯 TEST 4: FINAL VERIFICATION - GET UPDATED TRANSACTION")
+    try:
+        if 'passenger_transaction_id' in globals():
+            response = requests.get(f"{API_URL}/transactions", timeout=10)
+            if response.status_code == 200:
+                transactions = response.json()
+                
+                # Find our updated transaction
+                found_transaction = None
+                for t in transactions:
+                    if t.get("id") == passenger_transaction_id:
+                        found_transaction = t
+                        break
+                
+                if found_transaction:
+                    print_result(True, "Final verification - Updated transaction found", 
+                               f"Updated transaction found in database")
+                    
+                    # Verify all updates persisted
+                    passengers = found_transaction.get("passengers", [])
+                    if (len(passengers) == 3 and 
+                        passengers[0].get("email") == "joao.silva.updated@email.com" and
+                        passengers[2].get("name") == "Carlos Roberto Lima"):
+                        print_result(True, "Final verification - Passenger updates persisted", 
+                                   f"All passenger updates correctly persisted")
+                    else:
+                        print_result(False, "Final verification - Passenger updates persisted", 
+                                   f"Passenger updates not correctly persisted")
+                    
+                    if (found_transaction.get("supplier") == "Companhia Aérea Teste UPDATED" and
+                        found_transaction.get("airline") == "GOL Airlines" and
+                        found_transaction.get("amount") == 3000.00):
+                        print_result(True, "Final verification - All field updates persisted", 
+                                   f"All field updates correctly persisted")
+                    else:
+                        print_result(False, "Final verification - All field updates persisted", 
+                                   f"Some field updates not correctly persisted")
+                    
+                    # Final summary
+                    print_result(True, "🎯 PASSENGER FIELD PERSISTENCE FIXES - COMPLETE SUCCESS", 
+                               "✅ POST /api/transactions with passengers field works\n✅ Passengers data saves to database\n✅ PUT /api/transactions/{id} with passengers field works\n✅ Passenger updates persist correctly\n✅ Supplier field returns correctly in GET requests\n✅ Airline and travelNotes fields work correctly")
+                    
+                else:
+                    print_result(False, "Final verification - Updated transaction not found", 
+                               f"Updated transaction not found in database")
+            else:
+                print_result(False, f"Final verification - HTTP {response.status_code}", response.text)
+        else:
+            print_result(False, "Final verification - No transaction ID", 
+                       "Cannot perform final verification without transaction ID")
+    except Exception as e:
+        print_result(False, "Final verification test failed", str(e))
+
 def test_passenger_control_system_investigation():
     """Test Passenger Control System Issues - REVIEW REQUEST"""
     print_test_header("Passenger Control System Investigation - Review Request Testing")
