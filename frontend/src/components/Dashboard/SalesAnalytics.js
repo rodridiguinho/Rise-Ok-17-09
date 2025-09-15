@@ -229,7 +229,7 @@ const SalesAnalytics = () => {
               <span className="text-sm font-medium text-gray-600">LUCRO LÍQUIDO</span>
             </div>
             <div className={`text-3xl font-bold mb-2 ${analytics.sales.net_sales_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(analytics.sales.net_profit)}
+              {formatCurrency(analytics.sales.net_sales_profit)}
             </div>
             {prevSales && (
               <div className="text-sm">
