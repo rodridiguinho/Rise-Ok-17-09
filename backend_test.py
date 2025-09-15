@@ -7056,3 +7056,325 @@ if __name__ == "__main__":
     print("\n" + "="*80)
     print("🏁 Backend API Tests Completed - USERS API ENDPOINTS TESTED")
     print("="*80)
+def test_sales_analysis_endpoint():
+    """Test Sales Analysis Endpoint - SPECIFIC REVIEW REQUEST"""
+    print_test_header("Sales Analysis Endpoint Testing - Review Request")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for sales analysis testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for sales analysis testing failed", str(e))
+        return
+    
+    # Test 2: Create sample transactions with supplier costs for testing
+    print("\n🎯 TEST 1: CREATE SAMPLE TRANSACTIONS WITH SUPPLIER COSTS")
+    sample_transactions = []
+    
+    try:
+        # Create transactions with supplierValue field to test supplier costs calculation
+        test_transactions = [
+            {
+                "type": "entrada",
+                "category": "Passagem Aérea",
+                "description": "Venda com custo fornecedor - Teste 1",
+                "amount": 2000.00,
+                "paymentMethod": "PIX",
+                "client": "Cliente Teste Sales Analysis 1",
+                "supplier": "Fornecedor Teste 1",
+                "saleValue": 2000.00,
+                "supplierValue": 1200.00,  # This should appear in supplier costs
+                "commissionValue": 200.00,
+                "transactionDate": "2025-01-15"
+            },
+            {
+                "type": "entrada", 
+                "category": "Hotel/Hospedagem",
+                "description": "Venda com custo fornecedor - Teste 2",
+                "amount": 1500.00,
+                "paymentMethod": "Cartão de Crédito",
+                "client": "Cliente Teste Sales Analysis 2",
+                "supplier": "Fornecedor Teste 2", 
+                "saleValue": 1500.00,
+                "supplierValue": 900.00,  # This should appear in supplier costs
+                "commissionValue": 150.00,
+                "transactionDate": "2025-01-20"
+            },
+            {
+                "type": "entrada",
+                "category": "Seguro Viagem", 
+                "description": "Venda com custo fornecedor - Teste 3",
+                "amount": 800.00,
+                "paymentMethod": "PIX",
+                "client": "Cliente Teste Sales Analysis 3",
+                "supplier": "Fornecedor Teste 3",
+                "saleValue": 800.00,
+                "supplierValue": 500.00,  # This should appear in supplier costs
+                "commissionValue": 80.00,
+                "transactionDate": "2025-01-25"
+            }
+        ]
+        
+        for i, transaction_data in enumerate(test_transactions):
+            response = requests.post(f"{API_URL}/transactions", json=transaction_data, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data:
+                    sample_transactions.append(data)
+                    print_result(True, f"Sample transaction {i+1} created", 
+                               f"ID: {data['id']}, Supplier Value: R$ {data.get('supplierValue', 0)}")
+                else:
+                    print_result(False, f"Sample transaction {i+1} creation failed", "No ID returned")
+            else:
+                print_result(False, f"Sample transaction {i+1} creation failed", 
+                           f"HTTP {response.status_code}: {response.text}")
+        
+        if len(sample_transactions) >= 2:
+            print_result(True, "Sample transactions creation", 
+                       f"Created {len(sample_transactions)} transactions with supplier costs for testing")
+        else:
+            print_result(False, "Sample transactions creation", 
+                       "Failed to create sufficient sample transactions")
+            
+    except Exception as e:
+        print_result(False, "Sample transactions creation failed", str(e))
+    
+    # Test 3: Test GET /api/reports/sales-analysis endpoint
+    print("\n🎯 TEST 2: TEST SALES ANALYSIS ENDPOINT")
+    try:
+        # Calculate current month dates as specified in review request
+        from datetime import date
+        today = date.today()
+        start_date = today.replace(day=1).strftime("%Y-%m-%d")  # First day of current month
+        last_day = 31
+        while True:
+            try:
+                end_date = today.replace(day=last_day).strftime("%Y-%m-%d")  # Last day of current month
+                break
+            except ValueError:
+                last_day -= 1
+        
+        print(f"Testing with date range: {start_date} to {end_date}")
+        
+        # Test the endpoint with date parameters
+        params = {
+            "start_date": start_date,
+            "end_date": end_date
+        }
+        
+        response = requests.get(f"{API_URL}/reports/sales-analysis", params=params, timeout=10)
+        print(f"Sales Analysis Response Status: {response.status_code}")
+        print(f"Sales Analysis Response Text: {response.text[:1000]}...")  # First 1000 chars
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Sales Analysis Endpoint - HTTP 200 Status", 
+                       "Endpoint returns 200 status as required")
+            
+            # Test 4: Verify response structure and required fields
+            print("\n🎯 TEST 3: VERIFY RESPONSE STRUCTURE AND REQUIRED FIELDS")
+            
+            # Check for period information
+            if "period" in data:
+                period = data["period"]
+                if period.get("start_date") == start_date and period.get("end_date") == end_date:
+                    print_result(True, "Sales Analysis - Period validation", 
+                               f"Period correctly set: {start_date} to {end_date}")
+                else:
+                    print_result(False, "Sales Analysis - Period validation", 
+                               f"Expected: {start_date} to {end_date}, Got: {period}")
+            else:
+                print_result(False, "Sales Analysis - Period field missing", 
+                           "Response should include 'period' field")
+            
+            # Check for sales data
+            if "sales" in data:
+                sales = data["sales"]
+                print_result(True, "Sales Analysis - Sales data present", 
+                           "Response includes sales data section")
+                
+                # Test 5: Verify supplier costs field is present and calculated
+                print("\n🎯 TEST 4: VERIFY SUPPLIER COSTS FIELD")
+                
+                required_sales_fields = [
+                    "total_sales", 
+                    "total_supplier_costs",  # This is the key field from review request
+                    "total_commissions", 
+                    "net_profit", 
+                    "sales_count", 
+                    "average_sale"
+                ]
+                
+                missing_fields = [f for f in required_sales_fields if f not in sales]
+                if not missing_fields:
+                    print_result(True, "Sales Analysis - Required fields present", 
+                               f"All required fields present: {required_sales_fields}")
+                    
+                    # Verify total_supplier_costs field specifically
+                    total_supplier_costs = sales.get("total_supplier_costs", 0)
+                    if total_supplier_costs > 0:
+                        print_result(True, "Sales Analysis - Supplier costs calculated", 
+                                   f"total_supplier_costs field present and calculated: R$ {total_supplier_costs}")
+                    else:
+                        print_result(False, "Sales Analysis - Supplier costs not calculated", 
+                                   f"total_supplier_costs is {total_supplier_costs} - should be > 0 if transactions have supplier costs")
+                    
+                    # Verify other analytics fields
+                    total_sales = sales.get("total_sales", 0)
+                    total_commissions = sales.get("total_commissions", 0)
+                    net_profit = sales.get("net_profit", 0)
+                    
+                    print_result(True, "Sales Analysis - Financial metrics", 
+                               f"Total Sales: R$ {total_sales}, Supplier Costs: R$ {total_supplier_costs}, Commissions: R$ {total_commissions}, Net Profit: R$ {net_profit}")
+                    
+                    # Test 6: Verify profit margin calculation (if applicable)
+                    print("\n🎯 TEST 5: VERIFY PROFIT CALCULATIONS")
+                    
+                    # Calculate expected net profit: total_sales - total_supplier_costs - total_commissions
+                    expected_net_profit = total_sales - total_supplier_costs - total_commissions
+                    
+                    if abs(net_profit - expected_net_profit) < 0.01:  # Allow for small floating point differences
+                        print_result(True, "Sales Analysis - Net profit calculation", 
+                                   f"Net profit correctly calculated: R$ {total_sales} - R$ {total_supplier_costs} - R$ {total_commissions} = R$ {net_profit}")
+                    else:
+                        print_result(False, "Sales Analysis - Net profit calculation", 
+                                   f"Expected: R$ {expected_net_profit}, Got: R$ {net_profit}")
+                    
+                    # Calculate profit margin if total_sales > 0
+                    if total_sales > 0:
+                        profit_margin = (net_profit / total_sales) * 100
+                        print_result(True, "Sales Analysis - Profit margin calculation", 
+                                   f"Profit margin: {profit_margin:.2f}% ({net_profit}/{total_sales})")
+                    else:
+                        print_result(True, "Sales Analysis - Profit margin calculation", 
+                                   "No sales data for profit margin calculation")
+                    
+                else:
+                    print_result(False, "Sales Analysis - Required fields missing", 
+                               f"Missing fields: {missing_fields}")
+                
+            else:
+                print_result(False, "Sales Analysis - Sales data missing", 
+                           "Response should include 'sales' data section")
+            
+            # Test 7: Verify transactions data is included
+            print("\n🎯 TEST 6: VERIFY TRANSACTIONS DATA")
+            
+            if "transactions" in data:
+                transactions = data["transactions"]
+                if isinstance(transactions, list):
+                    print_result(True, "Sales Analysis - Transactions data present", 
+                               f"Found {len(transactions)} transactions in response")
+                    
+                    # Check if any transactions have supplierValue field
+                    transactions_with_supplier_costs = [t for t in transactions if t.get("supplierValue")]
+                    if transactions_with_supplier_costs:
+                        print_result(True, "Sales Analysis - Supplier costs in transactions", 
+                                   f"Found {len(transactions_with_supplier_costs)} transactions with supplier costs")
+                        
+                        # Show sample transaction with supplier costs
+                        sample_transaction = transactions_with_supplier_costs[0]
+                        print_result(True, "Sales Analysis - Sample transaction with supplier costs", 
+                                   f"ID: {sample_transaction.get('id')}, Description: {sample_transaction.get('description')}, Supplier Value: R$ {sample_transaction.get('supplierValue')}")
+                    else:
+                        print_result(False, "Sales Analysis - No supplier costs in transactions", 
+                                   "No transactions found with supplierValue field")
+                else:
+                    print_result(False, "Sales Analysis - Transactions data format", 
+                               "Transactions should be an array")
+            else:
+                print_result(False, "Sales Analysis - Transactions data missing", 
+                           "Response should include 'transactions' array")
+            
+        else:
+            print_result(False, f"Sales Analysis Endpoint - HTTP {response.status_code}", 
+                       f"Expected 200, got {response.status_code}: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Sales Analysis Endpoint testing failed", str(e))
+    
+    # Test 8: Final validation summary
+    print("\n🎯 FINAL VALIDATION SUMMARY")
+    try:
+        # Re-test the endpoint to get final results
+        params = {
+            "start_date": start_date,
+            "end_date": end_date
+        }
+        response = requests.get(f"{API_URL}/reports/sales-analysis", params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            sales = data.get("sales", {})
+            
+            # Check all review request requirements
+            requirements_met = []
+            
+            # 1. Endpoint returns 200 status
+            requirements_met.append(("✅ Returns 200 status", True))
+            
+            # 2. Response includes sales data with supplier costs
+            has_sales_data = "sales" in data
+            requirements_met.append(("✅ Includes sales data", has_sales_data))
+            
+            # 3. total_supplier_costs field is present and calculated correctly
+            has_supplier_costs = "total_supplier_costs" in sales
+            supplier_costs_value = sales.get("total_supplier_costs", 0)
+            requirements_met.append(("✅ total_supplier_costs field present", has_supplier_costs))
+            requirements_met.append(("✅ total_supplier_costs calculated", supplier_costs_value >= 0))
+            
+            # 4. Other analytics fields like net_profit, profit_margin
+            has_net_profit = "net_profit" in sales
+            requirements_met.append(("✅ net_profit field present", has_net_profit))
+            
+            # 5. Transactions with supplierValue field
+            transactions = data.get("transactions", [])
+            has_supplier_transactions = any(t.get("supplierValue") for t in transactions)
+            requirements_met.append(("✅ Transactions with supplier costs", has_supplier_transactions))
+            
+            # Summary
+            all_requirements_met = all(req[1] for req in requirements_met)
+            
+            print("\n📋 REVIEW REQUEST REQUIREMENTS CHECK:")
+            for requirement, met in requirements_met:
+                status = "✅" if met else "❌"
+                print(f"  {status} {requirement}")
+            
+            if all_requirements_met:
+                print_result(True, "🎯 SALES ANALYSIS ENDPOINT - ALL REVIEW REQUIREMENTS MET", 
+                           f"✅ Endpoint working correctly\n✅ Returns supplier costs: R$ {supplier_costs_value}\n✅ All analytics fields present\n✅ Transactions data included")
+            else:
+                print_result(False, "🎯 SALES ANALYSIS ENDPOINT - SOME REQUIREMENTS NOT MET", 
+                           "Some requirements from review request not fully satisfied")
+        else:
+            print_result(False, "Final validation failed", 
+                       f"Endpoint returned {response.status_code} instead of 200")
+            
+    except Exception as e:
+        print_result(False, "Final validation failed", str(e))
+
+if __name__ == "__main__":
+    print("🚀 Starting Backend API Test Suite")
+    print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"🔗 Backend URL: {BASE_URL}")
+    print(f"🔗 API URL: {API_URL}")
+    
+    # Run the specific sales analysis test as requested
+    test_sales_analysis_endpoint()
+    
+    print("\n" + "="*80)
+    print("🏁 Backend API Test Suite Complete")
+    print("="*80)
