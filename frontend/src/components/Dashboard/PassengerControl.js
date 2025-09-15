@@ -57,6 +57,7 @@ const PassengerControl = () => {
         clientReservationCode: transaction.clientReservationCode,
         client: transaction.client,
         airline: transaction.airline,
+        supplier: transaction.supplier,
         departureCity: transaction.departureCity,
         arrivalCity: transaction.arrivalCity,
         departureDate: transaction.departureDate,
@@ -69,6 +70,10 @@ const PassengerControl = () => {
         hasReturnStop: transaction.hasReturnStop,
         outboundStopCity: transaction.outboundStopCity,
         returnStopCity: transaction.returnStopCity,
+        outboundStopArrival: transaction.outboundStopArrival,
+        outboundStopDeparture: transaction.outboundStopDeparture,
+        returnStopArrival: transaction.returnStopArrival,
+        returnStopDeparture: transaction.returnStopDeparture,
         tripType: transaction.tripType,
         amount: transaction.amount,
         passengers: transaction.passengers || [
@@ -298,7 +303,7 @@ const PassengerControl = () => {
       {/* Enhanced Modal for Selected Reservation */}
       {selectedReservation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold flex items-center">
                 <UserCheck className="mr-2 h-5 w-5" />
@@ -416,53 +421,54 @@ const PassengerControl = () => {
                 <h3 className="font-medium text-lg">
                   Passageiros ({selectedReservation.passengers.length})
                 </h3>
-              
-              {selectedReservation.passengers.map((passenger, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-blue-600" />
-                      <span className="font-medium">{passenger.name}</span>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                        {passenger.type}
-                      </span>
-                      {index === 0 && (
-                        <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">
-                          Principal
+                
+                {selectedReservation.passengers.map((passenger, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded mt-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium">{passenger.name}</span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                          {passenger.type}
                         </span>
-                      )}
+                        {index === 0 && (
+                          <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">
+                            Principal
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    
+                    {passenger.document && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        Documento: {passenger.document}
+                      </p>
+                    )}
+                    
+                    {passenger.birthDate && (
+                      <p className="text-sm text-gray-600">
+                        Nascimento: {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                    
+                    {passenger.specialNeeds && (
+                      <p className="text-sm text-orange-600">
+                        Necessidades especiais: {passenger.specialNeeds}
+                      </p>
+                    )}
                   </div>
-                  
-                  {passenger.document && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      Documento: {passenger.document}
-                    </p>
-                  )}
-                  
-                  {passenger.birthDate && (
-                    <p className="text-sm text-gray-600">
-                      Nascimento: {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}
-                    </p>
-                  )}
-                  
-                  {passenger.specialNeeds && (
-                    <p className="text-sm text-orange-600">
-                      Necessidades especiais: {passenger.specialNeeds}
-                    </p>
-                  )}
-                </div>
-              ))}
-              
-              {/* Add Passenger Button */}
-              <Button
-                onClick={() => setIsAddPassengerOpen(true)}
-                className="w-full flex items-center justify-center space-x-2 border-2 border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600"
-                variant="outline"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Adicionar Novo Passageiro</span>
-              </Button>
+                ))}
+                
+                {/* Add Passenger Button */}
+                <Button
+                  onClick={() => setIsAddPassengerOpen(true)}
+                  className="w-full flex items-center justify-center space-x-2 border-2 border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 mt-4"
+                  variant="outline"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Adicionar Novo Passageiro</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
