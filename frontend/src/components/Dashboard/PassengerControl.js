@@ -316,10 +316,106 @@ const PassengerControl = () => {
               {selectedReservation.client} • {selectedReservation.departureCity} → {selectedReservation.arrivalCity}
             </p>
 
-            <div className="space-y-4">
-              <h3 className="font-medium text-lg">
-                Passageiros ({selectedReservation.passengers.length})
-              </h3>
+            <div className="space-y-6">
+              {/* Flight Details Section */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-3">
+                  <Plane className="mr-2 h-5 w-5 text-blue-600" />
+                  Detalhes da Viagem
+                </h3>
+                
+                {/* Supplier Information */}
+                {selectedReservation.supplier && (
+                  <div className="mb-4 p-3 bg-white rounded border-l-4 border-blue-500">
+                    <p className="text-sm font-medium text-blue-700">Fornecedor:</p>
+                    <p className="font-semibold">{selectedReservation.supplier}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Outbound Flight */}
+                  <div className="bg-white p-3 rounded">
+                    <h4 className="font-medium text-green-700 flex items-center mb-2">
+                      <MapPin className="mr-1 h-4 w-4" />
+                      Voo de Ida
+                    </h4>
+                    
+                    {selectedReservation.departureDate && (
+                      <p className="text-sm">
+                        <Calendar className="inline h-4 w-4 mr-1" />
+                        {new Date(selectedReservation.departureDate).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                    
+                    {selectedReservation.outboundDepartureTime && (
+                      <p className="text-sm">
+                        <Clock className="inline h-4 w-4 mr-1" />
+                        Saída: {selectedReservation.outboundDepartureTime}
+                        {selectedReservation.outboundArrivalTime && (
+                          <span> → Chegada: {selectedReservation.outboundArrivalTime}</span>
+                        )}
+                      </p>
+                    )}
+                    
+                    {selectedReservation.hasOutboundStop && selectedReservation.outboundStopCity && (
+                      <div className="mt-2 p-2 bg-orange-50 rounded text-sm">
+                        <p className="text-orange-700 font-medium">✈️ Escala:</p>
+                        <p>{selectedReservation.outboundStopCity}</p>
+                        {selectedReservation.outboundStopArrival && (
+                          <p>Chegada: {selectedReservation.outboundStopArrival}</p>
+                        )}
+                        {selectedReservation.outboundStopDeparture && (
+                          <p>Saída: {selectedReservation.outboundStopDeparture}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Return Flight */}
+                  {selectedReservation.returnDate && (
+                    <div className="bg-white p-3 rounded">
+                      <h4 className="font-medium text-purple-700 flex items-center mb-2">
+                        <MapPin className="mr-1 h-4 w-4" />
+                        Voo de Volta
+                      </h4>
+                      
+                      <p className="text-sm">
+                        <Calendar className="inline h-4 w-4 mr-1" />
+                        {new Date(selectedReservation.returnDate).toLocaleDateString('pt-BR')}
+                      </p>
+                      
+                      {selectedReservation.returnDepartureTime && (
+                        <p className="text-sm">
+                          <Clock className="inline h-4 w-4 mr-1" />
+                          Saída: {selectedReservation.returnDepartureTime}
+                          {selectedReservation.returnArrivalTime && (
+                            <span> → Chegada: {selectedReservation.returnArrivalTime}</span>
+                          )}
+                        </p>
+                      )}
+                      
+                      {selectedReservation.hasReturnStop && selectedReservation.returnStopCity && (
+                        <div className="mt-2 p-2 bg-orange-50 rounded text-sm">
+                          <p className="text-orange-700 font-medium">✈️ Escala:</p>
+                          <p>{selectedReservation.returnStopCity}</p>
+                          {selectedReservation.returnStopArrival && (
+                            <p>Chegada: {selectedReservation.returnStopArrival}</p>
+                          )}
+                          {selectedReservation.returnStopDeparture && (
+                            <p>Saída: {selectedReservation.returnStopDeparture}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Passengers Section */}
+              <div>
+                <h3 className="font-medium text-lg">
+                  Passageiros ({selectedReservation.passengers.length})
+                </h3>
               
               {selectedReservation.passengers.map((passenger, index) => (
                 <div key={index} className="bg-gray-50 p-4 rounded">
