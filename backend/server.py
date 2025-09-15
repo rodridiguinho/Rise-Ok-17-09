@@ -1004,7 +1004,7 @@ async def get_transaction_summary():
         logging.error(f"Summary error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting summary")
 
-@api_router.get("/reports/sales-analysis")
+@reports_router.get("/sales-analysis")
 async def get_sales_analysis(start_date: str = None, end_date: str = None):
     """Obter análise de vendas por período"""
     try:
