@@ -66,6 +66,12 @@ const PassengerControlDirect = () => {
   const [stopoverArrivalTime, setStopoverArrivalTime] = useState('');
   const [stopoverDepartureTime, setStopoverDepartureTime] = useState('');
   const [connectionDuration, setConnectionDuration] = useState('');
+  // Escalas da volta
+  const [hasReturnStopover, setHasReturnStopover] = useState(false);
+  const [returnStopoverCity, setReturnStopoverCity] = useState('');
+  const [returnStopoverArrivalTime, setReturnStopoverArrivalTime] = useState('');
+  const [returnStopoverDepartureTime, setReturnStopoverDepartureTime] = useState('');
+  const [returnConnectionDuration, setReturnConnectionDuration] = useState('');
   
   const { toast } = useToast();
 
