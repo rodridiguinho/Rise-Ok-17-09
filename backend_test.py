@@ -2787,6 +2787,201 @@ def test_supplier_miles_bug_fix():
     except Exception as e:
         print_result(False, "API validation - Minimal supplier transaction failed", str(e))
 
+def test_emission_type_supplier_phone_persistence():
+    """Test Passenger Control emissionType and supplierPhone field persistence - REVIEW REQUEST"""
+    print_test_header("Passenger Control emissionType and supplierPhone Field Persistence - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for emissionType/supplierPhone testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for emissionType/supplierPhone testing failed", str(e))
+        return
+    
+    # Test 2: Create a transaction first to get an ID for updating
+    print("\n🎯 TEST 1: CREATE BASE TRANSACTION FOR TESTING")
+    try:
+        base_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Teste emissionType e supplierPhone",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Passenger Control",
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=base_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                transaction_id = data["id"]
+                print_result(True, "Base transaction creation", 
+                           f"Transaction created with ID: {transaction_id}")
+            else:
+                print_result(False, "Base transaction creation - No ID returned", str(data))
+                return
+        else:
+            print_result(False, f"Base transaction creation failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Base transaction creation failed", str(e))
+        return
+    
+    # Test 3: Update transaction with emissionType and supplierPhone fields
+    print("\n🎯 TEST 2: UPDATE TRANSACTION WITH EMISSIONTYPE AND SUPPLIERPHONE")
+    try:
+        updated_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Teste emissionType e supplierPhone - Updated",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Passenger Control",
+            "transactionDate": "2025-01-15",
+            # The specific fields being tested
+            "emissionType": "E-ticket digital",
+            "supplierPhone": "(11) 99999-8888"
+        }
+        
+        response = requests.put(f"{API_URL}/transactions/{transaction_id}", json=updated_transaction, timeout=10)
+        print(f"PUT Response Status: {response.status_code}")
+        print(f"PUT Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "PUT /api/transactions/{id} - Update successful", 
+                       f"Transaction {transaction_id} updated successfully")
+            
+            # Test 4: Verify emissionType field is accepted and persisted
+            emission_type = data.get("emissionType")
+            if emission_type == "E-ticket digital":
+                print_result(True, "emissionType field - API acceptance and persistence", 
+                           f"emissionType correctly saved: {emission_type}")
+            else:
+                print_result(False, "emissionType field - API acceptance and persistence", 
+                           f"Expected: 'E-ticket digital', Got: {emission_type}")
+            
+            # Test 5: Verify supplierPhone field is accepted and persisted
+            supplier_phone = data.get("supplierPhone")
+            if supplier_phone == "(11) 99999-8888":
+                print_result(True, "supplierPhone field - API acceptance and persistence", 
+                           f"supplierPhone correctly saved: {supplier_phone}")
+            else:
+                print_result(False, "supplierPhone field - API acceptance and persistence", 
+                           f"Expected: '(11) 99999-8888', Got: {supplier_phone}")
+            
+        else:
+            print_result(False, f"PUT /api/transactions/{transaction_id} failed - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+            print("🚨 CRITICAL ERROR: Cannot update transaction with emissionType and supplierPhone!")
+            return
+            
+    except Exception as e:
+        print_result(False, "Transaction update with emissionType/supplierPhone failed", str(e))
+        return
+    
+    # Test 6: Verify fields can be retrieved correctly via GET
+    print("\n🎯 TEST 3: VERIFY FIELDS RETRIEVABLE VIA GET")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            
+            # Find our updated transaction
+            found_transaction = None
+            for t in transactions:
+                if t.get("id") == transaction_id:
+                    found_transaction = t
+                    break
+            
+            if found_transaction:
+                print_result(True, "GET /api/transactions - Transaction retrieval", 
+                           f"Updated transaction found in list")
+                
+                # Verify emissionType persists in database
+                retrieved_emission_type = found_transaction.get("emissionType")
+                if retrieved_emission_type == "E-ticket digital":
+                    print_result(True, "emissionType field - Database persistence", 
+                               f"emissionType correctly persisted in database: {retrieved_emission_type}")
+                else:
+                    print_result(False, "emissionType field - Database persistence", 
+                               f"Expected: 'E-ticket digital', Retrieved: {retrieved_emission_type}")
+                
+                # Verify supplierPhone persists in database
+                retrieved_supplier_phone = found_transaction.get("supplierPhone")
+                if retrieved_supplier_phone == "(11) 99999-8888":
+                    print_result(True, "supplierPhone field - Database persistence", 
+                               f"supplierPhone correctly persisted in database: {retrieved_supplier_phone}")
+                else:
+                    print_result(False, "supplierPhone field - Database persistence", 
+                               f"Expected: '(11) 99999-8888', Retrieved: {retrieved_supplier_phone}")
+                
+                # Test 7: Final validation - both fields working correctly
+                if (retrieved_emission_type == "E-ticket digital" and 
+                    retrieved_supplier_phone == "(11) 99999-8888"):
+                    print_result(True, "🎯 PASSENGER CONTROL FIELDS - COMPLETE SUCCESS", 
+                               "✅ emissionType field accepts and persists correctly\n✅ supplierPhone field accepts and persists correctly\n✅ Both fields retrievable via GET API\n✅ Fields properly saved to MongoDB database")
+                else:
+                    print_result(False, "🎯 PASSENGER CONTROL FIELDS - PERSISTENCE ISSUE", 
+                               "One or both fields are not persisting correctly to database")
+                
+            else:
+                print_result(False, "GET /api/transactions - Transaction not found", 
+                           f"Updated transaction {transaction_id} not found in list")
+        else:
+            print_result(False, f"GET /api/transactions failed - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Transaction retrieval verification failed", str(e))
+    
+    # Test 8: Test direct GET by ID (if endpoint exists)
+    print("\n🎯 TEST 4: VERIFY FIELDS VIA DIRECT GET BY ID")
+    try:
+        response = requests.get(f"{API_URL}/transactions/{transaction_id}", timeout=10)
+        if response.status_code == 200:
+            transaction_data = response.json()
+            
+            # Verify both fields in direct GET response
+            direct_emission_type = transaction_data.get("emissionType")
+            direct_supplier_phone = transaction_data.get("supplierPhone")
+            
+            if direct_emission_type == "E-ticket digital":
+                print_result(True, "Direct GET - emissionType field", 
+                           f"emissionType correctly returned: {direct_emission_type}")
+            else:
+                print_result(False, "Direct GET - emissionType field", 
+                           f"Expected: 'E-ticket digital', Got: {direct_emission_type}")
+            
+            if direct_supplier_phone == "(11) 99999-8888":
+                print_result(True, "Direct GET - supplierPhone field", 
+                           f"supplierPhone correctly returned: {direct_supplier_phone}")
+            else:
+                print_result(False, "Direct GET - supplierPhone field", 
+                           f"Expected: '(11) 99999-8888', Got: {direct_supplier_phone}")
+                
+        elif response.status_code == 404:
+            print_result(False, "Direct GET by ID - Endpoint not implemented", 
+                       "GET /api/transactions/{id} endpoint not available")
+        else:
+            print_result(False, f"Direct GET by ID failed - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Direct GET by ID verification failed", str(e))
+
 def print_test_header(test_name):
     print(f"\n{'='*60}")
     print(f"🧪 TESTING: {test_name}")
