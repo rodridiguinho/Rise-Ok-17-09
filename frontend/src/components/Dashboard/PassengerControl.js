@@ -134,11 +134,17 @@ const PassengerControlDirect = () => {
         tripType: transaction.tripType || 'ida-volta',
         departureDate: transaction.departureDate || '',
         returnDate: transaction.returnDate || '',
-        outboundFlightTime: transaction.outboundFlightTime || '',
-        returnFlightTime: transaction.returnFlightTime || '',
+        outboundDepartureTime: transaction.outboundDepartureTime || '',
+        outboundArrivalTime: transaction.outboundArrivalTime || '',
+        outboundFlightDuration: transaction.outboundFlightDuration || '',
+        returnDepartureTime: transaction.returnDepartureTime || '',
+        returnArrivalTime: transaction.returnArrivalTime || '',
+        returnFlightDuration: transaction.returnFlightDuration || '',
         hasStopover: transaction.hasStopover || false,
         stopoverCity: transaction.stopoverCity || '',
-        stopoverTime: transaction.stopoverTime || '',
+        stopoverArrivalTime: transaction.stopoverArrivalTime || '',
+        stopoverDepartureTime: transaction.stopoverDepartureTime || '',
+        connectionDuration: transaction.connectionDuration || '',
         status: 'Ativa'
       }));
 
