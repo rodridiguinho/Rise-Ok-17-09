@@ -7946,7 +7946,6 @@ if __name__ == "__main__":
     # Run the specific investigation test for the review request
     test_supplier_commission_field_investigation()
     
-    print("
-" + "="*80)
+    print("\n" + "="*80)
     print("🏁 SUPPLIER & COMMISSION FIELD INVESTIGATION COMPLETE")
     print("="*80)
