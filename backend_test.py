@@ -1248,6 +1248,259 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_sales_performance_endpoint_investigation():
+    """URGENT: Investigate /reports/sales-performance endpoint returning zeros - REVIEW REQUEST"""
+    print_test_header("SALES PERFORMANCE ENDPOINT INVESTIGATION - Review Request")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for sales performance investigation", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for sales performance investigation failed", str(e))
+        return
+    
+    # Test 2: Check if /reports/sales-performance endpoint exists
+    print("\n🎯 TEST 1: CHECK IF /api/reports/sales-performance ENDPOINT EXISTS")
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"} if auth_token else {}
+        response = requests.get(f"{API_URL}/reports/sales-performance", headers=headers, timeout=10)
+        print(f"Sales Performance Endpoint Response Status: {response.status_code}")
+        print(f"Sales Performance Endpoint Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            print_result(True, "Sales Performance Endpoint - EXISTS AND RESPONDS", 
+                       "Endpoint is accessible and returns data")
+            
+            # Parse response data
+            try:
+                data = response.json()
+                print_result(True, "Sales Performance Endpoint - Response Format", 
+                           f"Response is valid JSON: {json.dumps(data, indent=2)}")
+                
+                # Check for the specific fields mentioned in review request
+                sales_data = data.get("sales", {})
+                total_sales = sales_data.get("total_sales", 0)
+                total_commissions = sales_data.get("total_commissions", 0)
+                total_supplier_payments = sales_data.get("total_supplier_payments", 0)
+                
+                print_result(True, "Sales Performance Endpoint - Field Analysis", 
+                           f"total_sales: {total_sales}, total_commissions: {total_commissions}, total_supplier_payments: {total_supplier_payments}")
+                
+                if total_sales == 0 and total_commissions == 0 and total_supplier_payments == 0:
+                    print_result(False, "🚨 SALES PERFORMANCE ISSUE CONFIRMED", 
+                               "All analytics values are returning 0 - this matches the user's report")
+                else:
+                    print_result(True, "Sales Performance Endpoint - Values Present", 
+                               "Analytics values are not all zeros")
+                
+            except json.JSONDecodeError:
+                print_result(False, "Sales Performance Endpoint - Invalid JSON", 
+                           "Response is not valid JSON")
+                
+        elif response.status_code == 404:
+            print_result(False, "🚨 SALES PERFORMANCE ENDPOINT - NOT FOUND", 
+                       "Endpoint returns 404 - this is likely the root cause of the issue")
+        elif response.status_code == 401:
+            print_result(False, "Sales Performance Endpoint - Authentication Required", 
+                       "Endpoint requires authentication")
+        else:
+            print_result(False, f"Sales Performance Endpoint - HTTP {response.status_code}", 
+                       f"Unexpected response: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Sales Performance Endpoint - Request Failed", str(e))
+    
+    # Test 3: Check current transaction data in database
+    print("\n🎯 TEST 2: VERIFY TRANSACTION DATA IN DATABASE")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "Database Transaction Check - Data Retrieved", 
+                       f"Found {len(transactions)} transactions in database")
+            
+            # Analyze transaction types
+            entrada_count = len([t for t in transactions if t.get('type') == 'entrada'])
+            saida_count = len([t for t in transactions if t.get('type') == 'saida'])
+            
+            print_result(True, "Database Transaction Check - Transaction Types", 
+                       f"Entrada transactions: {entrada_count}, Saida transactions: {saida_count}")
+            
+            # Check for supplier and commission data
+            transactions_with_supplier = [t for t in transactions if t.get('supplier') or t.get('supplierValue')]
+            transactions_with_commission = [t for t in transactions if t.get('commissionValue') or 'comissão' in t.get('description', '').lower()]
+            
+            print_result(True, "Database Transaction Check - Supplier Data", 
+                       f"Transactions with supplier data: {len(transactions_with_supplier)}")
+            print_result(True, "Database Transaction Check - Commission Data", 
+                       f"Transactions with commission data: {len(transactions_with_commission)}")
+            
+            # Show sample transaction data for debugging
+            if transactions:
+                sample_transaction = transactions[0]
+                print_result(True, "Database Transaction Check - Sample Transaction", 
+                           f"Sample: {json.dumps(sample_transaction, indent=2)[:500]}...")
+            
+        else:
+            print_result(False, f"Database Transaction Check - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Database Transaction Check - Request Failed", str(e))
+    
+    # Test 4: Create test transactions with supplier and commission data
+    print("\n🎯 TEST 3: CREATE TEST TRANSACTIONS WITH SUPPLIER/COMMISSION DATA")
+    try:
+        # Create entrada transaction with supplier and commission data
+        test_transaction = {
+            "type": "entrada",
+            "category": "Vendas de Passagens",
+            "description": "Teste Sales Performance - Entrada com fornecedor",
+            "amount": 2000.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Sales Performance",
+            "supplier": "Fornecedor Teste",
+            "supplierValue": 1200.00,
+            "commissionValue": 200.00,
+            "saleValue": 2000.00,
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=test_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            entrada_transaction_id = data.get("id")
+            print_result(True, "Test Transaction Creation - Entrada with supplier/commission", 
+                       f"Created transaction ID: {entrada_transaction_id}")
+            
+            # Create saida transaction for commission
+            commission_transaction = {
+                "type": "saida",
+                "category": "Comissão de Vendedor",
+                "description": "Comissão teste sales performance",
+                "amount": 200.00,
+                "paymentMethod": "PIX",
+                "transactionDate": "2025-01-15"
+            }
+            
+            response = requests.post(f"{API_URL}/transactions", json=commission_transaction, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                commission_transaction_id = data.get("id")
+                print_result(True, "Test Transaction Creation - Saida commission", 
+                           f"Created commission transaction ID: {commission_transaction_id}")
+                
+                # Create saida transaction for supplier payment
+                supplier_transaction = {
+                    "type": "saida",
+                    "category": "Pagamento a Fornecedor",
+                    "description": "Pagamento a Fornecedor Teste - sales performance",
+                    "amount": 1200.00,
+                    "paymentMethod": "PIX",
+                    "supplier": "Fornecedor Teste",
+                    "transactionDate": "2025-01-15"
+                }
+                
+                response = requests.post(f"{API_URL}/transactions", json=supplier_transaction, timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    supplier_transaction_id = data.get("id")
+                    print_result(True, "Test Transaction Creation - Saida supplier payment", 
+                               f"Created supplier payment transaction ID: {supplier_transaction_id}")
+                else:
+                    print_result(False, f"Test Transaction Creation - Supplier payment failed - HTTP {response.status_code}", response.text)
+            else:
+                print_result(False, f"Test Transaction Creation - Commission failed - HTTP {response.status_code}", response.text)
+        else:
+            print_result(False, f"Test Transaction Creation - Entrada failed - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Test Transaction Creation - Exception", str(e))
+    
+    # Test 5: Re-test sales-performance endpoint after creating test data
+    print("\n🎯 TEST 4: RE-TEST SALES-PERFORMANCE ENDPOINT AFTER CREATING TEST DATA")
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"} if auth_token else {}
+        response = requests.get(f"{API_URL}/reports/sales-performance", headers=headers, timeout=10)
+        print(f"Sales Performance Re-test Response Status: {response.status_code}")
+        print(f"Sales Performance Re-test Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                sales_data = data.get("sales", {})
+                total_sales = sales_data.get("total_sales", 0)
+                total_commissions = sales_data.get("total_commissions", 0)
+                total_supplier_payments = sales_data.get("total_supplier_payments", 0)
+                
+                print_result(True, "Sales Performance Re-test - Values After Test Data", 
+                           f"total_sales: {total_sales}, total_commissions: {total_commissions}, total_supplier_payments: {total_supplier_payments}")
+                
+                if total_sales > 0 or total_commissions > 0 or total_supplier_payments > 0:
+                    print_result(True, "✅ SALES PERFORMANCE ENDPOINT - NOW WORKING", 
+                               "Analytics values are no longer all zeros after adding test data")
+                else:
+                    print_result(False, "❌ SALES PERFORMANCE ENDPOINT - STILL RETURNING ZEROS", 
+                               "Analytics values are still all zeros even after adding test data - logic issue")
+                
+            except json.JSONDecodeError:
+                print_result(False, "Sales Performance Re-test - Invalid JSON", 
+                           "Response is not valid JSON")
+        else:
+            print_result(False, f"Sales Performance Re-test - HTTP {response.status_code}", 
+                       f"Endpoint still not working: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Sales Performance Re-test - Request Failed", str(e))
+    
+    # Test 6: Test alternative sales analysis endpoint
+    print("\n🎯 TEST 5: TEST ALTERNATIVE /api/reports/sales-analysis ENDPOINT")
+    try:
+        # Test the sales-analysis endpoint that exists in main server.py
+        response = requests.get(f"{API_URL}/reports/sales-analysis?start_date=2025-01-01&end_date=2025-01-31", timeout=10)
+        print(f"Sales Analysis Endpoint Response Status: {response.status_code}")
+        print(f"Sales Analysis Endpoint Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                sales_data = data.get("sales", {})
+                total_sales = sales_data.get("total_sales", 0)
+                total_supplier_costs = sales_data.get("total_supplier_costs", 0)
+                total_commissions = sales_data.get("total_commissions", 0)
+                
+                print_result(True, "Alternative Sales Analysis Endpoint - Working", 
+                           f"total_sales: {total_sales}, total_supplier_costs: {total_supplier_costs}, total_commissions: {total_commissions}")
+                
+                if total_sales > 0 or total_supplier_costs > 0 or total_commissions > 0:
+                    print_result(True, "✅ ALTERNATIVE SALES ANALYSIS - HAS DATA", 
+                               "Alternative endpoint shows non-zero values")
+                else:
+                    print_result(False, "❌ ALTERNATIVE SALES ANALYSIS - ALSO ZEROS", 
+                               "Alternative endpoint also returns zeros")
+                
+            except json.JSONDecodeError:
+                print_result(False, "Alternative Sales Analysis - Invalid JSON", 
+                           "Response is not valid JSON")
+        else:
+            print_result(False, f"Alternative Sales Analysis - HTTP {response.status_code}", 
+                       f"Alternative endpoint failed: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Alternative Sales Analysis - Request Failed", str(e))
+
 def test_supplier_commission_field_investigation():
     """URGENT: Investigate ACTUAL field names for supplier and commission values - REVIEW REQUEST"""
     print_test_header("SUPPLIER & COMMISSION FIELD INVESTIGATION - Review Request")
