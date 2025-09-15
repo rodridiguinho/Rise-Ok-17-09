@@ -160,6 +160,9 @@ class TransactionCreate(BaseModel):
 from fastapi import APIRouter
 api_router = APIRouter(prefix="/api")
 
+# Create reports router
+reports_router = APIRouter(prefix="/reports")
+
 # Helper functions
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
