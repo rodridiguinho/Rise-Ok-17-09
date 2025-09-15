@@ -500,6 +500,16 @@ const EnhancedTransactions = () => {
     "Fortaleza": { timezone: "America/Fortaleza", utc: -3, country: "Brasil" },
     "Recife": { timezone: "America/Recife", utc: -3, country: "Brasil" },
     "Manaus": { timezone: "America/Manaus", utc: -4, country: "Brasil" },
+    // Cidades brasileiras adicionais
+    "Campinas": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Curitiba": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Porto Alegre": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Belém": { timezone: "America/Belem", utc: -3, country: "Brasil" },
+    "Goiânia": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Vitória": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Florianópolis": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Campo Grande": { timezone: "America/Campo_Grande", utc: -4, country: "Brasil" },
+    "Cuiabá": { timezone: "America/Cuiaba", utc: -4, country: "Brasil" },
     
     // EUROPA
     "Lisboa": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
