@@ -195,7 +195,39 @@ const PassengerControl = () => {
     if (!selectedReservation) return;
 
     try {
-      // Atualizar reserva com as mudanças
+      // Prepare data for backend
+      const updateData = {
+        type: 'entrada',
+        category: 'Passagem Aérea',
+        description: selectedReservation.client,
+        amount: selectedReservation.amount,
+        paymentMethod: 'PIX',
+        supplier: selectedReservation.supplier,
+        client: selectedReservation.client,
+        passengers: selectedReservation.passengers,
+        airline: editableAirline,
+        travelNotes: reservationNotes,
+        // Include all travel fields
+        departureCity: selectedReservation.departureCity,
+        arrivalCity: selectedReservation.arrivalCity,
+        departureDate: selectedReservation.departureDate,
+        returnDate: selectedReservation.returnDate,
+        outboundDepartureTime: selectedReservation.outboundDepartureTime,
+        outboundArrivalTime: selectedReservation.outboundArrivalTime,
+        returnDepartureTime: selectedReservation.returnDepartureTime,
+        returnArrivalTime: selectedReservation.returnArrivalTime,
+        hasOutboundStop: selectedReservation.hasOutboundStop,
+        hasReturnStop: selectedReservation.hasReturnStop,
+        outboundStopCity: selectedReservation.outboundStopCity,
+        returnStopCity: selectedReservation.returnStopCity,
+        clientReservationCode: selectedReservation.clientReservationCode,
+        internalReservationCode: selectedReservation.internalCode
+      };
+
+      // Save to backend
+      await transactionsAPI.updateTransaction(selectedReservation.id, updateData);
+
+      // Update local state
       const updatedReservation = {
         ...selectedReservation,
         airline: editableAirline,
@@ -210,11 +242,8 @@ const PassengerControl = () => {
 
       toast({
         title: "✅ Alterações Salvas",
-        description: "As informações da reserva foram atualizadas com sucesso",
+        description: "As informações da reserva foram atualizadas com sucesso no sistema",
       });
-
-      // Aqui você pode adicionar uma chamada para o backend se necessário
-      // await transactionsAPI.updateTransaction(selectedReservation.id, updatedReservation);
 
     } catch (error) {
       console.error('Erro ao salvar alterações:', error);
