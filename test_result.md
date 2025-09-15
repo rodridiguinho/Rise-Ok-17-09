@@ -427,6 +427,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "GET /api/users working perfectly. Successfully retrieves all users from MongoDB with proper JSON serialization. Password field correctly excluded from responses. All required fields (id, email, name, role) present in response structure."
+        - working: true
+          agent: "testing"
+          comment: "✅ GET /api/users ENDPOINT COMPREHENSIVE TESTING COMPLETED: Successfully tested GET /api/users endpoint using rodrigo@risetravel.com.br / Emily2030* authentication as specified in review request. ✅ RESPONSE FORMAT: Response correctly formatted as JSON array containing 1 existing user. All expected fields present (id, name, email, role) with proper data types. ✅ SECURITY VALIDATION: Password field correctly excluded from response for security. ✅ USER STRUCTURE: All user data properly serialized including MongoDB ObjectId conversion to string format. Sample user: 'Rodrigo Rise Travel', rodrigo@risetravel.com.br, Admin role. ✅ DATABASE INTEGRATION: Successfully retrieves users from MongoDB database with proper error handling. ✅ CONCLUSION: GET /api/users endpoint is fully functional and secure, providing proper user listing functionality for the application."
 
   - task: "User Creation API"
     implemented: true
