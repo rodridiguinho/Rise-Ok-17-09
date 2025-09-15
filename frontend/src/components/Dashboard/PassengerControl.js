@@ -429,7 +429,7 @@ const PassengerControl = () => {
                       setReservationNotes(reservation.travelNotes || '');
                       // Inicializar campos do fornecedor
                       setSelectedSupplier(reservation.supplier || '');
-                      setEmissionType('E-ticket'); // Valor padrão
+                      setEmissionType(''); // Campo livre, sem valor padrão
                       setSupplierPhone('');
                     }}
                     className="text-sm px-3 py-1"
