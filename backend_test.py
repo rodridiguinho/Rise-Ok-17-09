@@ -8578,13 +8578,13 @@ if __name__ == "__main__":
     print("🏁 Backend API Test Suite Complete")
     print("="*80)
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - SUPPLIER & COMMISSION FIELD INVESTIGATION")
+    print("🚀 Starting Backend API Test Suite - SALES PERFORMANCE ENDPOINT CORRECTIONS")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the specific investigation test for the review request
-    test_supplier_commission_field_investigation()
+    # Run the specific test for the review request
+    test_sales_performance_endpoint_corrections()
     
     print("\n" + "="*80)
-    print("🏁 SUPPLIER & COMMISSION FIELD INVESTIGATION COMPLETE")
+    print("🏁 SALES PERFORMANCE ENDPOINT CORRECTIONS TESTING COMPLETE")
     print("="*80)
