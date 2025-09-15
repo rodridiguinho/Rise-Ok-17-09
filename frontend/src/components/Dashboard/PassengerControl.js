@@ -290,9 +290,12 @@ const PassengerControl = () => {
                 <UserCheck className="mr-2 h-5 w-5" />
                 Reserva: {selectedReservation.internalCode}
               </h2>
-              <Button onClick={() => setSelectedReservation(null)} variant="ghost">
+              <button 
+                onClick={() => setSelectedReservation(null)}
+                className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+              >
                 ✕
-              </Button>
+              </button>
             </div>
             
             <p className="text-gray-600 mb-6">
