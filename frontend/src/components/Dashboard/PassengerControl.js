@@ -502,36 +502,44 @@ const PassengerControl = () => {
                       <Building className="h-4 w-4 mr-2 text-blue-600" />
                       <p className="text-sm font-medium text-blue-700">Fornecedor:</p>
                     </div>
-                    <select
-                      value={selectedSupplier}
-                      onChange={(e) => setSelectedSupplier(e.target.value)}
-                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                    >
-                      <option value="">Selecione o fornecedor</option>
-                      {suppliersList.map((supplier, index) => (
-                        <option key={index} value={supplier}>{supplier}</option>
-                      ))}
-                    </select>
+                    {suppliersList.length > 0 ? (
+                      <select
+                        value={selectedSupplier}
+                        onChange={(e) => setSelectedSupplier(e.target.value)}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                      >
+                        <option value="">Selecione o fornecedor</option>
+                        {suppliersList.map((supplier, index) => (
+                          <option key={index} value={supplier}>{supplier}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <Input
+                        value={selectedSupplier}
+                        onChange={(e) => setSelectedSupplier(e.target.value)}
+                        placeholder="Digite o nome do fornecedor"
+                        className="text-sm"
+                      />
+                    )}
+                    {suppliersList.length === 0 && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Crie fornecedores no sistema ou digite manualmente
+                      </p>
+                    )}
                   </div>
                   
-                  {/* Tipo de Emissão */}
+                  {/* Tipo de Emissão - Campo Livre */}
                   <div className="p-3 bg-white rounded border-l-4 border-purple-500">
                     <div className="flex items-center mb-2">
                       <FileText className="h-4 w-4 mr-2 text-purple-600" />
                       <p className="text-sm font-medium text-purple-700">Tipo de Emissão:</p>
                     </div>
-                    <select
+                    <Input
                       value={emissionType}
                       onChange={(e) => setEmissionType(e.target.value)}
-                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                    >
-                      <option value="">Selecione o tipo</option>
-                      <option value="E-ticket">E-ticket</option>
-                      <option value="Bilhete Físico">Bilhete Físico</option>
-                      <option value="Voucher">Voucher</option>
-                      <option value="Reserva Online">Reserva Online</option>
-                      <option value="Check-in Online">Check-in Online</option>
-                    </select>
+                      placeholder="Ex: E-ticket, Voucher, Bilhete físico..."
+                      className="text-sm"
+                    />
                   </div>
                   
                   {/* Telefone do Fornecedor */}
