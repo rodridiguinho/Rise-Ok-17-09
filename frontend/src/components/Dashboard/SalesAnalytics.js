@@ -377,7 +377,7 @@ const SalesAnalytics = () => {
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-green-600">{chartData.vendas}%</div>
-                    <div className="text-sm text-gray-600">{formatCurrency(analytics.sales.net_profit)}</div>
+                    <div className="text-sm text-gray-600">{formatCurrency(analytics.sales.net_sales_profit)}</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
