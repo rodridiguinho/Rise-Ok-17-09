@@ -829,6 +829,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Passenger Field Persistence Fixes - COMPLETED ✅"
     - "Review Request New Functionalities Testing - COMPLETED ✅"
     - "Transaction List Real-Time Update Bug Fix - COMPLETED ✅"
     - "Enhanced Supplier Management - Travel-specific Fields - COMPLETED ✅"
@@ -845,7 +846,7 @@ test_plan:
     - "Analytics Error Investigation and Fix - COMPLETED ✅"
   stuck_tasks: []
   test_all: false
-  test_priority: "new_features_first"
+  test_priority: "passenger_fixes_first"
 
 agent_communication:
     - agent: "testing"
