@@ -423,16 +423,12 @@ const PassengerControlDirect = () => {
                     <Label className="text-sm font-medium text-blue-700 mb-2 block">
                       🏢 Fornecedor:
                     </Label>
-                    <select
+                    <Input
                       value={selectedSupplier}
                       onChange={(e) => setSelectedSupplier(e.target.value)}
-                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                    >
-                      <option value="">Selecione o fornecedor</option>
-                      {suppliersList.map((supplier, index) => (
-                        <option key={index} value={supplier}>{supplier}</option>
-                      ))}
-                    </select>
+                      placeholder="Digite o nome do fornecedor"
+                      className="text-sm"
+                    />
                   </div>
                   
                   {/* Tipo de Emissão */}
@@ -440,17 +436,12 @@ const PassengerControlDirect = () => {
                     <Label className="text-sm font-medium text-purple-700 mb-2 block">
                       📄 Tipo de Emissão:
                     </Label>
-                    <select
+                    <Input
                       value={emissionType}
                       onChange={(e) => setEmissionType(e.target.value)}
-                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                    >
-                      <option value="E-ticket">E-ticket</option>
-                      <option value="Bilhete Físico">Bilhete Físico</option>
-                      <option value="Voucher">Voucher</option>
-                      <option value="Reserva Online">Reserva Online</option>
-                      <option value="Check-in Online">Check-in Online</option>
-                    </select>
+                      placeholder="E-ticket, Voucher, etc."
+                      className="text-sm"
+                    />
                   </div>
                   
                   {/* Telefone do Fornecedor */}
