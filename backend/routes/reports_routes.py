@@ -165,15 +165,17 @@ async def get_sales_performance(
         total_commissions = 0
         for transaction in saida_transactions:
             description = transaction.get("description", "").lower()
-            if "comissão" in description or "comissao" in description:
+            category = transaction.get("category", "").lower()
+            if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
                 total_commissions += transaction.get("amount", 0)
         
         # Calcular pagamentos a fornecedores (das transações de saída)
         total_supplier_payments = 0
         for transaction in saida_transactions:
             description = transaction.get("description", "").lower()
+            category = transaction.get("category", "").lower()
             supplier = transaction.get("supplier", "").lower()
-            if "fornecedor" in description or supplier:
+            if "fornecedor" in description or "fornecedor" in category or supplier:
                 total_supplier_payments += transaction.get("amount", 0)
         
         # Lucro líquido das vendas
