@@ -1248,6 +1248,207 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_review_request_transaction_verification():
+    """Test Review Request - Verificar transações existentes e identificar transações de teste"""
+    print_test_header("REVIEW REQUEST - Verificar Transações Existentes e Identificar Transações de Teste")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for transaction verification", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for transaction verification failed", str(e))
+        return
+    
+    # Test 2: GET /api/transactions - Listar todas as transações
+    print("\n🎯 TEST 1: LISTAR TODAS AS TRANSAÇÕES")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "GET /api/transactions - Lista de transações obtida", 
+                       f"Total de transações encontradas: {len(transactions)}")
+            
+            # Test 3: Verificar ordenação por data/hora (mais recente primeiro)
+            print("\n🎯 TEST 2: VERIFICAR ORDENAÇÃO DAS TRANSAÇÕES")
+            if len(transactions) >= 2:
+                # Check if transactions are sorted by date (most recent first)
+                is_sorted = True
+                for i in range(len(transactions) - 1):
+                    current_date = transactions[i].get('date', '')
+                    next_date = transactions[i + 1].get('date', '')
+                    
+                    # Compare dates (assuming YYYY-MM-DD format)
+                    if current_date < next_date:
+                        is_sorted = False
+                        break
+                
+                if is_sorted:
+                    print_result(True, "Ordenação das transações - Por data (mais recente primeiro)", 
+                               f"Transações estão corretamente ordenadas por data")
+                    print_result(True, "Ordenação - Primeira transação", 
+                               f"Data: {transactions[0].get('date')}, Descrição: {transactions[0].get('description', 'N/A')}")
+                    print_result(True, "Ordenação - Última transação", 
+                               f"Data: {transactions[-1].get('date')}, Descrição: {transactions[-1].get('description', 'N/A')}")
+                else:
+                    print_result(False, "Ordenação das transações - Não ordenadas corretamente", 
+                               "Transações não estão ordenadas por data (mais recente primeiro)")
+            else:
+                print_result(True, "Ordenação das transações - Poucos dados para verificar", 
+                           f"Apenas {len(transactions)} transações encontradas")
+            
+            # Test 4: Identificar transações de teste
+            print("\n🎯 TEST 3: IDENTIFICAR TRANSAÇÕES DE TESTE")
+            test_keywords = ["teste", "test", "performance", "venda com custo fornecedor direto", 
+                           "demo", "exemplo", "sample", "debug", "temp", "temporário"]
+            
+            test_transactions = []
+            for transaction in transactions:
+                description = transaction.get('description', '').lower()
+                client = transaction.get('client', '').lower()
+                supplier = transaction.get('supplier', '').lower()
+                
+                # Check if any test keyword is in description, client, or supplier
+                for keyword in test_keywords:
+                    if (keyword in description or keyword in client or keyword in supplier):
+                        test_transactions.append({
+                            'id': transaction.get('id'),
+                            'date': transaction.get('date'),
+                            'description': transaction.get('description'),
+                            'amount': transaction.get('amount'),
+                            'client': transaction.get('client'),
+                            'supplier': transaction.get('supplier'),
+                            'matched_keyword': keyword
+                        })
+                        break
+            
+            if test_transactions:
+                print_result(True, "Identificação de transações de teste - Transações encontradas", 
+                           f"Encontradas {len(test_transactions)} transações que podem ser de teste")
+                
+                print("\n📋 TRANSAÇÕES DE TESTE IDENTIFICADAS:")
+                for i, test_tx in enumerate(test_transactions[:10]):  # Show first 10
+                    print(f"   {i+1}. ID: {test_tx['id']}")
+                    print(f"      Data: {test_tx['date']}")
+                    print(f"      Descrição: {test_tx['description']}")
+                    print(f"      Valor: R$ {test_tx['amount']}")
+                    print(f"      Cliente: {test_tx.get('client', 'N/A')}")
+                    print(f"      Fornecedor: {test_tx.get('supplier', 'N/A')}")
+                    print(f"      Palavra-chave encontrada: '{test_tx['matched_keyword']}'")
+                    print()
+                
+                if len(test_transactions) > 10:
+                    print(f"   ... e mais {len(test_transactions) - 10} transações de teste")
+                
+            else:
+                print_result(True, "Identificação de transações de teste - Nenhuma encontrada", 
+                           "Não foram encontradas transações com palavras-chave de teste")
+            
+            # Test 5: Análise detalhada das transações
+            print("\n🎯 TEST 4: ANÁLISE DETALHADA DAS TRANSAÇÕES")
+            
+            # Count by type
+            entrada_count = len([t for t in transactions if t.get('type') == 'entrada'])
+            saida_count = len([t for t in transactions if t.get('type') == 'saida'])
+            
+            print_result(True, "Análise por tipo - Entradas", f"{entrada_count} transações de entrada")
+            print_result(True, "Análise por tipo - Saídas", f"{saida_count} transações de saída")
+            
+            # Count transactions with supplier costs
+            transactions_with_supplier_costs = [t for t in transactions if t.get('supplierValue') and t.get('supplierValue') > 0]
+            print_result(True, "Análise de custos de fornecedores", 
+                       f"{len(transactions_with_supplier_costs)} transações com custos de fornecedores")
+            
+            # Show recent transactions
+            print("\n📋 ÚLTIMAS 5 TRANSAÇÕES:")
+            for i, tx in enumerate(transactions[:5]):
+                print(f"   {i+1}. [{tx.get('date')}] {tx.get('description')} - R$ {tx.get('amount')}")
+                if tx.get('supplierValue'):
+                    print(f"      Custo fornecedor: R$ {tx.get('supplierValue')}")
+                print()
+            
+        else:
+            print_result(False, f"GET /api/transactions - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "GET /api/transactions - Exception occurred", str(e))
+        return
+    
+    # Test 6: GET /api/reports/sales-performance - Verificar endpoint de performance de vendas
+    print("\n🎯 TEST 5: TESTAR ENDPOINT SALES-PERFORMANCE")
+    try:
+        # Test with current month dates
+        from datetime import datetime, date
+        current_date = date.today()
+        start_date = current_date.replace(day=1).strftime("%Y-%m-%d")
+        end_date = current_date.strftime("%Y-%m-%d")
+        
+        response = requests.get(f"{API_URL}/reports/sales-performance", 
+                              params={"start_date": start_date, "end_date": end_date}, 
+                              timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "GET /api/reports/sales-performance - Endpoint acessível", 
+                       f"Endpoint respondeu com sucesso para período {start_date} a {end_date}")
+            
+            # Verify response structure
+            if "sales" in data:
+                sales_data = data["sales"]
+                expected_fields = ["total_sales", "total_supplier_payments", "total_commissions", 
+                                 "net_sales_profit", "average_ticket", "sales_margin"]
+                
+                missing_fields = [f for f in expected_fields if f not in sales_data]
+                if not missing_fields:
+                    print_result(True, "Sales-performance - Estrutura da resposta", 
+                               "Todos os campos esperados estão presentes")
+                    
+                    # Show the values
+                    print_result(True, "Sales-performance - Valores calculados", 
+                               f"Total vendas: R$ {sales_data.get('total_sales', 0)}")
+                    print_result(True, "Sales-performance - Custos fornecedores", 
+                               f"Total custos fornecedores: R$ {sales_data.get('total_supplier_payments', 0)}")
+                    print_result(True, "Sales-performance - Comissões", 
+                               f"Total comissões: R$ {sales_data.get('total_commissions', 0)}")
+                    print_result(True, "Sales-performance - Lucro líquido", 
+                               f"Lucro líquido vendas: R$ {sales_data.get('net_sales_profit', 0)}")
+                    
+                    # Check if supplier costs are being calculated
+                    supplier_costs = sales_data.get('total_supplier_payments', 0)
+                    if supplier_costs > 0:
+                        print_result(True, "Sales-performance - Custos de fornecedores funcionando", 
+                                   f"Endpoint está calculando custos de fornecedores: R$ {supplier_costs}")
+                    else:
+                        print_result(True, "Sales-performance - Sem custos de fornecedores no período", 
+                                   f"Nenhum custo de fornecedor encontrado para o período {start_date} a {end_date}")
+                else:
+                    print_result(False, "Sales-performance - Estrutura da resposta incompleta", 
+                               f"Campos ausentes: {missing_fields}")
+            else:
+                print_result(False, "Sales-performance - Estrutura da resposta inválida", 
+                           "Campo 'sales' não encontrado na resposta")
+                
+        elif response.status_code == 404:
+            print_result(False, "GET /api/reports/sales-performance - Endpoint não encontrado", 
+                       "Endpoint sales-performance retorna 404 - pode não estar implementado")
+        else:
+            print_result(False, f"GET /api/reports/sales-performance - HTTP {response.status_code}", 
+                       response.text)
+    except Exception as e:
+        print_result(False, "GET /api/reports/sales-performance - Exception occurred", str(e))
+
 def test_sales_performance_endpoint_corrections():
     """Test Sales Performance Endpoint Corrections - SPECIFIC REVIEW REQUEST"""
     print_test_header("SALES PERFORMANCE ENDPOINT CORRECTIONS - Review Request Testing")
