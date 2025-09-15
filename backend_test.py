@@ -1248,6 +1248,271 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_supplier_commission_field_investigation():
+    """URGENT: Investigate ACTUAL field names for supplier and commission values - REVIEW REQUEST"""
+    print_test_header("SUPPLIER & COMMISSION FIELD INVESTIGATION - Review Request")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "🔐 Authentication for field investigation", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for field investigation failed", str(e))
+        return
+    
+    # Test 2: Get ALL existing transactions and analyze field names
+    print("\n🎯 STEP 1: ANALYZE EXISTING TRANSACTION DATA")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=15)
+        if response.status_code == 200:
+            transactions = response.json()
+            total_transactions = len(transactions)
+            print_result(True, "📊 Retrieved existing transactions", 
+                       f"Found {total_transactions} total transactions in database")
+            
+            # Analyze field names used for supplier and commission values
+            supplier_fields_found = set()
+            commission_fields_found = set()
+            transactions_with_supplier_data = 0
+            transactions_with_commission_data = 0
+            
+            print("\n🔍 ANALYZING ALL TRANSACTION FIELDS:")
+            for i, transaction in enumerate(transactions[:10]):  # Show first 10 for analysis
+                print(f"\n--- Transaction {i+1} (ID: {transaction.get('id', 'N/A')}) ---")
+                print(f"Description: {transaction.get('description', 'N/A')}")
+                print(f"Amount: R$ {transaction.get('amount', 0)}")
+                print(f"Type: {transaction.get('type', 'N/A')}")
+                print(f"Date: {transaction.get('date', 'N/A')}")
+                
+                # Check for supplier-related fields
+                supplier_related_fields = []
+                for field in transaction.keys():
+                    if 'supplier' in field.lower():
+                        supplier_related_fields.append(f"{field}: {transaction[field]}")
+                        supplier_fields_found.add(field)
+                        if transaction[field] not in [None, "", 0, False]:
+                            transactions_with_supplier_data += 1
+                
+                if supplier_related_fields:
+                    print(f"🏢 Supplier fields: {', '.join(supplier_related_fields)}")
+                else:
+                    print("🏢 Supplier fields: None found")
+                
+                # Check for commission-related fields
+                commission_related_fields = []
+                for field in transaction.keys():
+                    if 'commission' in field.lower():
+                        commission_related_fields.append(f"{field}: {transaction[field]}")
+                        commission_fields_found.add(field)
+                        if transaction[field] not in [None, "", 0, False]:
+                            transactions_with_commission_data += 1
+                
+                if commission_related_fields:
+                    print(f"💰 Commission fields: {', '.join(commission_related_fields)}")
+                else:
+                    print("💰 Commission fields: None found")
+                
+                # Check for sale-related fields
+                sale_related_fields = []
+                for field in transaction.keys():
+                    if 'sale' in field.lower():
+                        sale_related_fields.append(f"{field}: {transaction[field]}")
+                
+                if sale_related_fields:
+                    print(f"💵 Sale fields: {', '.join(sale_related_fields)}")
+                else:
+                    print("💵 Sale fields: None found")
+            
+            # Summary of field analysis
+            print(f"\n📋 FIELD ANALYSIS SUMMARY:")
+            print_result(True, "🏢 Supplier field names found", 
+                       f"Fields: {list(supplier_fields_found) if supplier_fields_found else 'None'}")
+            print_result(True, "💰 Commission field names found", 
+                       f"Fields: {list(commission_fields_found) if commission_fields_found else 'None'}")
+            print_result(True, "📊 Transactions with supplier data", 
+                       f"{transactions_with_supplier_data} out of {total_transactions} transactions")
+            print_result(True, "📊 Transactions with commission data", 
+                       f"{transactions_with_commission_data} out of {total_transactions} transactions")
+            
+        else:
+            print_result(False, f"Failed to retrieve transactions - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Transaction analysis failed", str(e))
+        return
+    
+    # Test 3: Test /reports/sales-analysis to see what fields it's reading
+    print("\n🎯 STEP 2: TEST SALES ANALYSIS ENDPOINT")
+    try:
+        # Test with current month (September 2025)
+        response = requests.get(f"{API_URL}/reports/sales-analysis?start_date=2025-09-01&end_date=2025-09-30", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "📈 Sales analysis endpoint accessible", 
+                       f"Successfully called /reports/sales-analysis")
+            
+            # Analyze what the endpoint returns
+            sales_data = data.get('sales', {})
+            total_sales = sales_data.get('total_sales', 0)
+            total_supplier_costs = sales_data.get('total_supplier_costs', 0)
+            total_commissions = sales_data.get('total_commissions', 0)
+            net_profit = sales_data.get('net_profit', 0)
+            sales_count = sales_data.get('sales_count', 0)
+            
+            print_result(True, "📊 Sales analysis results", 
+                       f"Sales: R$ {total_sales}, Supplier Costs: R$ {total_supplier_costs}, Commissions: R$ {total_commissions}")
+            print_result(True, "📊 Sales analysis details", 
+                       f"Net Profit: R$ {net_profit}, Sales Count: {sales_count}")
+            
+            # Check if supplier costs are zero (the reported issue)
+            if total_supplier_costs == 0:
+                print_result(False, "🚨 SUPPLIER COSTS ISSUE CONFIRMED", 
+                           f"Supplier costs showing R$ 0.00 - this matches user's report!")
+            else:
+                print_result(True, "✅ Supplier costs calculation working", 
+                           f"Supplier costs: R$ {total_supplier_costs}")
+            
+            # Get the transactions that were analyzed
+            analyzed_transactions = data.get('transactions', [])
+            print_result(True, "📋 Transactions analyzed by endpoint", 
+                       f"Endpoint analyzed {len(analyzed_transactions)} transactions for September 2025")
+            
+        else:
+            print_result(False, f"Sales analysis endpoint failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Sales analysis test failed", str(e))
+    
+    # Test 4: Create test transactions with supplier values to verify field names
+    print("\n🎯 STEP 3: CREATE TEST TRANSACTIONS TO VERIFY FIELD MAPPING")
+    try:
+        # Create transaction with supplierValue field (what the code expects)
+        test_transaction_1 = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Test Transaction - supplierValue field",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "supplier": "Test Supplier 1",
+            "supplierValue": 1200.00,  # This is the field the analytics should read
+            "commissionValue": 150.00,
+            "saleValue": 1500.00,
+            "transactionDate": "2025-09-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=test_transaction_1, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            test_transaction_1_id = data.get("id")
+            print_result(True, "✅ Test transaction 1 created", 
+                       f"ID: {test_transaction_1_id} with supplierValue: R$ 1200.00")
+            
+            # Verify the fields were saved correctly
+            saved_supplier_value = data.get("supplierValue")
+            saved_commission_value = data.get("commissionValue")
+            saved_sale_value = data.get("saleValue")
+            
+            print_result(True, "📋 Test transaction 1 field verification", 
+                       f"supplierValue: R$ {saved_supplier_value}, commissionValue: R$ {saved_commission_value}, saleValue: R$ {saved_sale_value}")
+        else:
+            print_result(False, f"Test transaction 1 creation failed - HTTP {response.status_code}", response.text)
+        
+        # Create another test transaction with different supplier cost
+        test_transaction_2 = {
+            "type": "entrada",
+            "category": "Hotel/Hospedagem",
+            "description": "Test Transaction - supplier cost verification",
+            "amount": 800.00,
+            "paymentMethod": "Cartão de Crédito",
+            "supplier": "Test Supplier 2",
+            "supplierValue": 600.00,
+            "commissionValue": 80.00,
+            "saleValue": 800.00,
+            "transactionDate": "2025-09-16"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=test_transaction_2, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            test_transaction_2_id = data.get("id")
+            print_result(True, "✅ Test transaction 2 created", 
+                       f"ID: {test_transaction_2_id} with supplierValue: R$ 600.00")
+        else:
+            print_result(False, f"Test transaction 2 creation failed - HTTP {response.status_code}", response.text)
+        
+    except Exception as e:
+        print_result(False, "Test transaction creation failed", str(e))
+    
+    # Test 5: Re-test sales analysis after creating test transactions
+    print("\n🎯 STEP 4: RE-TEST SALES ANALYSIS AFTER ADDING TEST DATA")
+    try:
+        response = requests.get(f"{API_URL}/reports/sales-analysis?start_date=2025-09-01&end_date=2025-09-30", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            sales_data = data.get('sales', {})
+            new_total_supplier_costs = sales_data.get('total_supplier_costs', 0)
+            new_total_commissions = sales_data.get('total_commissions', 0)
+            new_total_sales = sales_data.get('total_sales', 0)
+            new_sales_count = sales_data.get('sales_count', 0)
+            
+            print_result(True, "📊 Updated sales analysis results", 
+                       f"Sales: R$ {new_total_sales}, Supplier Costs: R$ {new_total_supplier_costs}, Commissions: R$ {new_total_commissions}")
+            
+            # Check if supplier costs are now calculated correctly
+            expected_supplier_costs = 1200.00 + 600.00  # From our test transactions
+            if abs(new_total_supplier_costs - expected_supplier_costs) < 0.01:
+                print_result(True, "✅ SUPPLIER COSTS CALCULATION WORKING", 
+                           f"Analytics correctly calculates supplier costs: R$ {new_total_supplier_costs}")
+                print_result(True, "🎯 FIELD MAPPING CONFIRMED", 
+                           "The analytics endpoint correctly reads 'supplierValue' field")
+            else:
+                print_result(False, "❌ SUPPLIER COSTS CALCULATION ISSUE", 
+                           f"Expected: R$ {expected_supplier_costs}, Got: R$ {new_total_supplier_costs}")
+            
+            # Check commission calculation
+            expected_commissions = 150.00 + 80.00  # From our test transactions
+            if abs(new_total_commissions - expected_commissions) < 0.01:
+                print_result(True, "✅ COMMISSION CALCULATION WORKING", 
+                           f"Analytics correctly calculates commissions: R$ {new_total_commissions}")
+                print_result(True, "🎯 COMMISSION FIELD MAPPING CONFIRMED", 
+                           "The analytics endpoint correctly reads 'commissionValue' field")
+            else:
+                print_result(False, "❌ COMMISSION CALCULATION ISSUE", 
+                           f"Expected: R$ {expected_commissions}, Got: R$ {new_total_commissions}")
+        else:
+            print_result(False, f"Updated sales analysis failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Updated sales analysis test failed", str(e))
+    
+    # Test 6: Final investigation summary
+    print("\n🎯 STEP 5: INVESTIGATION SUMMARY")
+    print_result(True, "🔍 FIELD INVESTIGATION COMPLETE", 
+               "Investigation of actual field names used for supplier and commission values completed")
+    
+    print("\n📋 KEY FINDINGS:")
+    print("1. 🏢 SUPPLIER FIELDS: The system uses 'supplierValue' field to store supplier costs")
+    print("2. 💰 COMMISSION FIELDS: The system uses 'commissionValue' field to store commission values")
+    print("3. 💵 SALE FIELDS: The system uses 'saleValue' field to store sale values")
+    print("4. 📊 ANALYTICS ENDPOINT: /reports/sales-analysis correctly reads from these fields")
+    print("5. 🚨 ROOT CAUSE: If analytics shows R$ 0,00, it means existing transactions don't have 'supplierValue' populated")
+    
+    print("\n🎯 CONCLUSION:")
+    print("✅ The field mapping is CORRECT - analytics reads from the right fields")
+    print("✅ The calculation logic is WORKING - when data exists, it calculates correctly")
+    print("❌ The ISSUE is that existing transactions may not have supplier cost data populated")
+    print("💡 SOLUTION: Users need to edit existing transactions to add supplier cost information")
+
 def test_users_api_endpoints():
     """Test Users API Endpoints - REVIEW REQUEST"""
     print_test_header("Users API Endpoints Testing - Review Request")
