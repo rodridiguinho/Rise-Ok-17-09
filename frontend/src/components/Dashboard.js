@@ -65,7 +65,7 @@ const Dashboard = () => {
       case 'suppliers':
         return <Suppliers />;
       case 'passengers':
-        return <PassengerControlDirect />;
+        return <PassengerControl />;
       case 'users':
         return <Users />;
       case 'reports':
