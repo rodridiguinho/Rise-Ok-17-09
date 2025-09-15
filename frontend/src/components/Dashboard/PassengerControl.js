@@ -671,16 +671,43 @@ const PassengerControlDirect = () => {
                     </div>
                   )}
                   
-                  {/* Horário Voo Ida */}
+                  {/* Horário Voo Ida - Partida */}
                   <div className="bg-white p-3 rounded border-l-4 border-yellow-500">
                     <Label className="text-sm font-medium text-yellow-700 mb-2 block">
-                      🕐 Horário Voo Ida:
+                      🛫 Partida - Ida:
                     </Label>
                     <Input
                       type="time"
-                      value={outboundFlightTime}
-                      onChange={(e) => setOutboundFlightTime(e.target.value)}
+                      value={outboundDepartureTime}
+                      onChange={(e) => setOutboundDepartureTime(e.target.value)}
                       className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Horário Voo Ida - Chegada */}
+                  <div className="bg-white p-3 rounded border-l-4 border-orange-500">
+                    <Label className="text-sm font-medium text-orange-700 mb-2 block">
+                      🛬 Chegada - Ida:
+                    </Label>
+                    <Input
+                      type="time"
+                      value={outboundArrivalTime}
+                      onChange={(e) => setOutboundArrivalTime(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Duração Voo Ida */}
+                  <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                    <Label className="text-sm font-medium text-green-700 mb-2 block">
+                      ⏱️ Duração - Ida:
+                    </Label>
+                    <Input
+                      value={outboundFlightDuration}
+                      onChange={(e) => setOutboundFlightDuration(e.target.value)}
+                      placeholder="Ex: 8h 30min"
+                      className="text-sm"
+                      readOnly
                     />
                   </div>
                   
