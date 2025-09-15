@@ -1907,13 +1907,6 @@ async def get_airports(search: str = ""):
 # Include the main router in the app  
 app.include_router(api_router)
 
-# Include reports router
-if reports_router:
-    app.include_router(reports_router, prefix="/api")
-    logger.info("✅ Reports router registered successfully")
-else:
-    logger.error("❌ Reports router not available")
-
 @app.get("/")
 async def root():
     return {"message": "Rise Travel Cash Control API - Sistema funcionando corretamente!"}
