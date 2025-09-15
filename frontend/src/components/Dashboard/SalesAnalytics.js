@@ -67,8 +67,8 @@ const SalesAnalytics = () => {
       const prevEnd = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0];
       
       const [currentResponse, prevResponse] = await Promise.all([
-        api.get(`/reports/sales-analysis?start_date=${currentStart}&end_date=${currentEnd}`),
-        api.get(`/reports/sales-analysis?start_date=${prevStart}&end_date=${prevEnd}`)
+        api.get(`/reports/sales-performance?start_date=${currentStart}&end_date=${currentEnd}`),
+        api.get(`/reports/sales-performance?start_date=${prevStart}&end_date=${prevEnd}`)
       ]);
       
       setAnalytics(currentResponse.data);
