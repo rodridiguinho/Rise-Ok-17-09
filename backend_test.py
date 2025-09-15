@@ -7045,14 +7045,14 @@ def run_review_request_tests():
     print("="*80)
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Tests - PASSENGER FIELD PERSISTENCE FIXES")
+    print("🚀 Starting Backend API Tests - USERS API ENDPOINTS")
     print(f"🔗 Backend URL: {BASE_URL}")
     print(f"🔗 API URL: {API_URL}")
     print(f"👤 Test User: {VALID_EMAIL}")
     
-    # Run passenger field persistence fixes testing as requested in review
-    test_passenger_field_persistence_fixes()
+    # Run users API endpoints testing as requested in review
+    test_users_api_endpoints()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Tests Completed - PASSENGER FIELD PERSISTENCE TESTED")
+    print("🏁 Backend API Tests Completed - USERS API ENDPOINTS TESTED")
     print("="*80)
