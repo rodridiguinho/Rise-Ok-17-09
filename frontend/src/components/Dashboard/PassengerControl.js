@@ -598,11 +598,11 @@ const PassengerControlDirect = () => {
                   ✈️ Detalhes da Viagem do Passageiro
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Tipo de Produto */}
-                  <div className="bg-white p-3 rounded border-l-4 border-blue-500">
+                {/* PRIMEIRA LINHA: Tipo Produto, Código Reserva, Cia Aérea */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500 shadow-sm">
                     <Label className="text-sm font-medium text-blue-700 mb-2 block">
-                      🎫 Tipo de Produto:
+                      🎫 1. Tipo de Produto
                     </Label>
                     <Input
                       value={productType}
@@ -612,10 +612,9 @@ const PassengerControlDirect = () => {
                     />
                   </div>
                   
-                  {/* Código da Reserva do Cliente */}
-                  <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-green-500 shadow-sm">
                     <Label className="text-sm font-medium text-green-700 mb-2 block">
-                      🏷️ Código Reserva Cliente:
+                      🏷️ 2. Código Reserva Cliente
                     </Label>
                     <Input
                       value={clientReservationCode}
@@ -625,26 +624,24 @@ const PassengerControlDirect = () => {
                     />
                   </div>
                   
-                  {/* Tipo de Viagem */}
-                  <div className="bg-white p-3 rounded border-l-4 border-purple-500">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-purple-500 shadow-sm">
                     <Label className="text-sm font-medium text-purple-700 mb-2 block">
-                      🔄 Tipo de Viagem:
+                      ✈️ 3. Companhia Aérea
                     </Label>
-                    <select
-                      value={tripType}
-                      onChange={(e) => setTripType(e.target.value)}
-                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                    >
-                      <option value="ida-volta">Ida e Volta</option>
-                      <option value="ida">Somente Ida</option>
-                      <option value="multiplos-destinos">Múltiplos Destinos</option>
-                    </select>
+                    <Input
+                      value={editableAirline}
+                      onChange={(e) => setEditableAirline(e.target.value)}
+                      placeholder="Nome da companhia aérea"
+                      className="text-sm"
+                    />
                   </div>
-                  
-                  {/* Cidade de Saída */}
-                  <div className="bg-white p-3 rounded border-l-4 border-orange-500">
+                </div>
+
+                {/* SEGUNDA LINHA: Cidade Saída, Cidade Chegada, Tipo Viagem */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-orange-500 shadow-sm">
                     <Label className="text-sm font-medium text-orange-700 mb-2 block">
-                      🛫 Cidade de Saída:
+                      🛫 4. Cidade de Saída
                     </Label>
                     <Input
                       value={departureCity}
@@ -654,10 +651,9 @@ const PassengerControlDirect = () => {
                     />
                   </div>
                   
-                  {/* Cidade de Chegada */}
-                  <div className="bg-white p-3 rounded border-l-4 border-teal-500">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-teal-500 shadow-sm">
                     <Label className="text-sm font-medium text-teal-700 mb-2 block">
-                      🛬 Cidade de Chegada:
+                      🛬 5. Cidade de Chegada
                     </Label>
                     <Input
                       value={arrivalCity}
@@ -667,38 +663,33 @@ const PassengerControlDirect = () => {
                     />
                   </div>
                   
-                  {/* Data de Partida */}
-                  <div className="bg-white p-3 rounded border-l-4 border-pink-500">
-                    <Label className="text-sm font-medium text-pink-700 mb-2 block">
-                      📅 Data de Partida:
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-indigo-500 shadow-sm">
+                    <Label className="text-sm font-medium text-indigo-700 mb-2 block">
+                      🔄 6. Tipo de Viagem
                     </Label>
-                    <Input
-                      type="date"
-                      value={departureDate}
-                      onChange={(e) => setDepartureDate(e.target.value)}
-                      className="text-sm"
-                    />
+                    <select
+                      value={tripType}
+                      onChange={(e) => setTripType(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-200"
+                    >
+                      <option value="ida-volta">Ida e Volta</option>
+                      <option value="ida">Somente Ida</option>
+                      <option value="multiplos-destinos">Múltiplos Destinos</option>
+                    </select>
                   </div>
-                  
-                  {/* Data de Retorno (se ida e volta) */}
-                  {tripType === 'ida-volta' && (
-                    <div className="bg-white p-3 rounded border-l-4 border-cyan-500">
-                      <Label className="text-sm font-medium text-cyan-700 mb-2 block">
-                        📅 Data de Retorno:
-                      </Label>
-                      <Input
-                        type="date"
-                        value={returnDate}
-                        onChange={(e) => setReturnDate(e.target.value)}
-                        className="text-sm"
-                      />
-                    </div>
-                  )}
-                  
-                  {/* Horário Voo Ida - Partida */}
-                  <div className="bg-white p-3 rounded border-l-4 border-yellow-500">
+                </div>
+
+                {/* TERCEIRA LINHA: Títulos dos Voos */}
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg mb-4">
+                  <h4 className="text-lg font-bold text-yellow-800 mb-2">🕐 7. Horários dos Voos</h4>
+                  <h5 className="text-md font-semibold text-orange-700">✈️ 8. Voo de Ida</h5>
+                </div>
+
+                {/* QUARTA LINHA: Horários Ida + Escala Ida */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-yellow-500 shadow-sm">
                     <Label className="text-sm font-medium text-yellow-700 mb-2 block">
-                      🛫 Partida - Ida:
+                      🛫 9. Horário Saída - Ida
                     </Label>
                     <Input
                       type="time"
@@ -708,10 +699,9 @@ const PassengerControlDirect = () => {
                     />
                   </div>
                   
-                  {/* Horário Voo Ida - Chegada */}
-                  <div className="bg-white p-3 rounded border-l-4 border-orange-500">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-orange-500 shadow-sm">
                     <Label className="text-sm font-medium text-orange-700 mb-2 block">
-                      🛬 Chegada - Ida:
+                      🛬 10. Horário Chegada - Ida
                     </Label>
                     <Input
                       type="time"
@@ -721,25 +711,103 @@ const PassengerControlDirect = () => {
                     />
                   </div>
                   
-                  {/* Duração Voo Ida */}
-                  <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-green-500 shadow-sm">
                     <Label className="text-sm font-medium text-green-700 mb-2 block">
-                      ⏱️ Duração - Ida:
+                      ⏱️ 11. Duração - Ida (Automático)
                     </Label>
                     <Input
                       value={outboundFlightDuration}
-                      onChange={(e) => setOutboundFlightDuration(e.target.value)}
-                      placeholder="Ex: 8h 30min"
-                      className="text-sm"
+                      placeholder="Calculado automaticamente"
+                      className="text-sm bg-gray-50"
                       readOnly
                     />
                   </div>
                   
-                  {/* Horário Voo Volta - Partida */}
-                  {tripType === 'ida-volta' && (
-                    <div className="bg-white p-3 rounded border-l-4 border-purple-500">
+                  <div className="bg-white p-4 rounded-lg border-l-4 border-red-500 shadow-sm">
+                    <Label className="text-sm font-medium text-red-700 mb-2 block">
+                      🔄 12. Tem Escala na Ida?
+                    </Label>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="hasOutboundStopover"
+                        checked={hasStopover}
+                        onChange={(e) => setHasStopover(e.target.checked)}
+                        className="mr-2 w-4 h-4"
+                      />
+                      <Label htmlFor="hasOutboundStopover" className="text-sm">
+                        Sim, possui escala
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* QUINTA LINHA: Detalhes Escala Ida (se tiver) */}
+                {hasStopover && (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 bg-red-50 p-4 rounded-lg">
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-pink-500 shadow-sm">
+                      <Label className="text-sm font-medium text-pink-700 mb-2 block">
+                        🏙️ 13. Cidade de Escala - Ida
+                      </Label>
+                      <Input
+                        value={stopoverCity}
+                        onChange={(e) => setStopoverCity(e.target.value)}
+                        placeholder="Ex: Paris (CDG)"
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-purple-500 shadow-sm">
                       <Label className="text-sm font-medium text-purple-700 mb-2 block">
-                        🛫 Partida - Volta:
+                        🛬 14. Chegada na Escala
+                      </Label>
+                      <Input
+                        type="time"
+                        value={stopoverArrivalTime}
+                        onChange={(e) => setStopoverArrivalTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-cyan-500 shadow-sm">
+                      <Label className="text-sm font-medium text-cyan-700 mb-2 block">
+                        🛫 15. Saída da Escala
+                      </Label>
+                      <Input
+                        type="time"
+                        value={stopoverDepartureTime}
+                        onChange={(e) => setStopoverDepartureTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+                      <Label className="text-sm font-medium text-emerald-700 mb-2 block">
+                        ⏱️ 16. Duração Conexão (Automático)
+                      </Label>
+                      <Input
+                        value={connectionDuration}
+                        placeholder="Calculado automaticamente"
+                        className="text-sm bg-gray-50"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* SEXTA LINHA: Título Voo de Volta (se ida e volta) */}
+                {tripType === 'ida-volta' && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-4">
+                    <h5 className="text-md font-semibold text-blue-700">🔄 17. Voo de Volta</h5>
+                  </div>
+                )}
+
+                {/* SÉTIMA LINHA: Horários Volta + Escala Volta */}
+                {tripType === 'ida-volta' && (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500 shadow-sm">
+                      <Label className="text-sm font-medium text-blue-700 mb-2 block">
+                        🛫 18. Horário Saída - Volta
                       </Label>
                       <Input
                         type="time"
@@ -748,13 +816,10 @@ const PassengerControlDirect = () => {
                         className="text-sm"
                       />
                     </div>
-                  )}
-                  
-                  {/* Horário Voo Volta - Chegada */}
-                  {tripType === 'ida-volta' && (
-                    <div className="bg-white p-3 rounded border-l-4 border-indigo-500">
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-indigo-500 shadow-sm">
                       <Label className="text-sm font-medium text-indigo-700 mb-2 block">
-                        🛬 Chegada - Volta:
+                        🛬 19. Horário Chegada - Volta
                       </Label>
                       <Input
                         type="time"
@@ -763,90 +828,91 @@ const PassengerControlDirect = () => {
                         className="text-sm"
                       />
                     </div>
-                  )}
-                  
-                  {/* Duração Voo Volta */}
-                  {tripType === 'ida-volta' && (
-                    <div className="bg-white p-3 rounded border-l-4 border-teal-500">
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-teal-500 shadow-sm">
                       <Label className="text-sm font-medium text-teal-700 mb-2 block">
-                        ⏱️ Duração - Volta:
+                        ⏱️ 20. Duração - Volta (Automático)
                       </Label>
                       <Input
                         value={returnFlightDuration}
-                        onChange={(e) => setReturnFlightDuration(e.target.value)}
-                        placeholder="Ex: 9h 15min"
-                        className="text-sm"
+                        placeholder="Calculado automaticamente"
+                        className="text-sm bg-gray-50"
                         readOnly
                       />
                     </div>
-                  )}
-                </div>
-                
-                {/* Seção de Escalas */}
-                <div className="mt-4 bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center mb-3">
-                    <input
-                      type="checkbox"
-                      id="hasStopover"
-                      checked={hasStopover}
-                      onChange={(e) => setHasStopover(e.target.checked)}
-                      className="mr-2"
-                    />
-                    <Label htmlFor="hasStopover" className="text-sm font-medium text-gray-700">
-                      🔄 Possui escalas/conexões
-                    </Label>
-                  </div>
-                  
-                  {hasStopover && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-3">
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          🏙️ Cidade da Escala:
-                        </Label>
-                        <Input
-                          value={stopoverCity}
-                          onChange={(e) => setStopoverCity(e.target.value)}
-                          placeholder="Ex: Paris (CDG)"
-                          className="text-sm"
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-violet-500 shadow-sm">
+                      <Label className="text-sm font-medium text-violet-700 mb-2 block">
+                        🔄 21. Tem Escala na Volta?
+                      </Label>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="hasReturnStopover"
+                          checked={hasReturnStopover}
+                          onChange={(e) => setHasReturnStopover(e.target.checked)}
+                          className="mr-2 w-4 h-4"
                         />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          🛬 Chegada na Escala:
+                        <Label htmlFor="hasReturnStopover" className="text-sm">
+                          Sim, possui escala
                         </Label>
-                        <Input
-                          type="time"
-                          value={stopoverArrivalTime}
-                          onChange={(e) => setStopoverArrivalTime(e.target.value)}
-                          className="text-sm"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          🛫 Saída da Escala:
-                        </Label>
-                        <Input
-                          type="time"
-                          value={stopoverDepartureTime}
-                          onChange={(e) => setStopoverDepartureTime(e.target.value)}
-                          className="text-sm"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          ⏱️ Tempo de Conexão:
-                        </Label>
-                        <Input
-                          value={connectionDuration}
-                          onChange={(e) => setConnectionDuration(e.target.value)}
-                          placeholder="Ex: 2h 30min"
-                          className="text-sm"
-                          readOnly
-                        />
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {/* OITAVA LINHA: Detalhes Escala Volta (se tiver) */}
+                {tripType === 'ida-volta' && hasReturnStopover && (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 bg-violet-50 p-4 rounded-lg">
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-rose-500 shadow-sm">
+                      <Label className="text-sm font-medium text-rose-700 mb-2 block">
+                        🏙️ 22. Cidade de Escala - Volta
+                      </Label>
+                      <Input
+                        value={returnStopoverCity}
+                        onChange={(e) => setReturnStopoverCity(e.target.value)}
+                        placeholder="Ex: Madrid (MAD)"
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-amber-500 shadow-sm">
+                      <Label className="text-sm font-medium text-amber-700 mb-2 block">
+                        🛬 23. Chegada na Escala - Volta
+                      </Label>
+                      <Input
+                        type="time"
+                        value={returnStopoverArrivalTime}
+                        onChange={(e) => setReturnStopoverArrivalTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-lime-500 shadow-sm">
+                      <Label className="text-sm font-medium text-lime-700 mb-2 block">
+                        🛫 24. Saída da Escala - Volta
+                      </Label>
+                      <Input
+                        type="time"
+                        value={returnStopoverDepartureTime}
+                        onChange={(e) => setReturnStopoverDepartureTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-sky-500 shadow-sm">
+                      <Label className="text-sm font-medium text-sky-700 mb-2 block">
+                        ⏱️ 25. Duração Conexão - Volta (Automático)
+                      </Label>
+                      <Input
+                        value={returnConnectionDuration}
+                        placeholder="Calculado automaticamente"
+                        className="text-sm bg-gray-50"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Observações */}
