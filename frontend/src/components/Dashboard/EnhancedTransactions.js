@@ -494,24 +494,48 @@ const EnhancedTransactions = () => {
 
   // Timezone Database for major destinations
   const timezoneDB = {
-    // BRASIL
+    // BRASIL - Principais cidades e aeroportos
     "São Paulo": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Sao Paulo": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Guarulhos": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Congonhas": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Rio de Janeiro": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Santos Dumont": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Salvador": { timezone: "America/Bahia", utc: -3, country: "Brasil" },
     "Brasília": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Brasilia": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Fortaleza": { timezone: "America/Fortaleza", utc: -3, country: "Brasil" },
     "Recife": { timezone: "America/Recife", utc: -3, country: "Brasil" },
     "Manaus": { timezone: "America/Manaus", utc: -4, country: "Brasil" },
-    // Cidades brasileiras adicionais
+    // Cidades brasileiras adicionais - TODAS as da lista de aeroportos
     "Campinas": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Viracopos": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Curitiba": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Porto Alegre": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Belém": { timezone: "America/Belem", utc: -3, country: "Brasil" },
+    "Belem": { timezone: "America/Belem", utc: -3, country: "Brasil" },
     "Goiânia": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Goiania": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Vitória": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Vitoria": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Florianópolis": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Florianopolis": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Campo Grande": { timezone: "America/Campo_Grande", utc: -4, country: "Brasil" },
     "Cuiabá": { timezone: "America/Cuiaba", utc: -4, country: "Brasil" },
+    "Cuiaba": { timezone: "America/Cuiaba", utc: -4, country: "Brasil" },
+    "Foz do Iguacu": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Uberlandia": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Ribeirao Preto": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Londrina": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Maringa": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Sao Jose do Rio Preto": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Bauru": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Presidente Prudente": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Aracatuba": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Marilia": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Joao Pessoa": { timezone: "America/Fortaleza", utc: -3, country: "Brasil" },
+    "Maceio": { timezone: "America/Maceio", utc: -3, country: "Brasil" },
+    "Natal": { timezone: "America/Fortaleza", utc: -3, country: "Brasil" },
     
     // EUROPA
     "Lisboa": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
