@@ -41,6 +41,7 @@ const PassengerControlDirect = () => {
   const [emissionType, setEmissionType] = useState('E-ticket');
   const [supplierPhone, setSupplierPhone] = useState('');
   const [editableAirline, setEditableAirline] = useState('');
+  const [reservationNumber, setReservationNumber] = useState('');
   const [reservationNotes, setReservationNotes] = useState('');
   
   const { toast } = useToast();
