@@ -52,11 +52,20 @@ const PassengerControlDirect = () => {
   const [tripType, setTripType] = useState('ida-volta');
   const [departureDate, setDepartureDate] = useState('');
   const [returnDate, setReturnDate] = useState('');
-  const [outboundFlightTime, setOutboundFlightTime] = useState('');
-  const [returnFlightTime, setReturnFlightTime] = useState('');
+  // Horários IDA
+  const [outboundDepartureTime, setOutboundDepartureTime] = useState('');
+  const [outboundArrivalTime, setOutboundArrivalTime] = useState('');
+  const [outboundFlightDuration, setOutboundFlightDuration] = useState('');
+  // Horários VOLTA
+  const [returnDepartureTime, setReturnDepartureTime] = useState('');
+  const [returnArrivalTime, setReturnArrivalTime] = useState('');
+  const [returnFlightDuration, setReturnFlightDuration] = useState('');
+  // Escalas
   const [hasStopover, setHasStopover] = useState(false);
   const [stopoverCity, setStopoverCity] = useState('');
-  const [stopoverTime, setStopoverTime] = useState('');
+  const [stopoverArrivalTime, setStopoverArrivalTime] = useState('');
+  const [stopoverDepartureTime, setStopoverDepartureTime] = useState('');
+  const [connectionDuration, setConnectionDuration] = useState('');
   
   const { toast } = useToast();
 
