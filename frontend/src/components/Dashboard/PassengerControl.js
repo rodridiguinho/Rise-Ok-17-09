@@ -210,7 +210,8 @@ const PassengerControlDirect = () => {
         airline: editableAirline,
         travelNotes: reservationNotes,
         emissionType: emissionType,
-        supplierPhone: supplierPhone
+        supplierPhone: supplierPhone,
+        reservationNumber: reservationNumber
       };
 
       setReservations(prev => 
