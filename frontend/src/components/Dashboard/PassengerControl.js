@@ -167,6 +167,41 @@ const PassengerControl = () => {
     setSelectedReservation(updatedReservation);
   };
 
+  const saveReservationChanges = async () => {
+    if (!selectedReservation) return;
+
+    try {
+      // Atualizar reserva com as mudanças
+      const updatedReservation = {
+        ...selectedReservation,
+        airline: editableAirline,
+        travelNotes: reservationNotes
+      };
+
+      setReservations(prev => 
+        prev.map(res => res.id === selectedReservation.id ? updatedReservation : res)
+      );
+
+      setSelectedReservation(updatedReservation);
+
+      toast({
+        title: "✅ Alterações Salvas",
+        description: "As informações da reserva foram atualizadas com sucesso",
+      });
+
+      // Aqui você pode adicionar uma chamada para o backend se necessário
+      // await transactionsAPI.updateTransaction(selectedReservation.id, updatedReservation);
+
+    } catch (error) {
+      console.error('Erro ao salvar alterações:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível salvar as alterações"
+      });
+    }
+  };
+
   const getDaysUntilTravel = (departureDate) => {
     if (!departureDate) return null;
     const today = new Date();
