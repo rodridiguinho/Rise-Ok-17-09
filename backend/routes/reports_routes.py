@@ -158,11 +158,22 @@ async def get_sales_analysis(
         
         # Calcular custos de fornecedores (valores pagos)
         total_supplier_costs = 0
+        
+        # Primeiro, verificar supplierValue nas transações de entrada
         for transaction in entrada_transactions:
-            # Somar supplierValue se existir
             supplier_value = transaction.get("supplierValue", 0)
             if supplier_value:
                 total_supplier_costs += supplier_value
+        
+        # Se não encontrou valores nas entradas, buscar nas transações de saída relacionadas a fornecedores
+        if total_supplier_costs == 0:
+            for transaction in saida_transactions:
+                # Verificar se é transação para fornecedor
+                if transaction.get("category") == "Fornecedor" or "fornecedor" in transaction.get("description", "").lower():
+                    total_supplier_costs += transaction.get("amount", 0)
+                # Ou verificar se tem campo supplier preenchido
+                elif transaction.get("supplier"):
+                    total_supplier_costs += transaction.get("amount", 0)
         
         # Calcular comissões (assumindo campo commission nas transações)
         total_commissions = sum(t.get("commission", 0) for t in entrada_transactions)
