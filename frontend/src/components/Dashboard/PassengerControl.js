@@ -489,30 +489,73 @@ const PassengerControl = () => {
                   Detalhes da Viagem
                 </h3>
                 
-                {/* Supplier and Airline Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  {selectedReservation.supplier && (
-                    <div className="p-3 bg-white rounded border-l-4 border-blue-500">
-                      <div className="flex items-center mb-1">
-                        <Building className="h-4 w-4 mr-2 text-blue-600" />
-                        <p className="text-sm font-medium text-blue-700">Fornecedor:</p>
-                      </div>
-                      <p className="font-semibold">{selectedReservation.supplier}</p>
+                {/* Supplier and Airline Information - Editable */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                  {/* Fornecedor */}
+                  <div className="p-3 bg-white rounded border-l-4 border-blue-500">
+                    <div className="flex items-center mb-2">
+                      <Building className="h-4 w-4 mr-2 text-blue-600" />
+                      <p className="text-sm font-medium text-blue-700">Fornecedor:</p>
                     </div>
-                  )}
+                    <select
+                      value={selectedSupplier}
+                      onChange={(e) => setSelectedSupplier(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    >
+                      <option value="">Selecione o fornecedor</option>
+                      {suppliersList.map((supplier, index) => (
+                        <option key={index} value={supplier}>{supplier}</option>
+                      ))}
+                    </select>
+                  </div>
                   
-                  <div className="p-3 bg-white rounded border-l-4 border-green-500">
-                    <div className="flex items-center mb-1">
-                      <Plane className="h-4 w-4 mr-2 text-green-600" />
-                      <p className="text-sm font-medium text-green-700">Companhia Aérea:</p>
+                  {/* Tipo de Emissão */}
+                  <div className="p-3 bg-white rounded border-l-4 border-purple-500">
+                    <div className="flex items-center mb-2">
+                      <FileText className="h-4 w-4 mr-2 text-purple-600" />
+                      <p className="text-sm font-medium text-purple-700">Tipo de Emissão:</p>
+                    </div>
+                    <select
+                      value={emissionType}
+                      onChange={(e) => setEmissionType(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    >
+                      <option value="">Selecione o tipo</option>
+                      <option value="E-ticket">E-ticket</option>
+                      <option value="Bilhete Físico">Bilhete Físico</option>
+                      <option value="Voucher">Voucher</option>
+                      <option value="Reserva Online">Reserva Online</option>
+                      <option value="Check-in Online">Check-in Online</option>
+                    </select>
+                  </div>
+                  
+                  {/* Telefone do Fornecedor */}
+                  <div className="p-3 bg-white rounded border-l-4 border-orange-500">
+                    <div className="flex items-center mb-2">
+                      <Bell className="h-4 w-4 mr-2 text-orange-600" />
+                      <p className="text-sm font-medium text-orange-700">Contato:</p>
                     </div>
                     <Input
-                      value={editableAirline}
-                      onChange={(e) => setEditableAirline(e.target.value)}
-                      placeholder="Nome da companhia aérea"
-                      className="mt-1"
+                      value={supplierPhone}
+                      onChange={(e) => setSupplierPhone(e.target.value)}
+                      placeholder="Telefone do fornecedor"
+                      className="text-sm"
                     />
                   </div>
+                </div>
+                
+                {/* Companhia Aérea */}
+                <div className="p-3 bg-white rounded border-l-4 border-green-500 mb-4">
+                  <div className="flex items-center mb-2">
+                    <Plane className="h-4 w-4 mr-2 text-green-600" />
+                    <p className="text-sm font-medium text-green-700">Companhia Aérea:</p>
+                  </div>
+                  <Input
+                    value={editableAirline}
+                    onChange={(e) => setEditableAirline(e.target.value)}
+                    placeholder="Nome da companhia aérea"
+                    className="mt-1"
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
