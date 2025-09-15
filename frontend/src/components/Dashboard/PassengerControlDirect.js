@@ -19,6 +19,7 @@ import {
 import { transactionsAPI } from '../../services/api';
 
 const PassengerControlDirect = () => {
+  console.log('🔥 PassengerControlDirect component loaded successfully!');
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedReservation, setSelectedReservation] = useState(null);
