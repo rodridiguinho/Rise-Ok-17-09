@@ -37,9 +37,9 @@ const SalesAnalytics = () => {
     if (!data || !data.sales) return null;
     
     const total = data.sales.total_sales || 0;
-    const costs = data.sales.total_supplier_costs || 0;
+    const costs = data.sales.total_supplier_payments || 0;
     const commissions = data.sales.total_commissions || 0;
-    const profit = data.sales.net_profit || 0;
+    const profit = data.sales.net_sales_profit || 0;
     
     if (total === 0) return null;
     
