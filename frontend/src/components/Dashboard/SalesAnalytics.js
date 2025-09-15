@@ -177,7 +177,7 @@ const SalesAnalytics = () => {
               <span className="text-sm font-medium text-gray-600">CUSTOS FORNECEDORES</span>
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-2">
-              {formatCurrency(analytics.sales.total_supplier_costs)}
+              {formatCurrency(analytics.sales.total_supplier_payments)}
             </div>
             {prevSales && (
               <div className="text-sm">
