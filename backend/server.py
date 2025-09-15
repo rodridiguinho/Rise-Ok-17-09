@@ -147,6 +147,10 @@ class TransactionCreate(BaseModel):
     additionalInfo: Optional[str] = None
     # Multiple suppliers support
     suppliers: Optional[list] = []
+    # Passenger management for travel bookings
+    passengers: Optional[list] = []
+    airline: Optional[str] = None
+    travelNotes: Optional[str] = None
 
 # Create API router
 from fastapi import APIRouter
