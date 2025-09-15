@@ -1115,7 +1115,7 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
 
 @reports_router.get("/sales-performance")
 async def get_sales_performance(start_date: str = None, end_date: str = None):
-    """Analytics específico de vendas (sem despesas da empresa)"""
+    """Analytics específico de vendas (som entradas e saídas relacionadas)"""
     try:
         # Build date filter
         date_filter = {}
@@ -1127,32 +1127,41 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
                 ]
             }
         
-        # Get ONLY entrada transactions (sales)
-        entrada_transactions = await db.transactions.find({
-            **date_filter,
-            "type": "entrada"
-        }).to_list(None)
+        # Get ALL transactions in period (both entrada and saida)
+        all_transactions = await db.transactions.find(date_filter).to_list(None)
         
-        # Get saida transactions for commissions and supplier payments
-        saida_transactions = await db.transactions.find({
-            **date_filter,
-            "type": "saida"
-        }).to_list(None)
+        # Separate entrada and saida transactions
+        entrada_transactions = [t for t in all_transactions if t.get('type') == 'entrada']
+        saida_transactions = [t for t in all_transactions if t.get('type') == 'saida']
         
-        # Sales totals
+        # Sales totals from entrada transactions
         total_sales = sum(t.get("amount", 0) for t in entrada_transactions)
         total_quantity = len(entrada_transactions)
         
-        # Calculate commissions from sales (from saida transactions)
+        # Calculate commissions from both entrada (direct) and saida transactions
         total_commissions = 0
+        
+        # From entrada transactions (direct commission field)
+        for transaction in entrada_transactions:
+            if transaction.get("commissionValue"):
+                total_commissions += transaction.get("commissionValue", 0)
+        
+        # From saida transactions (commission payments)
         for transaction in saida_transactions:
             description = transaction.get("description", "").lower()
             category = transaction.get("category", "").lower()
             if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
                 total_commissions += transaction.get("amount", 0)
         
-        # Calculate supplier payments (from saida transactions)
+        # Calculate supplier payments from both entrada (direct) and saida transactions
         total_supplier_payments = 0
+        
+        # From entrada transactions (direct supplier cost field)
+        for transaction in entrada_transactions:
+            if transaction.get("supplierValue"):
+                total_supplier_payments += transaction.get("supplierValue", 0)
+        
+        # From saida transactions (supplier payments)
         for transaction in saida_transactions:
             description = transaction.get("description", "").lower()
             category = transaction.get("category", "").lower()
@@ -1184,7 +1193,8 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
             "period": {
                 "start_date": start_date,
                 "end_date": end_date
-            }
+            },
+            "transactions": entrada_transactions  # Include transactions for frontend display
         }
         
     except Exception as e:
