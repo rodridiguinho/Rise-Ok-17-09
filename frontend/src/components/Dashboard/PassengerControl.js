@@ -192,11 +192,17 @@ const PassengerControlDirect = () => {
         tripType: tripType,
         departureDate: departureDate,
         returnDate: returnDate,
-        outboundFlightTime: outboundFlightTime,
-        returnFlightTime: returnFlightTime,
+        outboundDepartureTime: outboundDepartureTime,
+        outboundArrivalTime: outboundArrivalTime,
+        outboundFlightDuration: outboundFlightDuration,
+        returnDepartureTime: returnDepartureTime,
+        returnArrivalTime: returnArrivalTime,
+        returnFlightDuration: returnFlightDuration,
         hasStopover: hasStopover,
         stopoverCity: stopoverCity,
-        stopoverTime: stopoverTime
+        stopoverArrivalTime: stopoverArrivalTime,
+        stopoverDepartureTime: stopoverDepartureTime,
+        connectionDuration: connectionDuration
       });
 
       setReservations(prev => 
