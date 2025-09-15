@@ -293,6 +293,17 @@ const AdminSettings = () => {
     });
   };
 
+  const removeExpenseCategory = (index) => {
+    const categoryToRemove = expenseCategories[index];
+    const updatedCategories = expenseCategories.filter((_, i) => i !== index);
+    setExpenseCategories(updatedCategories);
+    localStorage.setItem('riseTravel_expenseCategories', JSON.stringify(updatedCategories));
+    toast({
+      title: "Categoria de despesa removida",
+      description: `"${categoryToRemove}" foi removida da lista.`,
+    });
+  };
+
   const addPaymentMethod = () => {
     if (!newPaymentMethod.trim()) {
       toast({
