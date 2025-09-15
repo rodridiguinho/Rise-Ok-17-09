@@ -217,6 +217,13 @@ const PassengerControl = () => {
                 {/* Flight Info */}
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm">
+                    <User className="h-4 w-4 mr-2 text-indigo-600" />
+                    <span className="font-medium text-indigo-800">
+                      {reservation.client || reservation.passengers[0]?.name || 'Passageiro não informado'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm">
                     <Plane className="h-4 w-4 mr-2 text-blue-600" />
                     <span className="font-medium">{reservation.airline || 'Companhia não informada'}</span>
                   </div>
