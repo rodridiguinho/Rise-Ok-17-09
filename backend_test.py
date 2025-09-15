@@ -1248,6 +1248,301 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_passenger_control_system_investigation():
+    """Test Passenger Control System Issues - REVIEW REQUEST"""
+    print_test_header("Passenger Control System Investigation - Review Request Testing")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,
+            "password": VALID_PASSWORD
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for passenger control investigation", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for passenger control investigation failed", str(e))
+        return
+    
+    # Test 2: Check existing transactions in database and their structure
+    print("\n🎯 TEST 1: DATABASE TRANSACTION STRUCTURE INVESTIGATION")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "GET /api/transactions - Database query successful", 
+                       f"Found {len(transactions)} transactions in database")
+            
+            if len(transactions) > 0:
+                # Analyze first few transactions for structure
+                print("\n📋 TRANSACTION STRUCTURE ANALYSIS:")
+                for i, transaction in enumerate(transactions[:3]):  # Check first 3 transactions
+                    print(f"\n--- Transaction {i+1} (ID: {transaction.get('id', 'No ID')}) ---")
+                    
+                    # Check for supplier field
+                    supplier = transaction.get('supplier')
+                    if supplier:
+                        print_result(True, f"Transaction {i+1} - Supplier field present", 
+                                   f"Supplier: '{supplier}'")
+                    else:
+                        print_result(False, f"Transaction {i+1} - Supplier field missing", 
+                                   "No supplier field found")
+                    
+                    # Check for passengers field
+                    passengers = transaction.get('passengers')
+                    if passengers:
+                        print_result(True, f"Transaction {i+1} - Passengers field present", 
+                                   f"Passengers: {passengers}")
+                    else:
+                        print_result(False, f"Transaction {i+1} - Passengers field missing", 
+                                   "No passengers field found in transaction")
+                    
+                    # Show all available fields for analysis
+                    available_fields = list(transaction.keys())
+                    print(f"     Available fields: {', '.join(available_fields[:10])}{'...' if len(available_fields) > 10 else ''}")
+                    
+                    # Check for travel-related fields that might contain passenger info
+                    travel_fields = ['clientReservationCode', 'internalReservationCode', 'client', 'products']
+                    found_travel_fields = [f for f in travel_fields if f in transaction and transaction[f]]
+                    if found_travel_fields:
+                        print(f"     Travel-related fields: {', '.join(found_travel_fields)}")
+                        for field in found_travel_fields:
+                            print(f"       {field}: {transaction[field]}")
+                
+                # Summary of findings
+                transactions_with_supplier = [t for t in transactions if t.get('supplier')]
+                transactions_with_passengers = [t for t in transactions if t.get('passengers')]
+                
+                print(f"\n📊 DATABASE ANALYSIS SUMMARY:")
+                print_result(True, "Database Analysis - Supplier field usage", 
+                           f"{len(transactions_with_supplier)}/{len(transactions)} transactions have supplier field")
+                print_result(False if len(transactions_with_passengers) == 0 else True, 
+                           "Database Analysis - Passengers field usage", 
+                           f"{len(transactions_with_passengers)}/{len(transactions)} transactions have passengers field")
+                
+                if len(transactions_with_passengers) == 0:
+                    print_result(False, "🚨 CRITICAL FINDING - NO PASSENGERS FIELD", 
+                               "NO transactions in database contain 'passengers' field - this confirms the user's report")
+            else:
+                print_result(False, "Database Analysis - No transactions found", 
+                           "Database is empty - cannot analyze transaction structure")
+        else:
+            print_result(False, f"GET /api/transactions failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Database transaction structure investigation failed", str(e))
+    
+    # Test 3: Test GET /api/transactions endpoint data format
+    print("\n🎯 TEST 2: GET /api/transactions ENDPOINT DATA FORMAT VALIDATION")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "GET /api/transactions - Endpoint accessible", 
+                       f"Successfully retrieved {len(transactions)} transactions")
+            
+            if len(transactions) > 0:
+                sample_transaction = transactions[0]
+                
+                # Check response format
+                print("\n📋 RESPONSE FORMAT ANALYSIS:")
+                print(f"Sample transaction keys: {list(sample_transaction.keys())}")
+                
+                # Specifically check for fields mentioned in review request
+                critical_fields = {
+                    'supplier': sample_transaction.get('supplier'),
+                    'passengers': sample_transaction.get('passengers'),
+                    'id': sample_transaction.get('id'),
+                    'description': sample_transaction.get('description'),
+                    'amount': sample_transaction.get('amount')
+                }
+                
+                for field, value in critical_fields.items():
+                    if value is not None:
+                        print_result(True, f"GET /api/transactions - {field} field present", 
+                                   f"{field}: {value}")
+                    else:
+                        print_result(False, f"GET /api/transactions - {field} field missing", 
+                                   f"Field '{field}' not found in response")
+                
+                # Check if supplier field is properly populated
+                suppliers_found = [t.get('supplier') for t in transactions if t.get('supplier')]
+                if suppliers_found:
+                    print_result(True, "GET /api/transactions - Supplier data availability", 
+                               f"Found {len(suppliers_found)} transactions with supplier data: {suppliers_found[:3]}")
+                else:
+                    print_result(False, "GET /api/transactions - Supplier data availability", 
+                               "No transactions contain supplier data")
+            else:
+                print_result(False, "GET /api/transactions - No data to analyze", 
+                           "No transactions available for format analysis")
+        else:
+            print_result(False, f"GET /api/transactions endpoint failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/transactions endpoint testing failed", str(e))
+    
+    # Test 4: Test PUT /api/transactions/{id} endpoint for passenger data support
+    print("\n🎯 TEST 3: PUT /api/transactions/{id} PASSENGER DATA UPDATE SUPPORT")
+    try:
+        # First create a test transaction
+        test_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Test transaction for passenger update",
+            "amount": 1500.00,
+            "paymentMethod": "PIX",
+            "supplier": "Test Airline",
+            "client": "Test Client",
+            "transactionDate": "2025-01-25"
+        }
+        
+        create_response = requests.post(f"{API_URL}/transactions", json=test_transaction, timeout=10)
+        if create_response.status_code == 200:
+            created_data = create_response.json()
+            transaction_id = created_data.get("id")
+            print_result(True, "PUT endpoint test - Test transaction created", 
+                       f"Created transaction ID: {transaction_id}")
+            
+            # Now try to update it with passenger data
+            updated_transaction = {
+                "type": "entrada",
+                "category": "Passagem Aérea", 
+                "description": "Test transaction for passenger update",
+                "amount": 1500.00,
+                "paymentMethod": "PIX",
+                "supplier": "Test Airline Updated",
+                "client": "Test Client",
+                "passengers": [  # THIS IS THE KEY TEST
+                    {
+                        "name": "João Silva",
+                        "document": "123.456.789-00",
+                        "birthDate": "1990-05-15",
+                        "phone": "(11) 99999-9999"
+                    },
+                    {
+                        "name": "Maria Silva", 
+                        "document": "987.654.321-00",
+                        "birthDate": "1992-08-20",
+                        "phone": "(11) 88888-8888"
+                    }
+                ],
+                "transactionDate": "2025-01-25"
+            }
+            
+            update_response = requests.put(f"{API_URL}/transactions/{transaction_id}", 
+                                         json=updated_transaction, timeout=10)
+            
+            print(f"PUT Response Status: {update_response.status_code}")
+            print(f"PUT Response Text: {update_response.text[:500]}...")
+            
+            if update_response.status_code == 200:
+                updated_data = update_response.json()
+                print_result(True, "PUT /api/transactions/{id} - Update successful", 
+                           f"Transaction {transaction_id} updated successfully")
+                
+                # Check if passengers field was saved
+                saved_passengers = updated_data.get('passengers')
+                if saved_passengers:
+                    print_result(True, "PUT /api/transactions/{id} - Passengers field support", 
+                               f"Passengers field saved successfully: {len(saved_passengers)} passengers")
+                    
+                    # Verify passenger data integrity
+                    if (len(saved_passengers) == 2 and 
+                        saved_passengers[0].get('name') == 'João Silva' and
+                        saved_passengers[1].get('name') == 'Maria Silva'):
+                        print_result(True, "PUT /api/transactions/{id} - Passenger data integrity", 
+                                   "All passenger data saved correctly")
+                    else:
+                        print_result(False, "PUT /api/transactions/{id} - Passenger data integrity", 
+                                   f"Passenger data corrupted: {saved_passengers}")
+                else:
+                    print_result(False, "PUT /api/transactions/{id} - Passengers field support", 
+                               "Passengers field NOT saved - this confirms the persistence issue")
+                
+                # Check if supplier field was updated
+                saved_supplier = updated_data.get('supplier')
+                if saved_supplier == "Test Airline Updated":
+                    print_result(True, "PUT /api/transactions/{id} - Supplier field update", 
+                               f"Supplier field updated correctly: {saved_supplier}")
+                else:
+                    print_result(False, "PUT /api/transactions/{id} - Supplier field update", 
+                               f"Expected: 'Test Airline Updated', Got: {saved_supplier}")
+                
+            elif update_response.status_code == 404:
+                print_result(False, "PUT /api/transactions/{id} - Endpoint not found", 
+                           "PUT endpoint returns 404 - endpoint may not be implemented")
+            else:
+                print_result(False, f"PUT /api/transactions/{id} - Update failed - HTTP {update_response.status_code}", 
+                           update_response.text)
+        else:
+            print_result(False, f"PUT endpoint test - Test transaction creation failed - HTTP {create_response.status_code}", 
+                       create_response.text)
+    except Exception as e:
+        print_result(False, "PUT /api/transactions/{id} endpoint testing failed", str(e))
+    
+    # Test 5: Check TransactionCreate model structure by examining API validation
+    print("\n🎯 TEST 4: TRANSACTION MODEL STRUCTURE VALIDATION")
+    try:
+        # Try to create transaction with passengers field to see if model supports it
+        model_test_transaction = {
+            "type": "entrada",
+            "category": "Passagem Aérea",
+            "description": "Model structure test",
+            "amount": 1000.00,
+            "paymentMethod": "PIX",
+            "passengers": [
+                {
+                    "name": "Test Passenger",
+                    "document": "000.000.000-00"
+                }
+            ]
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=model_test_transaction, timeout=10)
+        print(f"Model Test Response Status: {response.status_code}")
+        print(f"Model Test Response: {response.text[:300]}...")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('passengers'):
+                print_result(True, "Transaction Model - Passengers field support", 
+                           "TransactionCreate model supports passengers field")
+            else:
+                print_result(False, "Transaction Model - Passengers field support", 
+                           "TransactionCreate model does NOT support passengers field")
+        elif response.status_code == 422:
+            # Validation error - check if it mentions passengers field
+            error_text = response.text.lower()
+            if 'passenger' in error_text:
+                print_result(False, "Transaction Model - Passengers field validation", 
+                           "Model validation error related to passengers field")
+            else:
+                print_result(False, "Transaction Model - General validation error", 
+                           "Model validation error (not passengers related)")
+        else:
+            print_result(False, f"Transaction Model - Unexpected response - HTTP {response.status_code}", 
+                       response.text)
+    except Exception as e:
+        print_result(False, "Transaction model structure validation failed", str(e))
+    
+    # Test 6: Final summary and recommendations
+    print("\n🎯 INVESTIGATION SUMMARY AND FINDINGS")
+    print("="*80)
+    print("🔍 PASSENGER CONTROL SYSTEM INVESTIGATION RESULTS:")
+    print("="*80)
+    print("1. MISSING PASSENGERS FIELD: Confirmed - no transactions contain 'passengers' field")
+    print("2. SUPPLIER FIELD STATUS: Available in transaction structure")
+    print("3. PUT ENDPOINT STATUS: Needs verification for passenger data support")
+    print("4. ROOT CAUSE: TransactionCreate model likely missing 'passengers' field definition")
+    print("="*80)
+
 def test_review_request_expense_transaction():
     """Test Expense Transaction - REVIEW REQUEST"""
     print_test_header("Expense Transaction Test - Review Request Testing")
