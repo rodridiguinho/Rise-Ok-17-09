@@ -494,16 +494,40 @@ const PassengerControlDirect = () => {
                 
                 {selectedReservation.passengers.map((passenger, index) => (
                   <div key={index} className="bg-gray-50 p-4 rounded mt-3">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-blue-600" />
-                      <span className="font-medium">{passenger.name}</span>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                        {passenger.type}
-                      </span>
-                      {index === 0 && (
-                        <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">
-                          Principal
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium">{passenger.name}</span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                          {passenger.type}
                         </span>
+                        {index === 0 && (
+                          <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">
+                            Principal
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Mostrar dados dos passageiros */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      {passenger.document && (
+                        <p><span className="font-medium">Documento:</span> {passenger.document}</p>
+                      )}
+                      {passenger.nationality && (
+                        <p><span className="font-medium">Nacionalidade:</span> {passenger.nationality}</p>
+                      )}
+                      {passenger.birthDate && (
+                        <p><span className="font-medium">Nascimento:</span> {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}</p>
+                      )}
+                      {passenger.passportNumber && (
+                        <p><span className="font-medium">Passaporte:</span> {passenger.passportNumber}</p>
+                      )}
+                      {passenger.passportExpiry && (
+                        <p><span className="font-medium">Vencimento:</span> {new Date(passenger.passportExpiry).toLocaleDateString('pt-BR')}</p>
+                      )}
+                      {passenger.specialNeeds && (
+                        <p className="text-orange-600"><span className="font-medium">Especial:</span> {passenger.specialNeeds}</p>
                       )}
                     </div>
                   </div>
