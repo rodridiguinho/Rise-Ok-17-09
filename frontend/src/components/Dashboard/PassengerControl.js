@@ -133,6 +133,8 @@ const PassengerControl = () => {
         ],
         reminders: transaction.reminders || [],
         travelNotes: transaction.travelNotes || '',
+        emissionType: transaction.emissionType || '',
+        supplierPhone: transaction.supplierPhone || '',
         status: 'Ativa'
       }));
 
