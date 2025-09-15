@@ -25,13 +25,34 @@ api.interceptors.request.use(
 // Interceptor para lidar com respostas e erros
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado ou inválido - limpar e redirecionar para login
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // Tentar renovar o token uma vez antes de forçar logout
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // Aguardar um pouco antes de tentar novamente
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Tentar a requisição original novamente
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        } catch (retryError) {
+          // Se falhar mesmo assim, aí sim fazer logout
+          console.warn('Token definitivamente inválido, fazendo logout');
+        }
+      }
+      
+      // Só fazer logout se realmente necessário
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    
     return Promise.reject(error);
   }
 );
