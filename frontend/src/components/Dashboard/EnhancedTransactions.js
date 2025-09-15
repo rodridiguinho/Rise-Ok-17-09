@@ -414,6 +414,8 @@ const EnhancedTransactions = () => {
 
   // Comprehensive Airport Cities Database - Individual airports
   const airportCities = [
+    // TESTE - Campinas primeiro
+    "Campinas (VCP)", "Viracopos (VCP)",
     // BRASIL - Aeroportos separados
     "Sao Paulo (GRU)", "Sao Paulo (CGH)", "Rio de Janeiro (GIG)", "Rio de Janeiro (SDU)", 
     "Salvador (SSA)", "Brasilia (BSB)", "Fortaleza (FOR)", "Recife (REC)", "Manaus (MAO)", 
@@ -421,7 +423,7 @@ const EnhancedTransactions = () => {
     "Maceio (MCZ)", "Natal (NAT)", "Vitoria (VIX)", "Florianopolis (FLN)", "Campo Grande (CGR)", 
     "Cuiaba (CGB)", "Foz do Iguacu (IGU)", "Uberlandia (UDI)", "Ribeirao Preto (RAO)",
     // Aeroportos brasileiros adicionais
-    "Campinas (VCP)", "Viracopos (VCP)", "Londrina (LDB)", "Maringa (MGF)", "Sao Jose do Rio Preto (SJP)",
+    "Londrina (LDB)", "Maringa (MGF)", "Sao Jose do Rio Preto (SJP)",
     "Bauru (BAU)", "Presidente Prudente (PPB)", "Aracatuba (ARU)", "Marilia (MII)",
     "Santos Dumont (SDU)", "Congonhas (CGH)", "Guarulhos (GRU)",
     
