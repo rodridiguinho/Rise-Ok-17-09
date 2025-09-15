@@ -100,27 +100,21 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "BUG CRÍTICO: Transações novas são salvas com sucesso no backend, mas não aparecem imediatamente na lista de transações no frontend. O usuário precisa navegar para outra aba e voltar para ver a transação. Este é um problema de atualização da lista em tempo real no componente EnhancedTransactions.js."
+user_problem_statement: "I need to investigate two issues in the passenger control system: 1. **Missing passenger persistence**: When a passenger is added to a reservation in the frontend, it's not being saved to the backend database. The data disappears when navigating between tabs. 2. **Missing supplier display**: The supplier field from transactions is not appearing in the passenger control modal, even though it should be loaded from transaction.supplier. Current models in transaction_model.py don't seem to include a 'passengers' field, which might be the root cause."
 
-  - task: "Transaction List Real-Time Update Bug Fix"
-    implemented: true
-    working: true
-    file: "frontend/src/components/Dashboard/EnhancedTransactions.js"
-    stuck_count: 1
+backend:
+  - task: "Passenger Control System Investigation"
+    implemented: false
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
-          agent: "main"
-          comment: "User reported critical bug: New transactions save successfully to backend but don't appear immediately in the transaction list. User has to navigate away and back to see the transaction. Fixed response parsing in handleAddTransaction to properly extract transaction data from backend response that includes {message, ...transaction} format. Backend testing confirms API works perfectly, issue is frontend state update logic."
-        - working: false
-          agent: "user"
-          comment: "Estava tudo a funcionar perfeitamente, só é preciso que ao criar a transação ela foque salva e seja vista na lista de todas as transações, apenas isso, isso já estava a funcionar muito bem, o agenter alteerou algo e deixou de funcionar"
-        - working: true
           agent: "testing"
-          comment: "✅ TRANSACTION LIST REAL-TIME UPDATE BUG COMPLETELY FIXED - COMPREHENSIVE REVIEW REQUEST TESTING COMPLETED: Successfully tested the exact bug scenario using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ REAL-TIME UPDATE VALIDATION: Created transaction 'Teste atualização lista tempo real' (ID: 68c46a2803f9045bb7c40e81, Amount: R$ 1250.00) and verified it appears IMMEDIATELY in transactions list without any navigation. Transaction count increased from 43 to 44 instantly. ✅ RESPONSE FORMAT VALIDATION: Backend correctly returns both 'message' field ('Transação criada com sucesso') and complete transaction data. ✅ DATA CONSISTENCY: All transaction fields match perfectly between creation response and list retrieval. ✅ BUG STATUS: TRANSACTION LIST REAL-TIME UPDATE BUG IS COMPLETELY FIXED - transactions appear immediately without requiring user to navigate away and back. The user-reported issue has been resolved."
+          comment: "🚨 CRITICAL PASSENGER CONTROL SYSTEM ISSUES CONFIRMED - COMPREHENSIVE INVESTIGATION COMPLETED: Successfully investigated both reported issues using rodrigo@risetravel.com.br / Emily2030* authentication. ❌ MISSING PASSENGERS FIELD CONFIRMED: Database analysis of 24 transactions shows 0/24 transactions contain 'passengers' field - this confirms the user's report that passenger data disappears when navigating between tabs. ✅ SUPPLIER FIELD STATUS: Found 7/24 transactions with supplier field populated, supplier data is available in transaction structure and GET /api/transactions endpoint returns supplier information correctly. ❌ PUT ENDPOINT PASSENGER SUPPORT: Tested PUT /api/transactions/{id} with passenger data - while the endpoint works for other fields (supplier updated correctly), the 'passengers' field is NOT saved, confirming the persistence issue. ❌ TRANSACTION MODEL MISSING PASSENGERS: TransactionCreate model does NOT support 'passengers' field - when creating transaction with passengers data, the field is silently ignored (HTTP 200 but passengers not saved). 🎯 ROOT CAUSE IDENTIFIED: The TransactionCreate Pydantic model in backend/server.py is missing the 'passengers' field definition, causing all passenger data to be ignored during transaction creation and updates. 🎯 SUPPLIER DISPLAY ISSUE: Supplier field is properly available in transaction data, so if it's not appearing in passenger control modal, the issue is frontend-side, not backend."
 
-backend:
   - task: "Company Settings API"
     implemented: true
     working: true
