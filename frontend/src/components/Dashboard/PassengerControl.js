@@ -471,6 +471,19 @@ const PassengerControlDirect = () => {
                     className="text-sm"
                   />
                 </div>
+                
+                {/* Número da Reserva */}
+                <div className="bg-white p-3 rounded border-l-4 border-red-500 mt-4">
+                  <Label className="text-sm font-medium text-red-700 mb-2 block">
+                    🎫 Número da Reserva:
+                  </Label>
+                  <Input
+                    value={reservationNumber}
+                    onChange={(e) => setReservationNumber(e.target.value)}
+                    placeholder="Digite o número da reserva"
+                    className="text-sm"
+                  />
+                </div>
               </div>
 
               {/* Observações */}
