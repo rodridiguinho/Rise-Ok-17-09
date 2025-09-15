@@ -64,22 +64,17 @@ const PassengerControl = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setSuppliersList(data || []);
+        // Extrair apenas os nomes dos fornecedores
+        const supplierNames = data.map(supplier => supplier.name || supplier.supplierName || supplier);
+        setSuppliersList(supplierNames);
+      } else {
+        // Se não conseguir carregar, deixar lista vazia para o usuário preencher manualmente
+        setSuppliersList([]);
       }
     } catch (error) {
       console.error('Erro ao carregar fornecedores:', error);
-      // Lista de fornecedores padrão se não conseguir carregar do backend
-      setSuppliersList([
-        'CVC',
-        'Decolar',
-        'Latam Travel',
-        'Azul Viagens',
-        'TAM Viagens',
-        'Expedia',
-        'Booking.com',
-        'Agência Local',
-        'Outros'
-      ]);
+      // Lista vazia - usuário pode digitar manualmente ou criar fornecedores no sistema
+      setSuppliersList([]);
     }
   };
 
