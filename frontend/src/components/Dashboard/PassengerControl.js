@@ -419,6 +419,20 @@ const PassengerControlDirect = () => {
                       setEditableAirline(reservation.airline || '');
                       setReservationNumber(reservation.reservationNumber || '');
                       setReservationNotes(reservation.travelNotes || '');
+                      
+                      // Inicializar novos campos de detalhes da viagem
+                      setProductType(reservation.productType || '');
+                      setClientReservationCode(reservation.clientReservationCode || '');
+                      setDepartureCity(reservation.departureCity || '');
+                      setArrivalCity(reservation.arrivalCity || '');
+                      setTripType(reservation.tripType || 'ida-volta');
+                      setDepartureDate(reservation.departureDate || '');
+                      setReturnDate(reservation.returnDate || '');
+                      setOutboundFlightTime(reservation.outboundFlightTime || '');
+                      setReturnFlightTime(reservation.returnFlightTime || '');
+                      setHasStopover(reservation.hasStopover || false);
+                      setStopoverCity(reservation.stopoverCity || '');
+                      setStopoverTime(reservation.stopoverTime || '');
                       setSelectedSupplier(reservation.supplier || '');
                       setEmissionType(reservation.emissionType || 'E-ticket');
                       setSupplierPhone(reservation.supplierPhone || '');
