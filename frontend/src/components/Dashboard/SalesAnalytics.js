@@ -387,7 +387,7 @@ const SalesAnalytics = () => {
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-yellow-600">{chartData.fornecedores}%</div>
-                    <div className="text-sm text-gray-600">{formatCurrency(analytics.sales.total_supplier_costs)}</div>
+                    <div className="text-sm text-gray-600">{formatCurrency(analytics.sales.total_supplier_payments)}</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
