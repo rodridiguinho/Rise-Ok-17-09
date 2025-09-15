@@ -14,7 +14,8 @@ import {
   Users,
   User,
   Building,
-  FileText
+  FileText,
+  Trash2
 } from 'lucide-react';
 import { transactionsAPI } from '../../services/api';
 
