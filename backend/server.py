@@ -789,6 +789,9 @@ async def create_transaction(transaction: TransactionCreate):
             "passengers": transaction.passengers or [],
             "airline": transaction.airline,
             "travelNotes": transaction.travelNotes,
+            # Supplier contact information
+            "emissionType": transaction.emissionType,
+            "supplierPhone": transaction.supplierPhone,
             "status": "Confirmado",
             "transactionDate": transaction_date,  # Store the actual transaction date
             "createdAt": datetime.utcnow(),  # Keep record of when this was entered into system
