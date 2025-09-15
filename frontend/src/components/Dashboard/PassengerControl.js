@@ -427,10 +427,10 @@ const PassengerControl = () => {
                       setSelectedReservation(reservation);
                       setEditableAirline(reservation.airline || '');
                       setReservationNotes(reservation.travelNotes || '');
-                      // Inicializar campos do fornecedor
+                      // Inicializar campos do fornecedor com valores existentes
                       setSelectedSupplier(reservation.supplier || '');
-                      setEmissionType(''); // Campo livre, sem valor padrão
-                      setSupplierPhone('');
+                      setEmissionType(reservation.emissionType || ''); // Carregar valor existente
+                      setSupplierPhone(reservation.supplierPhone || ''); // Carregar valor existente
                     }}
                     className="text-sm px-3 py-1"
                   >
