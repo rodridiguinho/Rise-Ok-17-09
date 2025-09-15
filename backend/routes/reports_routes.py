@@ -125,6 +125,81 @@ async def get_category_analysis(
         )
 
 
+@router.get("/sales-analysis")
+async def get_sales_analysis(
+    payload: dict = Depends(auth_handler.auth_wrapper),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    start_date: Optional[date] = Query(None),
+    end_date: Optional[date] = Query(None)
+):
+    """Análise de vendas incluindo valores pagos a fornecedores"""
+    try:
+        user_id = ObjectId(payload.get("user_id"))
+        
+        # Filtros de data
+        date_filter = {"userId": user_id}
+        if start_date or end_date:
+            date_filter["date"] = {}
+            if start_date:
+                date_filter["date"]["$gte"] = start_date
+            if end_date:
+                date_filter["date"]["$lte"] = end_date
+        
+        # Buscar todas as transações
+        transactions = await db.transactions.find(date_filter).to_list(None)
+        
+        # Separar transações por tipo
+        entrada_transactions = [t for t in transactions if t.get("type") == "entrada"]
+        saida_transactions = [t for t in transactions if t.get("type") == "saida"]
+        
+        # Calcular totais de vendas (entradas)
+        total_sales = sum(t.get("amount", 0) for t in entrada_transactions)
+        total_quantity = len(entrada_transactions)
+        
+        # Calcular custos de fornecedores (valores pagos)
+        total_supplier_costs = 0
+        for transaction in entrada_transactions:
+            # Somar supplierValue se existir
+            supplier_value = transaction.get("supplierValue", 0)
+            if supplier_value:
+                total_supplier_costs += supplier_value
+        
+        # Calcular comissões (assumindo campo commission nas transações)
+        total_commissions = sum(t.get("commission", 0) for t in entrada_transactions)
+        
+        # Calcular lucro líquido
+        net_profit = total_sales - total_supplier_costs - total_commissions
+        
+        # Calcular ticket médio
+        average_ticket = total_sales / total_quantity if total_quantity > 0 else 0
+        
+        # Calcular margem de lucro
+        profit_margin = (net_profit / total_sales * 100) if total_sales > 0 else 0
+        
+        return {
+            "sales": {
+                "total_sales": total_sales,
+                "total_quantity": total_quantity,
+                "total_supplier_costs": total_supplier_costs,
+                "total_commissions": total_commissions,
+                "net_profit": net_profit,
+                "average_ticket": average_ticket,
+                "profit_margin": profit_margin
+            },
+            "period": {
+                "start_date": start_date.strftime("%Y-%m-%d") if start_date else None,
+                "end_date": end_date.strftime("%Y-%m-%d") if end_date else None
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting sales analysis: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error getting sales analysis"
+        )
+
+
 @router.post("/export/pdf")
 async def export_pdf_report(
     payload: dict = Depends(auth_handler.auth_wrapper),
