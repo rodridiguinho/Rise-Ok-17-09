@@ -1248,6 +1248,271 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_users_api_endpoints():
+    """Test Users API Endpoints - REVIEW REQUEST"""
+    print_test_header("Users API Endpoints Testing - Review Request")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for users API testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for users API testing failed", str(e))
+        return
+    
+    # Test 2: GET /api/users - List existing users
+    print("\n🎯 TEST 1: GET /api/users - LIST EXISTING USERS")
+    try:
+        response = requests.get(f"{API_URL}/users", timeout=10)
+        print(f"GET /api/users Response Status: {response.status_code}")
+        print(f"GET /api/users Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            users_data = response.json()
+            
+            # Verify response is a list
+            if isinstance(users_data, list):
+                print_result(True, "GET /api/users - Response format", 
+                           f"Response is a list with {len(users_data)} users")
+                
+                # Verify user structure if users exist
+                if len(users_data) > 0:
+                    first_user = users_data[0]
+                    expected_fields = ["id", "name", "email", "role"]
+                    missing_fields = [f for f in expected_fields if f not in first_user]
+                    
+                    if not missing_fields:
+                        print_result(True, "GET /api/users - User structure validation", 
+                                   f"All expected fields present: {expected_fields}")
+                        
+                        # Verify password is not included in response
+                        if "password" not in first_user:
+                            print_result(True, "GET /api/users - Security validation", 
+                                       "Password field correctly excluded from response")
+                        else:
+                            print_result(False, "GET /api/users - Security issue", 
+                                       "Password field present in response (security risk)")
+                        
+                        # Display sample user info
+                        print_result(True, "GET /api/users - Sample user data", 
+                                   f"User: {first_user.get('name')}, Email: {first_user.get('email')}, Role: {first_user.get('role')}")
+                    else:
+                        print_result(False, "GET /api/users - User structure validation", 
+                                   f"Missing fields: {missing_fields}")
+                else:
+                    print_result(True, "GET /api/users - Empty list", 
+                               "No users found (empty list returned)")
+            else:
+                print_result(False, "GET /api/users - Response format error", 
+                           f"Expected list, got: {type(users_data)}")
+        else:
+            print_result(False, f"GET /api/users - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+    except Exception as e:
+        print_result(False, "GET /api/users - Exception occurred", str(e))
+    
+    # Test 3: POST /api/users - Create a new user with test data
+    print("\n🎯 TEST 2: POST /api/users - CREATE NEW USER WITH TEST DATA")
+    try:
+        # Test data from review request
+        test_user_data = {
+            "name": "João Vendedor",
+            "email": "joao@teste.com",
+            "password": "senha123",
+            "role": "Vendedor",
+            "phone": "(11) 99999-9999",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/users", json=test_user_data, timeout=10)
+        print(f"POST /api/users Response Status: {response.status_code}")
+        print(f"POST /api/users Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            created_user = response.json()
+            
+            # Verify user was created with correct data
+            if "id" in created_user:
+                user_id = created_user["id"]
+                print_result(True, "POST /api/users - User creation successful", 
+                           f"User created with ID: {user_id}")
+                
+                # Verify all fields were saved correctly
+                field_validations = {
+                    "name": "João Vendedor",
+                    "email": "joao@teste.com",
+                    "role": "Vendedor",
+                    "phone": "(11) 99999-9999",
+                    "status": "Ativo"
+                }
+                
+                all_fields_correct = True
+                for field, expected_value in field_validations.items():
+                    actual_value = created_user.get(field)
+                    if actual_value == expected_value:
+                        print_result(True, f"POST /api/users - Field validation ({field})", 
+                                   f"Correctly saved: {actual_value}")
+                    else:
+                        print_result(False, f"POST /api/users - Field validation ({field})", 
+                                   f"Expected: {expected_value}, Got: {actual_value}")
+                        all_fields_correct = False
+                
+                # Verify password is not returned in response
+                if "password" not in created_user:
+                    print_result(True, "POST /api/users - Security validation", 
+                               "Password correctly excluded from response")
+                else:
+                    print_result(False, "POST /api/users - Security issue", 
+                               "Password field present in response (security risk)")
+                
+                # Test 4: Verify user data is saved correctly by retrieving it
+                print("\n🎯 TEST 3: VERIFY USER DATA PERSISTENCE")
+                try:
+                    verify_response = requests.get(f"{API_URL}/users", timeout=10)
+                    if verify_response.status_code == 200:
+                        all_users = verify_response.json()
+                        
+                        # Find our created user
+                        created_user_found = None
+                        for user in all_users:
+                            if user.get("id") == user_id:
+                                created_user_found = user
+                                break
+                        
+                        if created_user_found:
+                            print_result(True, "User data persistence - User found in database", 
+                                       f"User {user_id} found in users list")
+                            
+                            # Verify persisted data matches
+                            persistence_correct = True
+                            for field, expected_value in field_validations.items():
+                                actual_value = created_user_found.get(field)
+                                if actual_value == expected_value:
+                                    print_result(True, f"User data persistence - {field}", 
+                                               f"Correctly persisted: {actual_value}")
+                                else:
+                                    print_result(False, f"User data persistence - {field}", 
+                                               f"Expected: {expected_value}, Got: {actual_value}")
+                                    persistence_correct = False
+                            
+                            if persistence_correct:
+                                print_result(True, "✅ USER DATA PERSISTENCE - ALL DATA SAVED CORRECTLY", 
+                                           "All user data correctly saved and persisted to database")
+                            else:
+                                print_result(False, "❌ USER DATA PERSISTENCE - DATA NOT SAVED CORRECTLY", 
+                                           "Some user data was not saved correctly to database")
+                        else:
+                            print_result(False, "User data persistence - User not found", 
+                                       f"Created user {user_id} NOT found in database")
+                    else:
+                        print_result(False, f"User data persistence - Verification failed - HTTP {verify_response.status_code}", 
+                                   verify_response.text)
+                except Exception as e:
+                    print_result(False, "User data persistence - Exception occurred", str(e))
+                
+                # Test 5: Test duplicate email validation
+                print("\n🎯 TEST 4: DUPLICATE EMAIL VALIDATION")
+                try:
+                    duplicate_user_data = {
+                        "name": "Another User",
+                        "email": "joao@teste.com",  # Same email as before
+                        "password": "password123",
+                        "role": "Operador",
+                        "phone": "(11) 88888-8888",
+                        "status": "Ativo"
+                    }
+                    
+                    duplicate_response = requests.post(f"{API_URL}/users", json=duplicate_user_data, timeout=10)
+                    print(f"Duplicate Email Response Status: {duplicate_response.status_code}")
+                    print(f"Duplicate Email Response Text: {duplicate_response.text}")
+                    
+                    if duplicate_response.status_code == 400:
+                        print_result(True, "Duplicate email validation - Proper error handling", 
+                                   "Duplicate email correctly rejected with 400 status")
+                        
+                        # Verify error message
+                        try:
+                            error_data = duplicate_response.json()
+                            if "detail" in error_data and "já existe" in error_data["detail"].lower():
+                                print_result(True, "Duplicate email validation - Error message", 
+                                           f"Appropriate error message: {error_data['detail']}")
+                            else:
+                                print_result(False, "Duplicate email validation - Error message", 
+                                           f"Unexpected error message: {error_data}")
+                        except:
+                            print_result(False, "Duplicate email validation - Response format", 
+                                       "Error response is not valid JSON")
+                    else:
+                        print_result(False, f"Duplicate email validation - Validation failed", 
+                                   f"Expected 400, got {duplicate_response.status_code}")
+                except Exception as e:
+                    print_result(False, "Duplicate email validation - Exception occurred", str(e))
+                
+                # Store user ID for potential cleanup
+                global created_test_user_id
+                created_test_user_id = user_id
+                
+            else:
+                print_result(False, "POST /api/users - No ID returned", str(created_user))
+        elif response.status_code == 400:
+            print_result(False, "POST /api/users - Validation error", 
+                       f"User creation failed with validation error: {response.text}")
+        else:
+            print_result(False, f"POST /api/users - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+    except Exception as e:
+        print_result(False, "POST /api/users - Exception occurred", str(e))
+    
+    # Test 6: Test user creation with minimal required fields
+    print("\n🎯 TEST 5: USER CREATION WITH MINIMAL REQUIRED FIELDS")
+    try:
+        minimal_user_data = {
+            "name": "Minimal User",
+            "email": "minimal@teste.com",
+            "password": "password123"
+        }
+        
+        response = requests.post(f"{API_URL}/users", json=minimal_user_data, timeout=10)
+        print(f"Minimal User Response Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            minimal_user = response.json()
+            print_result(True, "Minimal user creation - Success", 
+                       f"User created with minimal fields, ID: {minimal_user.get('id')}")
+            
+            # Verify default values are applied
+            expected_defaults = {
+                "role": "Operador",
+                "status": "Ativo",
+                "phone": ""
+            }
+            
+            for field, expected_default in expected_defaults.items():
+                actual_value = minimal_user.get(field)
+                if actual_value == expected_default:
+                    print_result(True, f"Minimal user creation - Default {field}", 
+                               f"Default applied correctly: {actual_value}")
+                else:
+                    print_result(False, f"Minimal user creation - Default {field}", 
+                               f"Expected default: {expected_default}, Got: {actual_value}")
+        else:
+            print_result(False, f"Minimal user creation - Failed - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+    except Exception as e:
+        print_result(False, "Minimal user creation - Exception occurred", str(e))
+
 def test_passenger_field_persistence_fixes():
     """Test Passenger Field Persistence Fixes - REVIEW REQUEST"""
     print_test_header("Passenger Field Persistence Fixes - Review Request Testing")
