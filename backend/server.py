@@ -151,6 +151,9 @@ class TransactionCreate(BaseModel):
     passengers: Optional[list] = []
     airline: Optional[str] = None
     travelNotes: Optional[str] = None
+    # Supplier contact information
+    emissionType: Optional[str] = None
+    supplierPhone: Optional[str] = None
 
 # Create API router
 from fastapi import APIRouter
