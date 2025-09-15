@@ -109,7 +109,7 @@ const FinancialAnalytics = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Dashboard Financeiro</h2>
         <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
-          01 jul. 2025 - 07 set. 2025
+          {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '01/$2/$3')} - {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
         </div>
       </div>
 
