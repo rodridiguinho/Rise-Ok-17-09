@@ -1212,6 +1212,10 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             "additionalInfo": transaction.additionalInfo,
             # Multiple suppliers support
             "suppliers": transaction.suppliers or [],
+            # Passenger management for travel bookings
+            "passengers": transaction.passengers or [],
+            "airline": transaction.airline,
+            "travelNotes": transaction.travelNotes,
             "status": "Confirmado",
             "transactionDate": transaction_date,
             "updatedAt": datetime.utcnow(),
