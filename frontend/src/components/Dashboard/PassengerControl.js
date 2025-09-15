@@ -249,32 +249,8 @@ const PassengerControlDirect = () => {
     if (!selectedReservation) return;
 
     try {
-      const updateData = {
-        type: 'entrada',
-        category: 'Passagem Aérea',
-        description: selectedReservation.client,
-        amount: selectedReservation.amount || 1000,
-        paymentMethod: 'PIX',
-        supplier: selectedSupplier,
-        client: selectedReservation.client,
+      const updatedData = {
         passengers: selectedReservation.passengers,
-        airline: editableAirline,
-        travelNotes: reservationNotes,
-        emissionType: emissionType,
-        supplierPhone: supplierPhone,
-        reservationNumber: reservationNumber,
-        departureCity: selectedReservation.departureCity,
-        arrivalCity: selectedReservation.arrivalCity,
-        departureDate: selectedReservation.departureDate,
-        returnDate: selectedReservation.returnDate,
-        clientReservationCode: selectedReservation.clientReservationCode,
-        internalReservationCode: selectedReservation.internalCode
-      };
-
-      await transactionsAPI.updateTransaction(selectedReservation.id, updateData);
-
-      const updatedReservation = {
-        ...selectedReservation,
         supplier: selectedSupplier,
         airline: editableAirline,
         travelNotes: reservationNotes,
@@ -302,15 +278,20 @@ const PassengerControlDirect = () => {
         connectionDuration: connectionDuration
       };
 
+      await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
+
+      // Atualizar a lista local
       setReservations(prev => 
-        prev.map(res => res.id === selectedReservation.id ? updatedReservation : res)
+        prev.map(res => 
+          res.id === selectedReservation.id 
+            ? { ...res, ...updatedData }
+            : res
+        )
       );
 
-      setSelectedReservation(updatedReservation);
-
       toast({
-        title: "✅ Alterações Salvas",
-        description: "As informações da reserva foram atualizadas com sucesso",
+        title: "Alterações Salvas",
+        description: "Os dados da reserva foram atualizados com sucesso",
       });
 
     } catch (error) {
@@ -321,6 +302,30 @@ const PassengerControlDirect = () => {
         description: "Não foi possível salvar as alterações"
       });
     }
+  };
+
+  // Função para remover passageiro
+  const removePassenger = (passengerIndex) => {
+    if (passengerIndex === 0) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não é possível eliminar o passageiro principal"
+      });
+      return;
+    }
+
+    const updatedPassengers = selectedReservation.passengers.filter((_, index) => index !== passengerIndex);
+    
+    setSelectedReservation(prev => ({
+      ...prev,
+      passengers: updatedPassengers
+    }));
+
+    toast({
+      title: "Passageiro Eliminado",
+      description: "O passageiro foi removido da reserva"
+    });
   };
 
   const getDaysUntilTravel = (departureDate) => {
