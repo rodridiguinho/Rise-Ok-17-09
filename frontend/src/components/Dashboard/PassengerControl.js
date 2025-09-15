@@ -664,123 +664,225 @@ const PassengerControl = () => {
                 />
               </div>
 
-              {/* Passengers Section */}
-              <div>
-                <h3 className="font-medium text-lg mb-4">
-                  Passageiros ({selectedReservation.passengers.length})
-                </h3>
+              {/* Passengers Section - Enhanced Layout */}
+              <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-5 rounded-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-bold text-xl text-indigo-900 flex items-center">
+                    <Users className="mr-3 h-6 w-6 text-indigo-600" />
+                    Lista de Passageiros
+                    <span className="ml-3 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+                      {selectedReservation.passengers.length} {selectedReservation.passengers.length > 1 ? 'passageiros' : 'passageiro'}
+                    </span>
+                  </h3>
+                </div>
                 
-                {selectedReservation.passengers.map((passenger, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded mt-3">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-blue-600" />
-                        <span className="font-medium">{passenger.name}</span>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                          {passenger.type}
-                        </span>
-                        {index === 0 && (
-                          <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">
-                            Principal
+                <div className="space-y-4">
+                  {selectedReservation.passengers.map((passenger, index) => (
+                    <div key={index} className={`${
+                      index === 0 
+                        ? 'bg-gradient-to-r from-emerald-50 to-teal-50 border-l-4 border-emerald-400' 
+                        : 'bg-white border-l-4 border-blue-300'
+                    } p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200`}>
+                      
+                      {/* Passenger Header */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-full ${
+                            index === 0 ? 'bg-emerald-100' : 'bg-blue-100'
+                          }`}>
+                            <User className={`h-5 w-5 ${
+                              index === 0 ? 'text-emerald-600' : 'text-blue-600'
+                            }`} />
+                          </div>
+                          <div>
+                            <p className={`font-bold text-lg ${
+                              index === 0 ? 'text-emerald-900' : 'text-blue-900'
+                            }`}>
+                              {passenger.name || 'Nome não informado'}
+                            </p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                index === 0 
+                                  ? 'bg-emerald-100 text-emerald-800' 
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {passenger.type || 'Adulto'}
+                              </span>
+                              {index === 0 && (
+                                <span className="px-3 py-1 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 rounded-full text-xs font-bold flex items-center">
+                                  ⭐ Titular da Reserva
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {passenger.status && (
+                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                            ✅ {passenger.status}
                           </span>
                         )}
                       </div>
+                      
+                      {/* Passenger Details */}
+                      {index === 0 ? (
+                        // Main passenger - editable with beautiful cards
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="bg-white p-4 rounded-lg border border-emerald-100 hover:border-emerald-200 transition-colors">
+                            <div className="flex items-center mb-2">
+                              <FileText className="h-4 w-4 mr-2 text-emerald-600" />
+                              <Label className="text-sm font-medium text-emerald-800">Documento</Label>
+                            </div>
+                            <Input
+                              value={passenger.document || ''}
+                              onChange={(e) => updateMainPassenger('document', e.target.value)}
+                              placeholder="RG, CPF, etc."
+                              className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-200"
+                            />
+                          </div>
+                          
+                          <div className="bg-white p-4 rounded-lg border border-emerald-100 hover:border-emerald-200 transition-colors">
+                            <div className="flex items-center mb-2">
+                              <MapPin className="h-4 w-4 mr-2 text-emerald-600" />
+                              <Label className="text-sm font-medium text-emerald-800">Nacionalidade</Label>
+                            </div>
+                            <Input
+                              value={passenger.nationality || 'Brasileira'}
+                              onChange={(e) => updateMainPassenger('nationality', e.target.value)}
+                              placeholder="Nacionalidade"
+                              className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-200"
+                            />
+                          </div>
+                          
+                          <div className="bg-white p-4 rounded-lg border border-emerald-100 hover:border-emerald-200 transition-colors">
+                            <div className="flex items-center mb-2">
+                              <Calendar className="h-4 w-4 mr-2 text-emerald-600" />
+                              <Label className="text-sm font-medium text-emerald-800">Data de Nascimento</Label>
+                            </div>
+                            <Input
+                              type="date"
+                              value={passenger.birthDate || ''}
+                              onChange={(e) => updateMainPassenger('birthDate', e.target.value)}
+                              className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-200"
+                            />
+                          </div>
+                          
+                          <div className="bg-white p-4 rounded-lg border border-emerald-100 hover:border-emerald-200 transition-colors">
+                            <div className="flex items-center mb-2">
+                              <FileText className="h-4 w-4 mr-2 text-emerald-600" />
+                              <Label className="text-sm font-medium text-emerald-800">Número do Passaporte</Label>
+                            </div>
+                            <Input
+                              value={passenger.passportNumber || ''}
+                              onChange={(e) => updateMainPassenger('passportNumber', e.target.value)}
+                              placeholder="Ex: BR123456789"
+                              className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-200"
+                            />
+                          </div>
+                          
+                          <div className="bg-white p-4 rounded-lg border border-emerald-100 hover:border-emerald-200 transition-colors">
+                            <div className="flex items-center mb-2">
+                              <Clock className="h-4 w-4 mr-2 text-emerald-600" />
+                              <Label className="text-sm font-medium text-emerald-800">Vencimento do Passaporte</Label>
+                            </div>
+                            <Input
+                              type="date"
+                              value={passenger.passportExpiry || ''}
+                              onChange={(e) => updateMainPassenger('passportExpiry', e.target.value)}
+                              className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-200"
+                            />
+                          </div>
+                          
+                          <div className="bg-white p-4 rounded-lg border border-emerald-100 hover:border-emerald-200 transition-colors">
+                            <div className="flex items-center mb-2">
+                              <Bell className="h-4 w-4 mr-2 text-emerald-600" />
+                              <Label className="text-sm font-medium text-emerald-800">Necessidades Especiais</Label>
+                            </div>
+                            <Input
+                              value={passenger.specialNeeds || ''}
+                              onChange={(e) => updateMainPassenger('specialNeeds', e.target.value)}
+                              placeholder="Dieta, mobilidade, medicamentos..."
+                              className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-200"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        // Other passengers - beautiful display cards
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {passenger.document && (
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                              <div className="flex items-center mb-1">
+                                <FileText className="h-4 w-4 mr-2 text-blue-600" />
+                                <span className="text-xs font-medium text-blue-800">DOCUMENTO</span>
+                              </div>
+                              <p className="text-blue-900 font-medium">{passenger.document}</p>
+                            </div>
+                          )}
+                          
+                          {passenger.nationality && (
+                            <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                              <div className="flex items-center mb-1">
+                                <MapPin className="h-4 w-4 mr-2 text-purple-600" />
+                                <span className="text-xs font-medium text-purple-800">NACIONALIDADE</span>
+                              </div>
+                              <p className="text-purple-900 font-medium">{passenger.nationality}</p>
+                            </div>
+                          )}
+                          
+                          {passenger.birthDate && (
+                            <div className="bg-pink-50 p-3 rounded-lg border border-pink-100">
+                              <div className="flex items-center mb-1">
+                                <Calendar className="h-4 w-4 mr-2 text-pink-600" />
+                                <span className="text-xs font-medium text-pink-800">NASCIMENTO</span>
+                              </div>
+                              <p className="text-pink-900 font-medium">{new Date(passenger.birthDate).toLocaleDateString('pt-BR')}</p>
+                            </div>
+                          )}
+                          
+                          {passenger.passportNumber && (
+                            <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                              <div className="flex items-center mb-1">
+                                <FileText className="h-4 w-4 mr-2 text-indigo-600" />
+                                <span className="text-xs font-medium text-indigo-800">PASSAPORTE</span>
+                              </div>
+                              <p className="text-indigo-900 font-medium">{passenger.passportNumber}</p>
+                            </div>
+                          )}
+                          
+                          {passenger.passportExpiry && (
+                            <div className="bg-orange-50 p-3 rounded-lg border border-orange-100">
+                              <div className="flex items-center mb-1">
+                                <Clock className="h-4 w-4 mr-2 text-orange-600" />
+                                <span className="text-xs font-medium text-orange-800">VENCIMENTO</span>
+                              </div>
+                              <p className="text-orange-900 font-medium">{new Date(passenger.passportExpiry).toLocaleDateString('pt-BR')}</p>
+                            </div>
+                          )}
+                          
+                          {passenger.specialNeeds && (
+                            <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 md:col-span-2 lg:col-span-3">
+                              <div className="flex items-center mb-1">
+                                <Bell className="h-4 w-4 mr-2 text-amber-600" />
+                                <span className="text-xs font-medium text-amber-800">NECESSIDADES ESPECIAIS</span>
+                              </div>
+                              <p className="text-amber-900 font-medium">{passenger.specialNeeds}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    
-                    {/* Passenger Details Grid */}
-                    {index === 0 ? (
-                      // Main passenger - editable
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                          <Label className="text-xs">Documento</Label>
-                          <Input
-                            value={passenger.document || ''}
-                            onChange={(e) => updateMainPassenger('document', e.target.value)}
-                            placeholder="RG, CPF"
-                            className="mt-1 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Nacionalidade</Label>
-                          <Input
-                            value={passenger.nationality || 'Brasileira'}
-                            onChange={(e) => updateMainPassenger('nationality', e.target.value)}
-                            placeholder="Nacionalidade"
-                            className="mt-1 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Data de Nascimento</Label>
-                          <Input
-                            type="date"
-                            value={passenger.birthDate || ''}
-                            onChange={(e) => updateMainPassenger('birthDate', e.target.value)}
-                            className="mt-1 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Número do Passaporte</Label>
-                          <Input
-                            value={passenger.passportNumber || ''}
-                            onChange={(e) => updateMainPassenger('passportNumber', e.target.value)}
-                            placeholder="Número do passaporte"
-                            className="mt-1 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Vencimento do Passaporte</Label>
-                          <Input
-                            type="date"
-                            value={passenger.passportExpiry || ''}
-                            onChange={(e) => updateMainPassenger('passportExpiry', e.target.value)}
-                            className="mt-1 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Necessidades Especiais</Label>
-                          <Input
-                            value={passenger.specialNeeds || ''}
-                            onChange={(e) => updateMainPassenger('specialNeeds', e.target.value)}
-                            placeholder="Dieta, mobilidade, etc."
-                            className="mt-1 text-sm"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      // Other passengers - display only
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                        {passenger.document && (
-                          <p><span className="font-medium">Documento:</span> {passenger.document}</p>
-                        )}
-                        {passenger.nationality && (
-                          <p><span className="font-medium">Nacionalidade:</span> {passenger.nationality}</p>
-                        )}
-                        {passenger.birthDate && (
-                          <p><span className="font-medium">Nascimento:</span> {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}</p>
-                        )}
-                        {passenger.passportNumber && (
-                          <p><span className="font-medium">Passaporte:</span> {passenger.passportNumber}</p>
-                        )}
-                        {passenger.passportExpiry && (
-                          <p><span className="font-medium">Vencimento:</span> {new Date(passenger.passportExpiry).toLocaleDateString('pt-BR')}</p>
-                        )}
-                        {passenger.specialNeeds && (
-                          <p className="text-orange-600"><span className="font-medium">Especial:</span> {passenger.specialNeeds}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
                 
-                {/* Add Passenger Button */}
-                <Button
-                  onClick={() => setIsAddPassengerOpen(true)}
-                  className="w-full flex items-center justify-center space-x-2 border-2 border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 mt-4"
-                  variant="outline"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Adicionar Novo Passageiro</span>
-                </Button>
+                {/* Enhanced Add Passenger Button */}
+                <div className="mt-6 p-4 bg-white rounded-xl border-2 border-dashed border-indigo-200 hover:border-indigo-300 transition-colors">
+                  <Button
+                    onClick={() => setIsAddPassengerOpen(true)}
+                    className="w-full flex items-center justify-center space-x-3 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    <Plus className="h-5 w-5" />
+                    <span className="font-medium">Adicionar Novo Passageiro à Reserva</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Save Changes Button */}
