@@ -160,14 +160,6 @@ class TransactionCreate(BaseModel):
 from fastapi import APIRouter
 api_router = APIRouter(prefix="/api")
 
-# Import reports router
-try:
-    from routes.reports_routes import router as reports_router
-    logger.info("✅ Reports router imported successfully")
-except ImportError as e:
-    logger.error(f"❌ Failed to import reports router: {e}")
-    reports_router = None
-
 # Helper functions
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
