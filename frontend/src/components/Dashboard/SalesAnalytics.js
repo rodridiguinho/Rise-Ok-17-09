@@ -137,7 +137,7 @@ const SalesAnalytics = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Dashboard Vendas</h2>
         <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
-          {new Date().toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' })}
+          01 de {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })} - {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
         </div>
       </div>
 
