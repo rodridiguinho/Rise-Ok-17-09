@@ -100,7 +100,20 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Layout improvements requested for Passenger Control system: 1. **Enhanced passenger layout**: Create a more beautiful and organized layout for passenger details in the 'Gerenciar' modal with better visual hierarchy, colors, and modern design. 2. **Timezone fix**: Guarulhos airport not recognizing timezone while Campinas works - need to add all missing cities from airport list to timezone database for accurate flight duration calculations."
+user_problem_statement: "Test the Passenger Control emission type and supplier phone saving functionality that the user reported as not working. SPECIFIC TEST REQUIREMENTS: 1. **Authentication**: Use rodrigo@risetravel.com.br / Emily2030* 2. **Target Endpoint**: PUT /api/transactions/{id} endpoint 3. **Test Scenario**: Update an existing transaction with emissionType and supplierPhone fields 4. **Fields to Test**: - emissionType: 'E-ticket digital' - supplierPhone: '(11) 99999-8888' 5. **Verify**: - Fields are accepted by the API without errors - Fields are persisted to MongoDB database - Fields can be retrieved correctly via GET /api/transactions/{id}"
+
+backend:
+  - task: "Passenger Control emissionType and supplierPhone Field Persistence"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 PASSENGER CONTROL EMISSIONTYPE AND SUPPLIERPHONE FIELD PERSISTENCE - COMPLETE SUCCESS: Successfully tested the exact functionality reported by user as not working using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ BASE TRANSACTION CREATION: Created test transaction (ID: 68c7ee5fbcaf86908c51fbd7) for testing emissionType and supplierPhone fields. ✅ PUT /api/transactions/{id} ENDPOINT: Successfully updated transaction with emissionType='E-ticket digital' and supplierPhone='(11) 99999-8888' fields. Both fields accepted by API without errors. ✅ API ACCEPTANCE AND PERSISTENCE: Both fields correctly saved in PUT response - emissionType: 'E-ticket digital', supplierPhone: '(11) 99999-8888'. ✅ DATABASE PERSISTENCE: Verified via GET /api/transactions that both fields correctly persisted to MongoDB database and are retrievable. ✅ FIELD RETRIEVAL: Both emissionType and supplierPhone fields can be retrieved correctly via GET API calls. ✅ CONCLUSION: The user-reported issue with emissionType and supplierPhone not saving is NOT a backend API problem. The backend correctly handles, accepts, persists, and returns these fields. The issue is likely frontend-related (form submission, field mapping, or UI state management)."
 
 frontend:
   - task: "Enhanced Passenger Layout Design"
