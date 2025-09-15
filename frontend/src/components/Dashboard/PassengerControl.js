@@ -371,6 +371,111 @@ const PassengerControl = () => {
           </div>
         </div>
       )}
+
+      {/* Add Passenger Modal */}
+      {isAddPassengerOpen && selectedReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold flex items-center">
+                <Plus className="mr-2 h-5 w-5 text-blue-600" />
+                Adicionar Passageiro
+              </h2>
+              <button 
+                onClick={() => setIsAddPassengerOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">
+              Reserva: {selectedReservation.internalCode}
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="passengerName">Nome Completo *</Label>
+                <Input
+                  id="passengerName"
+                  type="text"
+                  value={newPassenger.name}
+                  onChange={(e) => setNewPassenger({...newPassenger, name: e.target.value})}
+                  placeholder="Nome completo do passageiro"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerDocument">Documento</Label>
+                <Input
+                  id="passengerDocument"
+                  type="text"
+                  value={newPassenger.document}
+                  onChange={(e) => setNewPassenger({...newPassenger, document: e.target.value})}
+                  placeholder="RG, CPF ou Passaporte"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerBirth">Data de Nascimento</Label>
+                <Input
+                  id="passengerBirth"
+                  type="date"
+                  value={newPassenger.birthDate}
+                  onChange={(e) => setNewPassenger({...newPassenger, birthDate: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerType">Tipo de Passageiro</Label>
+                <select
+                  id="passengerType"
+                  value={newPassenger.type}
+                  onChange={(e) => setNewPassenger({...newPassenger, type: e.target.value})}
+                  className="mt-1 w-full border border-gray-300 rounded px-3 py-2"
+                >
+                  <option value="Adulto">Adulto</option>
+                  <option value="Criança">Criança (2-11 anos)</option>
+                  <option value="Bebê">Bebê (0-2 anos)</option>
+                  <option value="Idoso">Idoso (60+ anos)</option>
+                </select>
+              </div>
+
+              <div>
+                <Label htmlFor="specialNeeds">Necessidades Especiais</Label>
+                <Input
+                  id="specialNeeds"
+                  type="text"
+                  value={newPassenger.specialNeeds}
+                  onChange={(e) => setNewPassenger({...newPassenger, specialNeeds: e.target.value})}
+                  placeholder="Cadeirante, dieta especial, etc."
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 mt-6">
+              <Button
+                onClick={() => setIsAddPassengerOpen(false)}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={addPassenger}
+                disabled={!newPassenger.name.trim()}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                Adicionar Passageiro
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
