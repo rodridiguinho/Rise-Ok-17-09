@@ -44,6 +44,20 @@ const PassengerControlDirect = () => {
   const [reservationNumber, setReservationNumber] = useState('');
   const [reservationNotes, setReservationNotes] = useState('');
   
+  // Novos campos para controle de passageiros
+  const [productType, setProductType] = useState('');
+  const [clientReservationCode, setClientReservationCode] = useState('');
+  const [departureCity, setDepartureCity] = useState('');
+  const [arrivalCity, setArrivalCity] = useState('');
+  const [tripType, setTripType] = useState('ida-volta');
+  const [departureDate, setDepartureDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
+  const [outboundFlightTime, setOutboundFlightTime] = useState('');
+  const [returnFlightTime, setReturnFlightTime] = useState('');
+  const [hasStopover, setHasStopover] = useState(false);
+  const [stopoverCity, setStopoverCity] = useState('');
+  const [stopoverTime, setStopoverTime] = useState('');
+  
   const { toast } = useToast();
 
   // Lista de fornecedores padrão
