@@ -12,7 +12,9 @@ import {
   Clock, 
   Bell,
   Users,
-  User
+  User,
+  Building,
+  FileText
 } from 'lucide-react';
 import { transactionsAPI } from '../../services/api';
 
@@ -26,11 +28,16 @@ const PassengerControl = () => {
     document: '',
     birthDate: '',
     type: 'Adulto',
+    nationality: 'Brasileira',
+    passportNumber: '',
+    passportExpiry: '',
     seat: '',
     baggage: '',
     specialNeeds: '',
     status: 'Confirmado'
   });
+  const [reservationNotes, setReservationNotes] = useState('');
+  const [editableAirline, setEditableAirline] = useState('');
   const { toast } = useToast();
 
   // Carregar reservas das transações de entrada
@@ -82,6 +89,9 @@ const PassengerControl = () => {
             document: '',
             birthDate: '',
             type: 'Adulto',
+            nationality: 'Brasileira',
+            passportNumber: '',
+            passportExpiry: '',
             seat: '',
             baggage: '',
             specialNeeds: '',
@@ -124,6 +134,9 @@ const PassengerControl = () => {
       document: '',
       birthDate: '',
       type: 'Adulto',
+      nationality: 'Brasileira',
+      passportNumber: '',
+      passportExpiry: '',
       seat: '',
       baggage: '',
       specialNeeds: '',
@@ -135,6 +148,23 @@ const PassengerControl = () => {
       title: "✅ Passageiro Adicionado",
       description: `${newPassenger.name} foi adicionado à reserva`,
     });
+  };
+
+  const updateMainPassenger = (field, value) => {
+    if (!selectedReservation) return;
+
+    const updatedReservation = {
+      ...selectedReservation,
+      passengers: selectedReservation.passengers.map((passenger, index) => 
+        index === 0 ? { ...passenger, [field]: value } : passenger
+      )
+    };
+
+    setReservations(prev => 
+      prev.map(res => res.id === selectedReservation.id ? updatedReservation : res)
+    );
+
+    setSelectedReservation(updatedReservation);
   };
 
   const getDaysUntilTravel = (departureDate) => {
@@ -266,7 +296,11 @@ const PassengerControl = () => {
                   </div>
                   
                   <Button
-                    onClick={() => setSelectedReservation(reservation)}
+                    onClick={() => {
+                      setSelectedReservation(reservation);
+                      setEditableAirline(reservation.airline || '');
+                      setReservationNotes(reservation.travelNotes || '');
+                    }}
                     className="text-sm px-3 py-1"
                   >
                     Gerenciar
@@ -303,7 +337,7 @@ const PassengerControl = () => {
       {/* Enhanced Modal for Selected Reservation */}
       {selectedReservation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6">
+          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold flex items-center">
                 <UserCheck className="mr-2 h-5 w-5" />
@@ -329,13 +363,31 @@ const PassengerControl = () => {
                   Detalhes da Viagem
                 </h3>
                 
-                {/* Supplier Information */}
-                {selectedReservation.supplier && (
-                  <div className="mb-4 p-3 bg-white rounded border-l-4 border-blue-500">
-                    <p className="text-sm font-medium text-blue-700">Fornecedor:</p>
-                    <p className="font-semibold">{selectedReservation.supplier}</p>
+                {/* Supplier and Airline Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {selectedReservation.supplier && (
+                    <div className="p-3 bg-white rounded border-l-4 border-blue-500">
+                      <div className="flex items-center mb-1">
+                        <Building className="h-4 w-4 mr-2 text-blue-600" />
+                        <p className="text-sm font-medium text-blue-700">Fornecedor:</p>
+                      </div>
+                      <p className="font-semibold">{selectedReservation.supplier}</p>
+                    </div>
+                  )}
+                  
+                  <div className="p-3 bg-white rounded border-l-4 border-green-500">
+                    <div className="flex items-center mb-1">
+                      <Plane className="h-4 w-4 mr-2 text-green-600" />
+                      <p className="text-sm font-medium text-green-700">Companhia Aérea:</p>
+                    </div>
+                    <Input
+                      value={editableAirline}
+                      onChange={(e) => setEditableAirline(e.target.value)}
+                      placeholder="Nome da companhia aérea"
+                      className="mt-1"
+                    />
                   </div>
-                )}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Outbound Flight */}
@@ -416,15 +468,29 @@ const PassengerControl = () => {
                 </div>
               </div>
 
+              {/* Additional Information Section */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-3">
+                  <FileText className="mr-2 h-5 w-5 text-gray-600" />
+                  Informações Adicionais
+                </h3>
+                <textarea
+                  value={reservationNotes}
+                  onChange={(e) => setReservationNotes(e.target.value)}
+                  placeholder="Digite informações adicionais sobre a viagem, observações especiais, contatos de hotéis, etc."
+                  className="w-full h-24 p-3 border border-gray-300 rounded resize-none"
+                />
+              </div>
+
               {/* Passengers Section */}
               <div>
-                <h3 className="font-medium text-lg">
+                <h3 className="font-medium text-lg mb-4">
                   Passageiros ({selectedReservation.passengers.length})
                 </h3>
                 
                 {selectedReservation.passengers.map((passenger, index) => (
                   <div key={index} className="bg-gray-50 p-4 rounded mt-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
                         <User className="h-4 w-4 text-blue-600" />
                         <span className="font-medium">{passenger.name}</span>
@@ -439,22 +505,87 @@ const PassengerControl = () => {
                       </div>
                     </div>
                     
-                    {passenger.document && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Documento: {passenger.document}
-                      </p>
-                    )}
-                    
-                    {passenger.birthDate && (
-                      <p className="text-sm text-gray-600">
-                        Nascimento: {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}
-                      </p>
-                    )}
-                    
-                    {passenger.specialNeeds && (
-                      <p className="text-sm text-orange-600">
-                        Necessidades especiais: {passenger.specialNeeds}
-                      </p>
+                    {/* Passenger Details Grid */}
+                    {index === 0 ? (
+                      // Main passenger - editable
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <Label className="text-xs">Documento</Label>
+                          <Input
+                            value={passenger.document || ''}
+                            onChange={(e) => updateMainPassenger('document', e.target.value)}
+                            placeholder="RG, CPF"
+                            className="mt-1 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Nacionalidade</Label>
+                          <Input
+                            value={passenger.nationality || 'Brasileira'}
+                            onChange={(e) => updateMainPassenger('nationality', e.target.value)}
+                            placeholder="Nacionalidade"
+                            className="mt-1 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Data de Nascimento</Label>
+                          <Input
+                            type="date"
+                            value={passenger.birthDate || ''}
+                            onChange={(e) => updateMainPassenger('birthDate', e.target.value)}
+                            className="mt-1 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Número do Passaporte</Label>
+                          <Input
+                            value={passenger.passportNumber || ''}
+                            onChange={(e) => updateMainPassenger('passportNumber', e.target.value)}
+                            placeholder="Número do passaporte"
+                            className="mt-1 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Vencimento do Passaporte</Label>
+                          <Input
+                            type="date"
+                            value={passenger.passportExpiry || ''}
+                            onChange={(e) => updateMainPassenger('passportExpiry', e.target.value)}
+                            className="mt-1 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Necessidades Especiais</Label>
+                          <Input
+                            value={passenger.specialNeeds || ''}
+                            onChange={(e) => updateMainPassenger('specialNeeds', e.target.value)}
+                            placeholder="Dieta, mobilidade, etc."
+                            className="mt-1 text-sm"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      // Other passengers - display only
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                        {passenger.document && (
+                          <p><span className="font-medium">Documento:</span> {passenger.document}</p>
+                        )}
+                        {passenger.nationality && (
+                          <p><span className="font-medium">Nacionalidade:</span> {passenger.nationality}</p>
+                        )}
+                        {passenger.birthDate && (
+                          <p><span className="font-medium">Nascimento:</span> {new Date(passenger.birthDate).toLocaleDateString('pt-BR')}</p>
+                        )}
+                        {passenger.passportNumber && (
+                          <p><span className="font-medium">Passaporte:</span> {passenger.passportNumber}</p>
+                        )}
+                        {passenger.passportExpiry && (
+                          <p><span className="font-medium">Vencimento:</span> {new Date(passenger.passportExpiry).toLocaleDateString('pt-BR')}</p>
+                        )}
+                        {passenger.specialNeeds && (
+                          <p className="text-orange-600"><span className="font-medium">Especial:</span> {passenger.specialNeeds}</p>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}
@@ -477,7 +608,7 @@ const PassengerControl = () => {
       {/* Add Passenger Modal */}
       {isAddPassengerOpen && selectedReservation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold flex items-center">
                 <Plus className="mr-2 h-5 w-5 text-blue-600" />
@@ -495,7 +626,7 @@ const PassengerControl = () => {
               Reserva: {selectedReservation.internalCode}
             </p>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="passengerName">Nome Completo *</Label>
                 <Input
@@ -515,7 +646,19 @@ const PassengerControl = () => {
                   type="text"
                   value={newPassenger.document}
                   onChange={(e) => setNewPassenger({...newPassenger, document: e.target.value})}
-                  placeholder="RG, CPF ou Passaporte"
+                  placeholder="RG, CPF"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerNationality">Nacionalidade</Label>
+                <Input
+                  id="passengerNationality"
+                  type="text"
+                  value={newPassenger.nationality}
+                  onChange={(e) => setNewPassenger({...newPassenger, nationality: e.target.value})}
+                  placeholder="Nacionalidade"
                   className="mt-1"
                 />
               </div>
@@ -527,6 +670,29 @@ const PassengerControl = () => {
                   type="date"
                   value={newPassenger.birthDate}
                   onChange={(e) => setNewPassenger({...newPassenger, birthDate: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerPassport">Número do Passaporte</Label>
+                <Input
+                  id="passengerPassport"
+                  type="text"
+                  value={newPassenger.passportNumber}
+                  onChange={(e) => setNewPassenger({...newPassenger, passportNumber: e.target.value})}
+                  placeholder="Número do passaporte"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="passengerPassportExpiry">Vencimento do Passaporte</Label>
+                <Input
+                  id="passengerPassportExpiry"
+                  type="date"
+                  value={newPassenger.passportExpiry}
+                  onChange={(e) => setNewPassenger({...newPassenger, passportExpiry: e.target.value})}
                   className="mt-1"
                 />
               </div>
@@ -553,7 +719,7 @@ const PassengerControl = () => {
                   type="text"
                   value={newPassenger.specialNeeds}
                   onChange={(e) => setNewPassenger({...newPassenger, specialNeeds: e.target.value})}
-                  placeholder="Cadeirante, dieta especial, etc."
+                  placeholder="Dieta, mobilidade, etc."
                   className="mt-1"
                 />
               </div>
