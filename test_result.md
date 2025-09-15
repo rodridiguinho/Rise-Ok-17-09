@@ -851,6 +851,8 @@ test_plan:
   test_priority: "new_features_first"
 
 agent_communication:
+    - agent: "main"
+      message: "Starting work on Passenger Control System bugs reported by user. Issue 1: 'Gerenciar' button opens modal but shows only 'development message' instead of actual passenger management functionality. Issue 2: User wants main passenger name displayed more prominently on reservation cards. Issue 3: System should load passenger data from transaction/reservation numbers. Currently investigating PassengerControl.js component to implement proper passenger management functionality."
     - agent: "testing"
       message: "Completed comprehensive backend API testing. All core functionality working correctly. Two endpoints not implemented: GET /api/health and DELETE /api/transactions/{id}. All other endpoints pass validation including authentication, transactions, and reports."
     - agent: "testing"
