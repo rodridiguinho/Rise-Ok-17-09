@@ -863,7 +863,7 @@ async def create_transaction(transaction: TransactionCreate):
                         "time": datetime.now().strftime("%H:%M"),
                         "type": expense_type,  # CORREÇÃO: Tipo dinâmico baseado na entrada
                         "category": "Pagamento a Fornecedor",
-                        "description": f"Pagamento a {supplier['name']} - Ref: {transaction.description}",
+                        "description": f"Pagamento a {supplier['name']} - Ref: {transaction.description}" + (f" ({transaction.internalReservationCode})" if transaction.internalReservationCode else ""),
                         "amount": float(supplier['value']),
                         "paymentMethod": transaction.paymentMethod or "PIX",
                         "supplier": supplier['name'],
