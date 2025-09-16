@@ -556,8 +556,8 @@ const PassengerControlDirect = () => {
       {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reservations.map((reservation) => {
-            const daysUntil = getDaysUntilTravel(reservation.departureDate);
-            const reminderStatus = getReminderStatus(daysUntil);
+            const travelStatus = getTravelStatus(reservation);
+            const reminderStatus = getReminderStatus(travelStatus);
             
             return (
               <div key={reservation.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6">
@@ -567,22 +567,25 @@ const PassengerControlDirect = () => {
                     <h3 className="text-lg font-semibold">
                       🔗 {reservation.internalCode}
                     </h3>
-                    {reservation.clientReservationCode && (
-                      <p className="text-gray-600 text-sm">
-                        Cliente: {reservation.clientReservationCode}
-                      </p>
-                    )}
+                    <p className="text-gray-600 text-sm">
+                      Cliente: {reservation.client || reservation.clientReservationCode || 'N/A'}
+                    </p>
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    reminderStatus.color === 'red' ? 'bg-red-100 text-red-800' :
-                    reminderStatus.color === 'orange' ? 'bg-orange-100 text-orange-800' :
-                    reminderStatus.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                    reminderStatus.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                    reminderStatus.color === 'green' ? 'bg-green-100 text-green-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {reminderStatus.text}
-                  </span>
+                  <div className="text-right">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${reminderStatus.bgColor} ${reminderStatus.textColor} block mb-1`}>
+                      {reminderStatus.text}
+                    </span>
+                    {/* Status da viagem */}
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      travelStatus.phase === 'completed' ? 'bg-gray-100 text-gray-800' :
+                      travelStatus.phase === 'return' ? 'bg-blue-100 text-blue-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {travelStatus.phase === 'completed' ? '✅ Completa' :
+                       travelStatus.phase === 'return' ? '🔄 Aguardando volta' :
+                       '📅 Programada'}
+                    </span>
+                  </div>
                 </div>
                 
                 {/* Main Passenger - Prominently displayed */}
@@ -610,17 +613,33 @@ const PassengerControlDirect = () => {
                     <span>{reservation.departureCity} → {reservation.arrivalCity}</span>
                   </div>
                   
-                  {reservation.departureDate && (
-                    <div className="flex items-center text-sm">
-                      <Calendar className="h-4 w-4 mr-2 text-purple-600" />
-                      <span>
-                        Ida: {new Date(reservation.departureDate).toLocaleDateString('pt-BR')}
-                        {reservation.returnDate && reservation.tripType === 'ida-volta' && (
-                          <span className="ml-3 pl-3 border-l border-gray-300">
-                            Volta: {new Date(reservation.returnDate).toLocaleDateString('pt-BR')}
+                  {/* Data inteligente baseada no status da viagem */}
+                  {travelStatus.displayDate && (
+                    <div className="space-y-1">
+                      <div className="flex items-center text-sm">
+                        <Calendar className="h-4 w-4 mr-2 text-purple-600" />
+                        <span className="font-medium">
+                          {travelStatus.displayLabel}: {new Date(travelStatus.displayDate).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
+                      
+                      {/* Mostrar data adicional se houver */}
+                      {travelStatus.nextDate && (
+                        <div className="flex items-center text-xs text-gray-600 ml-6">
+                          <span>
+                            Próxima: {travelStatus.nextLabel} em {new Date(travelStatus.nextDate).toLocaleDateString('pt-BR')}
                           </span>
-                        )}
-                      </span>
+                        </div>
+                      )}
+                      
+                      {/* Mostrar data completada se houver */}
+                      {travelStatus.completedDate && (
+                        <div className="flex items-center text-xs text-gray-600 ml-6">
+                          <span>
+                            ✅ {travelStatus.completedLabel} em {new Date(travelStatus.completedDate).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
