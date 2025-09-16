@@ -1260,7 +1260,7 @@ const EnhancedTransactions = () => {
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
                       <SelectContent>
-                        {newTransaction.type === 'entrada' ? (
+                        {(newTransaction.type === 'entrada' || newTransaction.type === 'entrada_vendas') ? (
                           <>
                             <SelectItem disabled className="font-semibold text-green-700">💰 RECEITAS</SelectItem>
                             {revenueCategories.map(category => (
