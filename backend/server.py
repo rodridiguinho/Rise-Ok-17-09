@@ -896,7 +896,7 @@ async def create_transaction(transaction: TransactionCreate):
                 "time": datetime.now().strftime("%H:%M"),
                 "type": commission_type,  # CORREÇÃO: Tipo dinâmico baseado na entrada
                 "category": "Comissão de Vendedor",
-                "description": f"Comissão para {transaction.seller} - Ref: {transaction.description}",
+                "description": f"Comissão para {transaction.seller} - Ref: {transaction.description}" + (f" ({transaction.internalReservationCode})" if transaction.internalReservationCode else ""),
                 "amount": float(transaction.commissionValue),
                 "paymentMethod": transaction.paymentMethod or "PIX",
                 "seller": transaction.seller,
