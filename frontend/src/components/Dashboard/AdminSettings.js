@@ -54,7 +54,7 @@ const AdminSettings = () => {
 
   const loadCompanySettings = async () => {
     try {
-      const response = await api.get('/api/company/settings');
+      const response = await api.get('/company/settings');
       if (response.data) {
         setCompanySettings(response.data);
       }
