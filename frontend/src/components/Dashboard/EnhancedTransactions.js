@@ -2808,9 +2808,20 @@ const EnhancedTransactions = () => {
                       {transaction.airportTaxes && (
                         <span>Taxas: {formatCurrency(transaction.airportTaxes)}</span>
                       )}
-                      {transaction.supplierValue && (
+                      {/* Show supplier information when available */}
+                      {transaction.supplierValue && transaction.supplierValue > 0 && (
                         <span className="flex items-center text-orange-600">
                           💰 Valor Fornecedor: R$ {parseFloat(transaction.supplierValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      )}
+                      {transaction.supplier && !transaction.supplierValue && (
+                        <span className="flex items-center text-blue-600">
+                          🏢 Fornecedor: {transaction.supplier}
+                        </span>
+                      )}
+                      {transaction.commissionValue && transaction.commissionValue > 0 && (
+                        <span className="flex items-center text-green-600">
+                          💳 Comissão: R$ {parseFloat(transaction.commissionValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       )}
                     </div>
