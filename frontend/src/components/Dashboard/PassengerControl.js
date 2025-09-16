@@ -341,15 +341,179 @@ const PassengerControlDirect = () => {
     return diffDays;
   };
 
-  const getReminderStatus = (daysUntil) => {
-    if (daysUntil < 0) return { status: 'passed', color: 'gray', text: 'Viagem realizada' };
-    if (daysUntil === 0) return { status: 'today', color: 'red', text: 'HOJE!' };
-    if (daysUntil === 1) return { status: 'tomorrow', color: 'orange', text: 'Amanhã' };
-    if (daysUntil <= 2) return { status: 'urgent', color: 'red', text: `${daysUntil} dias` };
-    if (daysUntil <= 7) return { status: 'warning', color: 'yellow', text: `${daysUntil} dias` };
-    if (daysUntil <= 15) return { status: 'upcoming', color: 'blue', text: `${daysUntil} dias` };
-    if (daysUntil <= 30) return { status: 'planned', color: 'green', text: `${daysUntil} dias` };
-    return { status: 'future', color: 'gray', text: `${daysUntil} dias` };
+  // Nova função para determinar qual data mostrar e o status da viagem
+  const getTravelStatus = (reservation) => {
+    const today = new Date();
+    const departureDate = reservation.departureDate ? new Date(reservation.departureDate) : null;
+    const returnDate = reservation.returnDate ? new Date(reservation.returnDate) : null;
+    const isRoundTrip = reservation.tripType === 'ida-volta' && returnDate;
+
+    if (!departureDate) {
+      return {
+        displayDate: null,
+        displayLabel: 'Data não definida',
+        status: 'incomplete',
+        phase: 'pending'
+      };
+    }
+
+    // Se é só ida ou não tem data de volta
+    if (!isRoundTrip) {
+      const daysUntilDeparture = Math.ceil((departureDate - today) / (1000 * 60 * 60 * 24));
+      
+      if (daysUntilDeparture < 0) {
+        return {
+          displayDate: departureDate,
+          displayLabel: 'Viagem realizada',
+          status: 'completed',
+          phase: 'completed',
+          daysCount: Math.abs(daysUntilDeparture) + ' dias atrás'
+        };
+      } else {
+        return {
+          displayDate: departureDate,
+          displayLabel: 'Ida',
+          status: daysUntilDeparture === 0 ? 'today' : 'upcoming',
+          phase: 'outbound',
+          daysCount: daysUntilDeparture
+        };
+      }
+    }
+
+    // Lógica para ida e volta
+    const daysUntilDeparture = Math.ceil((departureDate - today) / (1000 * 60 * 60 * 24));
+    const daysUntilReturn = Math.ceil((returnDate - today) / (1000 * 60 * 60 * 24));
+
+    // Ainda não viajou (ida no futuro)
+    if (daysUntilDeparture > 0) {
+      return {
+        displayDate: departureDate,
+        displayLabel: 'Ida',
+        status: daysUntilDeparture === 1 ? 'tomorrow' : 'upcoming',
+        phase: 'outbound',
+        daysCount: daysUntilDeparture,
+        nextDate: returnDate,
+        nextLabel: 'Volta'
+      };
+    }
+
+    // Já fez a ida, aguardando volta (entre ida e volta)
+    if (daysUntilDeparture <= 0 && daysUntilReturn > 0) {
+      return {
+        displayDate: returnDate,
+        displayLabel: 'Volta',
+        status: daysUntilReturn === 1 ? 'tomorrow' : daysUntilReturn === 0 ? 'today' : 'upcoming',
+        phase: 'return',
+        daysCount: daysUntilReturn,
+        completedDate: departureDate,
+        completedLabel: 'Ida realizada'
+      };
+    }
+
+    // Viagem completa (volta no passado)
+    if (daysUntilReturn < 0) {
+      return {
+        displayDate: returnDate,
+        displayLabel: 'Viagem completa',
+        status: 'completed',
+        phase: 'completed',
+        daysCount: Math.abs(daysUntilReturn) + ' dias atrás',
+        completedDate: departureDate,
+        completedLabel: 'Ida e volta realizadas'
+      };
+    }
+
+    return {
+      displayDate: departureDate,
+      displayLabel: 'Ida',
+      status: 'upcoming',
+      phase: 'outbound',
+      daysCount: daysUntilDeparture
+    };
+  };
+
+  const getReminderStatus = (travelStatus) => {
+    const { status, daysCount, phase } = travelStatus;
+    
+    if (status === 'completed') {
+      return { 
+        status: 'completed', 
+        color: 'gray', 
+        text: travelStatus.daysCount,
+        bgColor: 'bg-gray-100',
+        textColor: 'text-gray-600'
+      };
+    }
+    
+    if (status === 'today') {
+      return { 
+        status: 'today', 
+        color: 'red', 
+        text: 'HOJE!',
+        bgColor: 'bg-red-100',
+        textColor: 'text-red-800'
+      };
+    }
+    
+    if (status === 'tomorrow') {
+      return { 
+        status: 'tomorrow', 
+        color: 'orange', 
+        text: 'Amanhã',
+        bgColor: 'bg-orange-100',
+        textColor: 'text-orange-800'
+      };
+    }
+
+    const days = typeof daysCount === 'number' ? daysCount : 0;
+    
+    if (days <= 2) {
+      return { 
+        status: 'urgent', 
+        color: 'red', 
+        text: `${days} dias`,
+        bgColor: 'bg-red-100',
+        textColor: 'text-red-800'
+      };
+    }
+    
+    if (days <= 7) {
+      return { 
+        status: 'warning', 
+        color: 'yellow', 
+        text: `${days} dias`,
+        bgColor: 'bg-yellow-100',
+        textColor: 'text-yellow-800'
+      };
+    }
+    
+    if (days <= 15) {
+      return { 
+        status: 'upcoming', 
+        color: 'blue', 
+        text: `${days} dias`,
+        bgColor: 'bg-blue-100',
+        textColor: 'text-blue-800'
+      };
+    }
+    
+    if (days <= 30) {
+      return { 
+        status: 'planned', 
+        color: 'green', 
+        text: `${days} dias`,
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-800'
+      };
+    }
+    
+    return { 
+      status: 'future', 
+      color: 'gray', 
+      text: `${days} dias`,
+      bgColor: 'bg-gray-100',
+      textColor: 'text-gray-600'
+    };
   };
 
   return (
