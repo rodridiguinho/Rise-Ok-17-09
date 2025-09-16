@@ -1421,6 +1421,23 @@ const EnhancedTransactions = () => {
                       </Select>
                     </div>
 
+                    {/* Conta Bancária */}
+                    <div className="space-y-2">
+                      <Label>Conta *</Label>
+                      <Select value={newTransaction.account} onValueChange={(value) => setNewTransaction({...newTransaction, account: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a conta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accountOptions.map(account => (
+                            <SelectItem key={account} value={account}>
+                              {account}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     {/* Valor Pago */}
                     <div className="space-y-2">
                       <Label>Valor Pago ao Fornecedor *</Label>
