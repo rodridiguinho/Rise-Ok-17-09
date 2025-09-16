@@ -1353,14 +1353,17 @@ def test_internal_code_display_in_automatic_outputs():
                     commission_saida = None
                     
                     for transaction in all_transactions:
-                        # Look for supplier payment
+                        # Look for supplier payment with our specific reference
                         if (transaction.get("type") == "saida_vendas" and 
-                            "Pagamento a Fornecedor Code Test" in transaction.get("description", "")):
+                            "Pagamento a Fornecedor Code Test" in transaction.get("description", "") and
+                            "RT-2025-TEST123" in transaction.get("description", "")):
                             supplier_saida = transaction
                         
-                        # Look for commission payment
+                        # Look for commission payment with our specific reference and saleReference
                         if (transaction.get("type") == "saida_vendas" and 
-                            "Comissão para Fernando Dos Anjos" in transaction.get("description", "")):
+                            "Comissão para Fernando Dos Anjos" in transaction.get("description", "") and
+                            "RT-2025-TEST123" in transaction.get("description", "") and
+                            transaction.get("saleReference") == entrada_transaction_id):
                             commission_saida = transaction
                     
                     # Test 4: Verify supplier output description contains internal code
