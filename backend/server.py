@@ -1217,20 +1217,14 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
                 "pagamento a fornecedor" in category.lower() or supplier):
                 total_supplier_payments += transaction.get("amount", 0)
         
-        # Calculate commissions from entrada_vendas (direct) and saida_vendas
+        # Calculate commissions ONLY from entrada_vendas (direct commission field)
+        # Avoid double counting: don't include saida_vendas commissions as they duplicate commissionValue
         total_commissions = 0
         
-        # From entrada_vendas (direct commission field)
+        # From entrada_vendas (direct commission field only)
         for transaction in entrada_vendas:
             if transaction.get("commissionValue"):
                 total_commissions += transaction.get("commissionValue", 0)
-        
-        # From saida_vendas (commission payments)
-        for transaction in saida_vendas:
-            description = transaction.get("description", "").lower()
-            category = transaction.get("category", "").lower()
-            if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
-                total_commissions += transaction.get("amount", 0)
         
         # Net profit from sales
         net_sales_profit = total_sales - total_commissions - total_supplier_payments
