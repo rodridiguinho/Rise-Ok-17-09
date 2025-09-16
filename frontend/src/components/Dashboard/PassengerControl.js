@@ -707,10 +707,43 @@ const PassengerControlDirect = () => {
                   </div>
                 </div>
 
-                {/* TERCEIRA LINHA: Títulos dos Voos */}
+                {/* TERCEIRA LINHA: Datas da Viagem */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg mb-4">
+                  <h4 className="text-lg font-bold text-green-800 mb-4">📅 7. Datas da Viagem</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-green-500 shadow-sm">
+                      <Label className="text-sm font-medium text-green-700 mb-2 block">
+                        📅 Data de Ida *
+                      </Label>
+                      <Input
+                        type="date"
+                        value={departureDate}
+                        onChange={(e) => setDepartureDate(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    {tripType === 'ida-volta' && (
+                      <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500 shadow-sm">
+                        <Label className="text-sm font-medium text-blue-700 mb-2 block">
+                          📅 Data de Volta
+                        </Label>
+                        <Input
+                          type="date"
+                          value={returnDate}
+                          onChange={(e) => setReturnDate(e.target.value)}
+                          className="text-sm"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* QUARTA LINHA: Títulos dos Voos */}
                 <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg mb-4">
-                  <h4 className="text-lg font-bold text-yellow-800 mb-2">🕐 7. Horários dos Voos</h4>
-                  <h5 className="text-md font-semibold text-orange-700">✈️ 8. Voo de Ida</h5>
+                  <h4 className="text-lg font-bold text-yellow-800 mb-2">🕐 8. Horários dos Voos</h4>
+                  <h5 className="text-md font-semibold text-orange-700">✈️ 9. Voo de Ida</h5>
                 </div>
 
                 {/* QUARTA LINHA: Horários Ida + Escala Ida */}
