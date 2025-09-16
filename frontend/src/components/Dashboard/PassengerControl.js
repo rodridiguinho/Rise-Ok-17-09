@@ -585,30 +585,44 @@ const PassengerControlDirect = () => {
   };
 
   const deleteReservation = async (reservationId) => {
-    if (!confirm('Tem certeza que deseja excluir esta reserva? Esta ação não pode ser desfeita.')) {
+    const confirmCode = prompt('⚠️ ATENÇÃO: Para confirmar a remoção desta reserva APENAS do Controle de Passageiros (sem afetar a venda), digite o código: 135200');
+    
+    if (confirmCode !== '135200') {
+      if (confirmCode !== null) { // Se não cancelou
+        toast({
+          variant: "destructive",
+          title: "Código incorreto",
+          description: "Código de confirmação incorreto. Operação cancelada."
+        });
+      }
       return;
     }
 
     try {
       setLoading(true);
-      const response = await api.delete(`/transactions/${reservationId}`);
+      
+      // CORREÇÃO: Apenas marcar como oculta no controle de passageiros
+      // NÃO deletar a transação de vendas
+      const response = await api.put(`/transactions/${reservationId}`, {
+        hiddenFromPassengerControl: true
+      });
       
       if (response.status === 200) {
         toast({
           variant: "default",
-          title: "Reserva excluída",
-          description: "Reserva excluída com sucesso!"
+          title: "Reserva removida do controle",
+          description: "Reserva removida do Controle de Passageiros (venda mantida em Transações)"
         });
         
         // Recarregar a lista de reservas
         await loadReservations();
       }
     } catch (error) {
-      console.error('Erro ao excluir reserva:', error);
+      console.error('Erro ao remover reserva do controle:', error);
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.response?.data?.detail || "Erro ao excluir reserva"
+        description: error.response?.data?.detail || "Erro ao remover reserva do controle"
       });
     } finally {
       setLoading(false);
