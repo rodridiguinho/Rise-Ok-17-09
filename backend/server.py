@@ -1285,6 +1285,33 @@ async def get_company_settings():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao obter configurações da empresa: {str(e)}")
 
+@api_router.patch("/transactions/{transaction_id}/hide-from-passenger-control")
+async def hide_from_passenger_control(transaction_id: str, current_user: dict = Depends(get_current_user)):
+    """Ocultar transação do controle de passageiros (não afeta a venda)"""
+    try:
+        # Verificar se a transação existe
+        existing_transaction = await db.transactions.find_one({"_id": ObjectId(transaction_id)})
+        if not existing_transaction:
+            raise HTTPException(status_code=404, detail="Transação não encontrada")
+        
+        # Atualizar apenas o campo hiddenFromPassengerControl
+        result = await db.transactions.update_one(
+            {"_id": ObjectId(transaction_id)},
+            {"$set": {
+                "hiddenFromPassengerControl": True,
+                "updatedAt": datetime.utcnow()
+            }}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Transação não encontrada")
+        
+        return {"message": "Reserva removida do controle de passageiros", "transaction_id": transaction_id}
+        
+    except Exception as e:
+        logging.error(f"Hide from passenger control error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erro ao ocultar reserva do controle")
+
 @api_router.put("/transactions/{transaction_id}")
 async def update_transaction(transaction_id: str, transaction: TransactionCreate, current_user: dict = Depends(get_current_user)):
     print(f"🔄 UPDATE REQUEST - Transaction ID: {transaction_id}")
