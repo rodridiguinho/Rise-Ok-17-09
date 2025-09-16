@@ -820,40 +820,51 @@ const PassengerControlDirect = () => {
                     <span>{reservation.passengers.length} Passageiro(s)</span>
                   </div>
                   
-                  <Button
-                    onClick={() => {
-                      setSelectedReservation(reservation);
-                      setEditableAirline(reservation.airline || '');
-                      setReservationNumber(reservation.reservationNumber || '');
-                      setReservationNotes(reservation.travelNotes || '');
-                      
-                      // Inicializar novos campos de detalhes da viagem
-                      setProductType(reservation.productType || '');
-                      setClientReservationCode(reservation.clientReservationCode || '');
-                      setDepartureCity(reservation.departureCity || '');
-                      setArrivalCity(reservation.arrivalCity || '');
-                      setTripType(reservation.tripType || 'ida-volta');
-                      setDepartureDate(reservation.departureDate || '');
-                      setReturnDate(reservation.returnDate || '');
-                      setOutboundDepartureTime(reservation.outboundDepartureTime || '');
-                      setOutboundArrivalTime(reservation.outboundArrivalTime || '');
-                      setOutboundFlightDuration(reservation.outboundFlightDuration || '');
-                      setReturnDepartureTime(reservation.returnDepartureTime || '');
-                      setReturnArrivalTime(reservation.returnArrivalTime || '');
-                      setReturnFlightDuration(reservation.returnFlightDuration || '');
-                      setHasStopover(reservation.hasStopover || false);
-                      setStopoverCity(reservation.stopoverCity || '');
-                      setStopoverArrivalTime(reservation.stopoverArrivalTime || '');
-                      setStopoverDepartureTime(reservation.stopoverDepartureTime || '');
-                      setConnectionDuration(reservation.connectionDuration || '');
-                      setSelectedSupplier(reservation.supplier || '');
-                      setEmissionType(reservation.emissionType || 'E-ticket');
-                      setSupplierPhone(reservation.supplierPhone || '');
-                    }}
-                    className="text-sm px-3 py-1"
-                  >
-                    Gerenciar
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={() => deleteReservation(reservation.id)}
+                      variant="outline"
+                      className="text-sm px-3 py-1 text-red-600 border-red-300 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Excluir
+                    </Button>
+                    
+                    <Button
+                      onClick={() => {
+                        setSelectedReservation(reservation);
+                        setEditableAirline(reservation.airline || '');
+                        setReservationNumber(reservation.reservationNumber || '');
+                        setReservationNotes(reservation.travelNotes || '');
+                        
+                        // Inicializar novos campos de detalhes da viagem
+                        setProductType(reservation.productType || '');
+                        setClientReservationCode(reservation.clientReservationCode || '');
+                        setDepartureCity(reservation.departureCity || '');
+                        setArrivalCity(reservation.arrivalCity || '');
+                        setTripType(reservation.tripType || 'ida-volta');
+                        setDepartureDate(reservation.departureDate || '');
+                        setReturnDate(reservation.returnDate || '');
+                        setOutboundDepartureTime(reservation.outboundDepartureTime || '');
+                        setOutboundArrivalTime(reservation.outboundArrivalTime || '');
+                        setOutboundFlightDuration(reservation.outboundFlightDuration || '');
+                        setReturnDepartureTime(reservation.returnDepartureTime || '');
+                        setReturnArrivalTime(reservation.returnArrivalTime || '');
+                        setReturnFlightDuration(reservation.returnFlightDuration || '');
+                        setHasStopover(reservation.hasStopover || false);
+                        setStopoverCity(reservation.stopoverCity || '');
+                        setStopoverArrivalTime(reservation.stopoverArrivalTime || '');
+                        setStopoverDepartureTime(reservation.stopoverDepartureTime || '');
+                        setConnectionDuration(reservation.connectionDuration || '');
+                        setSelectedSupplier(reservation.supplier || '');
+                        setEmissionType(reservation.emissionType || 'E-ticket');
+                        setSupplierPhone(reservation.supplierPhone || '');
+                      }}
+                      className="text-sm px-3 py-1"
+                    >
+                      Gerenciar
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
