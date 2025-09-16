@@ -697,7 +697,7 @@ const PassengerControlDirect = () => {
             const reminderStatus = getReminderStatus(travelStatus);
             
             return (
-              <div key={reservation.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6">
+              <div key={reservation.id} data-reservation-id={reservation.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
