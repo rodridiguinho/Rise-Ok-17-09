@@ -75,9 +75,9 @@ const Dashboard = () => {
       case 'settings':
         return <Settings />;
       case 'sales-analytics':
-        return <SalesAnalytics />;
+        return <SalesAnalytics key={`sales-${activeTab}-${Date.now()}`} />;
       case 'financial-analytics':
-        return <FinancialAnalytics />;
+        return <FinancialAnalytics key={`financial-${activeTab}-${Date.now()}`} />;
       case 'sales-reports':
         return <SalesReports />;
       case 'admin-settings':
