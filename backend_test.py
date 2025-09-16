@@ -9527,8 +9527,8 @@ if __name__ == "__main__":
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the specific review request test
-    test_review_request_sales_analysis_endpoints()
+    # Run the specific review request test for analysis endpoints corrections
+    test_analysis_endpoints_corrections()
     
     print("\n" + "="*80)
     print("🏁 Backend API Test Suite Complete")
