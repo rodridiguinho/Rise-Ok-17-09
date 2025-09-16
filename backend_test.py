@@ -10229,13 +10229,13 @@ def test_review_request_sales_analysis_endpoints():
                 print_result(False, f"Cleanup - Delete transaction {transaction_id}", str(e))
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - INTERNAL CODE DISPLAY IN AUTOMATIC OUTPUTS")
+    print("🚀 Starting Backend API Test Suite - CRITICAL PASSENGER CONTROL DELETION FIX")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the specific review request test for internal code display in automatic outputs
-    test_internal_code_display_in_automatic_outputs()
+    # Run the specific review request test for critical passenger control deletion fix
+    test_critical_passenger_control_deletion_fix()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Complete - INTERNAL CODE DISPLAY TESTED")
+    print("🏁 Backend API Test Suite Complete - CRITICAL PASSENGER CONTROL DELETION TESTED")
     print("="*80)
