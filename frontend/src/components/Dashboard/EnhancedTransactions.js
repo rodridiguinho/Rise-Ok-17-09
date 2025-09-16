@@ -2383,6 +2383,22 @@ const EnhancedTransactions = () => {
                             </SelectContent>
                           </Select>
                         </div>
+
+                        <div className="space-y-2">
+                          <Label>Conta Utilizada</Label>
+                          <Select value={supplier.account || ''} onValueChange={(value) => updateSupplier(index, 'account', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a conta" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {accountOptions.map(account => (
+                                <SelectItem key={account} value={account}>
+                                  {account}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       {/* Miles section for each supplier */}
