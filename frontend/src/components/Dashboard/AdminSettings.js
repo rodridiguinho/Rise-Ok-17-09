@@ -146,6 +146,9 @@ const AdminSettings = () => {
       const response = await api.post('/api/company/settings', companySettings);
       
       if (response.status === 200 || response.status === 201) {
+        // Recarregar as configurações após salvar
+        await loadCompanySettings();
+        
         toast({
           title: "Configurações da empresa salvas",
           description: "As informações da empresa foram atualizadas com sucesso.",
@@ -156,7 +159,7 @@ const AdminSettings = () => {
       toast({
         variant: "destructive",
         title: "Erro ao salvar",
-        description: "Não foi possível salvar as configurações da empresa. Tente novamente.",
+        description: `Erro: ${error.response?.data?.message || error.message || 'Não foi possível salvar as configurações da empresa.'}`,
       });
     }
   };
