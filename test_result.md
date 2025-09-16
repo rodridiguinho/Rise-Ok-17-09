@@ -100,7 +100,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Verificar transações existentes e identificar se há transações de teste que podem ser removidas. TAREFAS: 1. **Autenticação**: Use rodrigo@risetravel.com.br / Emily2030* 2. **Listar transações**: GET /api/transactions para ver todas as transações 3. **Identificar transações de teste**: Procurar por transações com descrições como 'Teste', 'Test', 'Performance', 'Venda com custo fornecedor direto', etc. 4. **Verificar ordenação**: Confirmar que as transações estão ordenadas por data/hora (mais recente primeiro) 5. **Testar sales-performance**: GET /api/reports/sales-performance para verificar se mostra custos de fornecedores OBJETIVO: Identificar transações de teste para o usuário poder deletar e verificar se o endpoint de sales-performance está funcionando corretamente."
+user_problem_statement: "Implementar o módulo de Controle Interno com 5 seções independentes: 1. Investimento de Sócios, 2. Pagamentos de Clientes Parcelados (com campo 'Número de registro gerado na venda'), 3. Controle de Cliente com Controle de Milhas, 4. Contas com Sócios (com campo 'Data de retirada'), 5. Links de Consolidadoras/Operadores/Serviços. Cada seção deve ter funcionalidade 'Adicionar mais 1' e integração no sidebar. Sistema deve ser independente do resto da aplicação, apenas para controle interno."
 
 backend:
   - task: "Transaction Verification and Test Data Identification"
