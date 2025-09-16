@@ -106,6 +106,8 @@ const PassengerControlDirect = () => {
         // Removed city requirement since flight details are managed in the modal
       );
 
+      console.log('🔍 DEBUG - Found entry transactions:', entryTransactions.length);
+      
       const reservationsData = entryTransactions.map(transaction => ({
         id: transaction.id,
         internalCode: transaction.internalReservationCode,
