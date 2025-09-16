@@ -3182,7 +3182,7 @@ const EnhancedTransactions = () => {
           />
         </div>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[240px]">
             <Filter className="mr-2 h-4 w-4" />
             <SelectValue />
           </SelectTrigger>
