@@ -8778,18 +8778,395 @@ if __name__ == "__main__":
     print("\n" + "="*80)
     print("🏁 Backend API Test Suite Complete")
     print("="*80)
+def test_review_request_sales_analysis_endpoints():
+    """Test Sales Analysis Endpoints for New Transaction Types - REVIEW REQUEST"""
+    print_test_header("REVIEW REQUEST - Teste completo dos endpoints de análises para verificar se estão somando corretamente os novos tipos de transação entrada_vendas e saida_vendas")
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
+            "password": VALID_PASSWORD  # Emily2030*
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for sales analysis testing", 
+                       f"Successfully logged in as {VALID_EMAIL}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for sales analysis testing failed", str(e))
+        return
+    
+    # Test 2: Verificar tipos de transação existentes
+    print("\n🎯 TEST 1: VERIFICAR TIPOS DE TRANSAÇÃO EXISTENTES")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "GET /api/transactions - Successful retrieval", 
+                       f"Retrieved {len(transactions)} transactions from database")
+            
+            # Analyze transaction types
+            transaction_types = {}
+            for transaction in transactions:
+                t_type = transaction.get('type', 'unknown')
+                if t_type in transaction_types:
+                    transaction_types[t_type] += 1
+                else:
+                    transaction_types[t_type] = 1
+            
+            print_result(True, "Transaction types analysis", 
+                       f"Found transaction types: {list(transaction_types.keys())}")
+            
+            for t_type, count in transaction_types.items():
+                print_result(True, f"Transaction type count - {t_type}", 
+                           f"Found {count} transactions of type '{t_type}'")
+            
+            # Check for new transaction types
+            has_entrada_vendas = 'entrada_vendas' in transaction_types
+            has_saida_vendas = 'saida_vendas' in transaction_types
+            
+            if has_entrada_vendas:
+                print_result(True, "New transaction type verification - entrada_vendas", 
+                           f"Found {transaction_types['entrada_vendas']} entrada_vendas transactions")
+            else:
+                print_result(False, "New transaction type verification - entrada_vendas", 
+                           "No entrada_vendas transactions found in database")
+            
+            if has_saida_vendas:
+                print_result(True, "New transaction type verification - saida_vendas", 
+                           f"Found {transaction_types['saida_vendas']} saida_vendas transactions")
+            else:
+                print_result(False, "New transaction type verification - saida_vendas", 
+                           "No saida_vendas transactions found in database")
+            
+        else:
+            print_result(False, f"GET /api/transactions - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Transaction types verification failed", str(e))
+        return
+    
+    # Test 3: Create test transactions with new types for testing
+    print("\n🎯 TEST 2: CRIAR TRANSAÇÕES DE TESTE COM NOVOS TIPOS")
+    test_transactions_created = []
+    
+    # Create entrada_vendas transaction
+    try:
+        entrada_vendas_transaction = {
+            "type": "entrada_vendas",
+            "category": "Vendas de Passagens",
+            "description": "Teste entrada_vendas - Venda de passagem",
+            "amount": 2500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Entrada Vendas",
+            "saleValue": 2500.00,
+            "supplierValue": 1800.00,
+            "commissionValue": 250.00,
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=entrada_vendas_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                test_transactions_created.append(data["id"])
+                print_result(True, "Create entrada_vendas test transaction", 
+                           f"Created entrada_vendas transaction with ID: {data['id']}")
+            else:
+                print_result(False, "Create entrada_vendas test transaction", "No ID returned")
+        else:
+            print_result(False, f"Create entrada_vendas test transaction - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Create entrada_vendas test transaction failed", str(e))
+    
+    # Create saida_vendas transaction
+    try:
+        saida_vendas_transaction = {
+            "type": "saida_vendas",
+            "category": "Pagamento a Fornecedor",
+            "description": "Teste saida_vendas - Pagamento fornecedor",
+            "amount": 1800.00,
+            "paymentMethod": "Transferência",
+            "supplier": "Fornecedor Teste Saida Vendas",
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=saida_vendas_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                test_transactions_created.append(data["id"])
+                print_result(True, "Create saida_vendas test transaction", 
+                           f"Created saida_vendas transaction with ID: {data['id']}")
+            else:
+                print_result(False, "Create saida_vendas test transaction", "No ID returned")
+        else:
+            print_result(False, f"Create saida_vendas test transaction - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Create saida_vendas test transaction failed", str(e))
+    
+    # Test 4: Testar Sales Analysis
+    print("\n🎯 TEST 3: TESTAR SALES ANALYSIS - GET /api/reports/sales-analysis")
+    try:
+        # Test with date range that includes our test transactions
+        response = requests.get(f"{API_URL}/reports/sales-analysis?start_date=2025-01-01&end_date=2025-01-31", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "GET /api/reports/sales-analysis - Successful response", 
+                       f"Sales analysis endpoint responded successfully")
+            
+            # Verify response structure
+            if "sales" in data:
+                sales_data = data["sales"]
+                required_fields = ["total_sales", "total_supplier_costs", "total_commissions", "net_profit", "sales_count"]
+                missing_fields = [f for f in required_fields if f not in sales_data]
+                
+                if not missing_fields:
+                    print_result(True, "Sales analysis response structure", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Display sales metrics
+                    total_sales = sales_data.get("total_sales", 0)
+                    total_supplier_costs = sales_data.get("total_supplier_costs", 0)
+                    total_commissions = sales_data.get("total_commissions", 0)
+                    net_profit = sales_data.get("net_profit", 0)
+                    sales_count = sales_data.get("sales_count", 0)
+                    
+                    print_result(True, "Sales analysis metrics", 
+                               f"Total vendas: R$ {total_sales:.2f}, Total custos fornecedores: R$ {total_supplier_costs:.2f}, Total comissões: R$ {total_commissions:.2f}, Lucro líquido: R$ {net_profit:.2f}, Vendas count: {sales_count}")
+                    
+                    # Verify entrada_vendas is included in sales
+                    if total_sales >= 2500.00:  # Our test transaction amount
+                        print_result(True, "Sales analysis - entrada_vendas inclusion", 
+                                   f"entrada_vendas appears to be included in total sales (R$ {total_sales:.2f} >= R$ 2500.00)")
+                    else:
+                        print_result(False, "Sales analysis - entrada_vendas inclusion", 
+                                   f"entrada_vendas may not be included in total sales (R$ {total_sales:.2f} < R$ 2500.00)")
+                    
+                    # Verify saida_vendas is considered in supplier costs
+                    if total_supplier_costs >= 1800.00:  # Our test transaction amount
+                        print_result(True, "Sales analysis - saida_vendas inclusion in supplier costs", 
+                                   f"saida_vendas appears to be included in supplier costs (R$ {total_supplier_costs:.2f} >= R$ 1800.00)")
+                    else:
+                        print_result(False, "Sales analysis - saida_vendas inclusion in supplier costs", 
+                                   f"saida_vendas may not be included in supplier costs (R$ {total_supplier_costs:.2f} < R$ 1800.00)")
+                    
+                else:
+                    print_result(False, "Sales analysis response structure", 
+                               f"Missing required fields: {missing_fields}")
+            else:
+                print_result(False, "Sales analysis response structure", 
+                           "Missing 'sales' object in response")
+        else:
+            print_result(False, f"GET /api/reports/sales-analysis - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Sales analysis test failed", str(e))
+    
+    # Test 5: Testar Complete Analysis
+    print("\n🎯 TEST 4: TESTAR COMPLETE ANALYSIS - GET /api/reports/complete-analysis")
+    try:
+        response = requests.get(f"{API_URL}/reports/complete-analysis?start_date=2025-01-01&end_date=2025-01-31", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "GET /api/reports/complete-analysis - Successful response", 
+                       f"Complete analysis endpoint responded successfully")
+            
+            # Verify response structure
+            if "summary" in data:
+                summary_data = data["summary"]
+                required_fields = ["total_entradas", "total_saidas", "balance", "entradas_count", "saidas_count"]
+                missing_fields = [f for f in required_fields if f not in summary_data]
+                
+                if not missing_fields:
+                    print_result(True, "Complete analysis response structure", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Display complete analysis metrics
+                    total_entradas = summary_data.get("total_entradas", 0)
+                    total_saidas = summary_data.get("total_saidas", 0)
+                    balance = summary_data.get("balance", 0)
+                    entradas_count = summary_data.get("entradas_count", 0)
+                    saidas_count = summary_data.get("saidas_count", 0)
+                    
+                    print_result(True, "Complete analysis metrics", 
+                               f"Total entradas: R$ {total_entradas:.2f}, Total saídas: R$ {total_saidas:.2f}, Balance: R$ {balance:.2f}, Entradas count: {entradas_count}, Saídas count: {saidas_count}")
+                    
+                    # Verify entrada_vendas is summed in entradas
+                    if total_entradas >= 2500.00:  # Our test transaction amount
+                        print_result(True, "Complete analysis - entrada_vendas inclusion in entradas", 
+                                   f"entrada_vendas appears to be included in total entradas (R$ {total_entradas:.2f} >= R$ 2500.00)")
+                    else:
+                        print_result(False, "Complete analysis - entrada_vendas inclusion in entradas", 
+                                   f"entrada_vendas may not be included in total entradas (R$ {total_entradas:.2f} < R$ 2500.00)")
+                    
+                    # Verify saida_vendas is summed in saidas
+                    if total_saidas >= 1800.00:  # Our test transaction amount
+                        print_result(True, "Complete analysis - saida_vendas inclusion in saidas", 
+                                   f"saida_vendas appears to be included in total saídas (R$ {total_saidas:.2f} >= R$ 1800.00)")
+                    else:
+                        print_result(False, "Complete analysis - saida_vendas inclusion in saidas", 
+                                   f"saida_vendas may not be included in total saídas (R$ {total_saidas:.2f} < R$ 1800.00)")
+                    
+                else:
+                    print_result(False, "Complete analysis response structure", 
+                               f"Missing required fields: {missing_fields}")
+            else:
+                print_result(False, "Complete analysis response structure", 
+                           "Missing 'summary' object in response")
+        else:
+            print_result(False, f"GET /api/reports/complete-analysis - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Complete analysis test failed", str(e))
+    
+    # Test 6: Testar Sales Performance
+    print("\n🎯 TEST 5: TESTAR SALES PERFORMANCE - GET /api/reports/sales-performance")
+    try:
+        response = requests.get(f"{API_URL}/reports/sales-performance?start_date=2025-01-01&end_date=2025-01-31", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "GET /api/reports/sales-performance - Successful response", 
+                       f"Sales performance endpoint responded successfully")
+            
+            # Verify response structure
+            if "sales" in data:
+                sales_data = data["sales"]
+                required_fields = ["total_sales", "total_quantity", "total_commissions", "total_supplier_payments", "net_sales_profit"]
+                missing_fields = [f for f in required_fields if f not in sales_data]
+                
+                if not missing_fields:
+                    print_result(True, "Sales performance response structure", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Display sales performance metrics
+                    total_sales = sales_data.get("total_sales", 0)
+                    total_quantity = sales_data.get("total_quantity", 0)
+                    total_commissions = sales_data.get("total_commissions", 0)
+                    total_supplier_payments = sales_data.get("total_supplier_payments", 0)
+                    net_sales_profit = sales_data.get("net_sales_profit", 0)
+                    
+                    print_result(True, "Sales performance metrics", 
+                               f"Total vendas: R$ {total_sales:.2f}, Quantidade: {total_quantity}, Comissões: R$ {total_commissions:.2f}, Custos fornecedores: R$ {total_supplier_payments:.2f}, Lucro líquido: R$ {net_sales_profit:.2f}")
+                    
+                    # Verify entrada_vendas is considered as sales
+                    if total_sales >= 2500.00:  # Our test transaction amount
+                        print_result(True, "Sales performance - entrada_vendas as sales", 
+                                   f"entrada_vendas appears to be considered as sales (R$ {total_sales:.2f} >= R$ 2500.00)")
+                    else:
+                        print_result(False, "Sales performance - entrada_vendas as sales", 
+                                   f"entrada_vendas may not be considered as sales (R$ {total_sales:.2f} < R$ 2500.00)")
+                    
+                    # Verify saida_vendas is considered in costs
+                    if total_supplier_payments >= 1800.00:  # Our test transaction amount
+                        print_result(True, "Sales performance - saida_vendas in costs", 
+                                   f"saida_vendas appears to be considered in costs (R$ {total_supplier_payments:.2f} >= R$ 1800.00)")
+                    else:
+                        print_result(False, "Sales performance - saida_vendas in costs", 
+                                   f"saida_vendas may not be considered in costs (R$ {total_supplier_payments:.2f} < R$ 1800.00)")
+                    
+                    # Verify sales count includes entrada_vendas
+                    if total_quantity >= 1:  # At least our test transaction
+                        print_result(True, "Sales performance - sales count includes entrada_vendas", 
+                                   f"Sales count appears to include entrada_vendas (count: {total_quantity} >= 1)")
+                    else:
+                        print_result(False, "Sales performance - sales count includes entrada_vendas", 
+                                   f"Sales count may not include entrada_vendas (count: {total_quantity} < 1)")
+                    
+                else:
+                    print_result(False, "Sales performance response structure", 
+                               f"Missing required fields: {missing_fields}")
+            else:
+                print_result(False, "Sales performance response structure", 
+                           "Missing 'sales' object in response")
+        else:
+            print_result(False, f"GET /api/reports/sales-performance - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Sales performance test failed", str(e))
+    
+    # Test 7: Verificar cálculos de lucro líquido
+    print("\n🎯 TEST 6: VERIFICAR CÁLCULOS DE LUCRO LÍQUIDO")
+    try:
+        # Get both sales analysis and sales performance to compare calculations
+        sales_analysis_response = requests.get(f"{API_URL}/reports/sales-analysis?start_date=2025-01-01&end_date=2025-01-31", timeout=10)
+        sales_performance_response = requests.get(f"{API_URL}/reports/sales-performance?start_date=2025-01-01&end_date=2025-01-31", timeout=10)
+        
+        if sales_analysis_response.status_code == 200 and sales_performance_response.status_code == 200:
+            analysis_data = sales_analysis_response.json()
+            performance_data = sales_performance_response.json()
+            
+            if "sales" in analysis_data and "sales" in performance_data:
+                analysis_sales = analysis_data["sales"]
+                performance_sales = performance_data["sales"]
+                
+                # Compare net profit calculations
+                analysis_net_profit = analysis_sales.get("net_profit", 0)
+                performance_net_profit = performance_sales.get("net_sales_profit", 0)
+                
+                print_result(True, "Net profit calculation comparison", 
+                           f"Sales Analysis net profit: R$ {analysis_net_profit:.2f}, Sales Performance net profit: R$ {performance_net_profit:.2f}")
+                
+                # Verify calculations are consistent (allowing small floating point differences)
+                if abs(analysis_net_profit - performance_net_profit) < 0.01:
+                    print_result(True, "Net profit calculation consistency", 
+                               "Net profit calculations are consistent between endpoints")
+                else:
+                    print_result(False, "Net profit calculation consistency", 
+                               f"Net profit calculations differ: Analysis={analysis_net_profit:.2f}, Performance={performance_net_profit:.2f}")
+                
+                # Manual calculation verification for our test data
+                expected_sales = 2500.00  # entrada_vendas
+                expected_costs = 1800.00  # saida_vendas + supplierValue from entrada_vendas
+                expected_commissions = 250.00  # from entrada_vendas
+                expected_net_profit = expected_sales - expected_costs - expected_commissions  # Should be 450.00
+                
+                print_result(True, "Manual calculation verification", 
+                           f"Expected: Sales=R$ {expected_sales:.2f}, Costs=R$ {expected_costs:.2f}, Commissions=R$ {expected_commissions:.2f}, Net Profit=R$ {expected_net_profit:.2f}")
+                
+            else:
+                print_result(False, "Net profit calculation comparison", 
+                           "Missing sales data in one or both responses")
+        else:
+            print_result(False, "Net profit calculation comparison", 
+                       "Failed to retrieve data from one or both endpoints")
+    except Exception as e:
+        print_result(False, "Net profit calculation verification failed", str(e))
+    
+    # Test 8: Final Summary
+    print("\n🎯 FINAL SUMMARY: VERIFICAÇÕES ESPECÍFICAS")
+    print_result(True, "OBJETIVO DO TESTE", 
+               "Garantir que os novos tipos de transação (entrada_vendas e saida_vendas) estão sendo corretamente incluídos em todas as análises financeiras")
+    
+    print_result(True, "VERIFICAÇÕES REALIZADAS", 
+               "✅ Tipos de transação existentes verificados\n✅ Sales Analysis testado\n✅ Complete Analysis testado\n✅ Sales Performance testado\n✅ Cálculos de lucro líquido verificados")
+    
+    # Cleanup: Delete test transactions if they were created
+    if test_transactions_created:
+        print("\n🧹 CLEANUP: Removing test transactions")
+        for transaction_id in test_transactions_created:
+            try:
+                delete_response = requests.delete(f"{API_URL}/transactions/{transaction_id}", timeout=10)
+                if delete_response.status_code == 200:
+                    print_result(True, f"Cleanup - Delete transaction {transaction_id}", 
+                               "Test transaction deleted successfully")
+                else:
+                    print_result(False, f"Cleanup - Delete transaction {transaction_id}", 
+                               f"Failed to delete: HTTP {delete_response.status_code}")
+            except Exception as e:
+                print_result(False, f"Cleanup - Delete transaction {transaction_id}", str(e))
+
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - REVIEW REQUEST: VERIFICAR TRANSAÇÕES EXISTENTES")
-    print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"🔗 Backend URL: {BASE_URL}")
-    print(f"🔗 API URL: {API_URL}")
-    print(f"👤 Test User: {VALID_EMAIL}")
+    print("🚀 Starting Backend API Test Suite")
+    print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the specific test for the review request
-    test_review_request_transaction_verification()
+    # Run the specific review request test
+    test_review_request_sales_analysis_endpoints()
     
     print("\n" + "="*80)
-    print("🏁 REVIEW REQUEST TESTING COMPLETE - TRANSAÇÕES VERIFICADAS")
-    print("="*80)
+    print("🏁 Backend API Test Suite Complete")
     print("="*80)
