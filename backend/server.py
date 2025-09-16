@@ -1402,7 +1402,9 @@ async def update_transaction(transaction_id: str, transaction: TransactionCreate
             "status": "Confirmado",
             "transactionDate": transaction_date,
             "updatedAt": datetime.utcnow(),
-            "entryDate": existing_transaction.get("entryDate", date.today().strftime("%Y-%m-%d"))
+            "entryDate": existing_transaction.get("entryDate", date.today().strftime("%Y-%m-%d")),
+            # CORREÇÃO: Campo para ocultar do controle de passageiros
+            "hiddenFromPassengerControl": getattr(transaction, 'hiddenFromPassengerControl', existing_transaction.get('hiddenFromPassengerControl', False))
         }
         
         # Update the transaction using _id ObjectId
