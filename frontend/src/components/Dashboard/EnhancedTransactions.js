@@ -1542,28 +1542,6 @@ const EnhancedTransactions = () => {
                       placeholder="RT-2025-XXX"
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>Cidade de Saída</Label>
-                    <CityInput
-                      value={newTransaction.departureCity}
-                      onChange={(value) => setNewTransaction({...newTransaction, departureCity: value})}
-                      placeholder="Digite para buscar cidades..."
-                      id="departure-city"
-                      airportCities={airportCities}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Cidade de Chegada</Label>
-                    <CityInput
-                      value={newTransaction.arrivalCity}
-                      onChange={(value) => setNewTransaction({...newTransaction, arrivalCity: value})}
-                      placeholder="Digite para buscar cidades..."
-                      id="arrival-city"
-                      airportCities={airportCities}
-                    />
-                  </div>
                 </div>
 
                 {/* Segunda linha - Datas e tipo de viagem */}
