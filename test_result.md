@@ -139,6 +139,18 @@ backend:
           agent: "testing"
           comment: "🎯 PASSENGER CONTROL EMISSIONTYPE AND SUPPLIERPHONE FIELD PERSISTENCE - COMPLETE SUCCESS: Successfully tested the exact functionality reported by user as not working using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ BASE TRANSACTION CREATION: Created test transaction (ID: 68c7ee5fbcaf86908c51fbd7) for testing emissionType and supplierPhone fields. ✅ PUT /api/transactions/{id} ENDPOINT: Successfully updated transaction with emissionType='E-ticket digital' and supplierPhone='(11) 99999-8888' fields. Both fields accepted by API without errors. ✅ API ACCEPTANCE AND PERSISTENCE: Both fields correctly saved in PUT response - emissionType: 'E-ticket digital', supplierPhone: '(11) 99999-8888'. ✅ DATABASE PERSISTENCE: Verified via GET /api/transactions that both fields correctly persisted to MongoDB database and are retrievable. ✅ FIELD RETRIEVAL: Both emissionType and supplierPhone fields can be retrieved correctly via GET API calls. ✅ CONCLUSION: The user-reported issue with emissionType and supplierPhone not saving is NOT a backend API problem. The backend correctly handles, accepts, persists, and returns these fields. The issue is likely frontend-related (form submission, field mapping, or UI state management)."
 
+  - task: "Critical Transaction Types Bug Fix - entrada_vendas to saida_vendas"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 CRITICAL TRANSACTION TYPES BUG FIX - COMPLETE SUCCESS: Successfully tested the exact bug fix scenario from review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ ENTRADA_VENDAS CREATION: Created entrada_vendas transaction with exact test data (type: 'entrada_vendas', description: 'TESTE CORREÇÃO BUG - Venda com fornecedor', amount: 1000, suppliers: [{'name': 'Fornecedor Teste', 'value': 800, 'paymentStatus': 'Pago', 'paymentDate': '2025-09-16'}], seller: 'Fernando Dos Anjos', commissionValue: 50, commissionPaymentStatus: 'Pago'). Transaction created successfully with ID: 68c9a44bda82b03813ee784a. ✅ AUTOMATIC SAÍDAS GENERATION: System correctly generated 2 automatic expense transactions (supplier payment + commission) as expected. ✅ CRITICAL BUG FIX VALIDATION: ALL generated saídas have correct type='saida_vendas' (2/2) - NOT 'saida' as before. This confirms the bug fix is working correctly. ✅ SAÍDA TYPES VERIFICATION: Found 2 generated transactions: (1) 'Pagamento a Fornecedor Teste' with type='saida_vendas', (2) 'Comissão para Fernando Dos Anjos' with type='saida_vendas'. Both have correct type. ✅ ANALYSIS ENDPOINTS VERIFICATION: Both GET /api/reports/sales-performance and GET /api/reports/complete-analysis correctly include saida_vendas transactions in their calculations. ✅ OBJECTIVE ACHIEVED: entrada_vendas → generates saida_vendas automatically (NOT 'saida'). The critical bug fix is completely functional and working as requested."
+
 frontend:
   - task: "Internal Control Module Implementation"
     implemented: true
