@@ -1245,8 +1245,10 @@ const EnhancedTransactions = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="entrada">Entrada</SelectItem>
-                          <SelectItem value="saida">Saída</SelectItem>
+                          <SelectItem value="entrada_vendas">Entrada - Vendas</SelectItem>
+                          <SelectItem value="saida_vendas">Saída - Vendas</SelectItem>
+                          <SelectItem value="entrada">Entrada - Outras</SelectItem>
+                          <SelectItem value="saida">Saída - Outras</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
