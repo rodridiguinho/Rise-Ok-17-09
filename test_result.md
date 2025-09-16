@@ -608,6 +608,18 @@ frontend:
           agent: "testing"
           comment: "✅ ANALYTICS NAVIGATION AND INTEGRATION FULLY FUNCTIONAL - COMPREHENSIVE TESTING COMPLETED: Successfully tested navigation and integration between analytics dashboards and existing application. ✅ Sidebar Navigation: Both 'Analytics Vendas' and 'Analytics Financeiro' buttons present in sidebar with correct icons (BarChart3, TrendingUp). ✅ Smooth Navigation: Seamless switching between Overview, Analytics Vendas, Analytics Financeiro, and other sections. ✅ API Integration: Both analytics endpoints (/api/analytics/sales, /api/analytics/financial) called correctly during navigation. ✅ Authentication: Login with rodrigo@risetravel.com.br / Emily2030* works correctly for accessing analytics. ✅ UI/UX Consistency: Rise Travel branding consistent throughout, gradient color scheme (pink-orange) maintained. ✅ Mobile Navigation: Analytics sections accessible and functional on mobile viewport. ✅ Loading States: Proper loading indicators during data fetch. ✅ Error Handling: No console errors detected during analytics usage. The analytics integration provides seamless user experience matching the existing application design."
 
+  - task: "Critical Passenger Control Deletion Button Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 CRITICAL PASSENGER CONTROL DELETION BUTTON FIX - COMPLETE SUCCESS: Successfully tested the exact critical fix from review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ NEW ENDPOINT EXISTS: PATCH /api/transactions/{transaction_id}/hide-from-passenger-control endpoint is available and responding correctly with proper response format (message + transaction_id). ✅ TEST TRANSACTION RT-2025-TEST123: Created test transaction with ID: 68c9b04911dfb57cead016f5 for comprehensive testing. ✅ ORIGINAL TRANSACTION NOT DELETED: Transaction still exists in database after hiding operation - only hiddenFromPassengerControl field set to true. All transaction data remains intact (description, amount, type, client, internalReservationCode). ✅ ANALYTICS NOT AFFECTED: GET /api/reports/sales-performance still includes the hidden transaction in sales calculations (Total Sales: R$ 23,740.0). Hidden transaction correctly included in sales-performance analytics as required. ✅ IDEMPOTENCY VERIFIED: Multiple hide operations work correctly without side effects - transaction remains hidden and intact. ✅ OBJECTIVE ACHIEVED: Exclusion from passenger control does NOT affect sales/transactions - the critical requirement is fully satisfied. The fix ensures that hiding from passenger control only sets a flag without deleting the transaction or affecting financial reports."
+
   - task: "Sales Analysis and Reporting Endpoints"
     implemented: true
     working: true
