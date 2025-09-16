@@ -9943,13 +9943,13 @@ def test_review_request_sales_analysis_endpoints():
                 print_result(False, f"Cleanup - Delete transaction {transaction_id}", str(e))
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - CRITICAL TRANSACTION TYPES BUG FIX")
+    print("🚀 Starting Backend API Test Suite - INTERNAL CODE DISPLAY IN AUTOMATIC OUTPUTS")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the specific review request test for critical transaction types bug fix
-    test_critical_transaction_types_bug_fix()
+    # Run the specific review request test for internal code display in automatic outputs
+    test_internal_code_display_in_automatic_outputs()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Complete - CRITICAL BUG FIX TESTED")
+    print("🏁 Backend API Test Suite Complete - INTERNAL CODE DISPLAY TESTED")
     print("="*80)
