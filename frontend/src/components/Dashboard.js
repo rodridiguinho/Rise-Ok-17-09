@@ -17,6 +17,7 @@ import AdminSettings from './Dashboard/AdminSettings';
 import SalesRanking from './Dashboard/SalesRanking';
 import PassengerControl from './Dashboard/PassengerControl';
 import TransactionMigration from './Dashboard/TransactionMigration';
+import InternalControl from './Dashboard/InternalControl';
 
 const Dashboard = () => {
   const { user } = useAuth();
