@@ -362,6 +362,13 @@ const PassengerControlDirect = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setIsAddReservationModalOpen(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Adicionar Reserva</span>
+          </button>
           <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded">
             {reservations.length} Reservas Ativas
           </span>
