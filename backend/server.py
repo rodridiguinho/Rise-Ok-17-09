@@ -1031,9 +1031,9 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
             if "updatedAt" in transaction:
                 transaction["updatedAt"] = transaction["updatedAt"].isoformat()
         
-        # Separate entrada and saida transactions
-        entrada_transactions = [t for t in all_transactions if t.get('type') == 'entrada']
-        saida_transactions = [t for t in all_transactions if t.get('type') == 'saida']
+        # Separate entrada and saida transactions (include new types)
+        entrada_transactions = [t for t in all_transactions if t.get('type') in ['entrada', 'entrada_vendas']]
+        saida_transactions = [t for t in all_transactions if t.get('type') in ['saida', 'saida_vendas']]
         
         # Calculate sales metrics (handle None values)
         total_sales = sum((t.get('saleValue') or 0) if t.get('saleValue') is not None else (t.get('amount') or 0) for t in entrada_transactions)
