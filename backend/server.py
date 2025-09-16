@@ -1083,7 +1083,7 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
 
 @reports_router.get("/complete-analysis")
 async def get_complete_analysis(start_date: str = None, end_date: str = None):
-    """Obter análise completa por período"""
+    """Obter análise completa por período - TODAS as entradas e saídas (vendas + outras)"""
     try:
         # Build date filter
         date_filter = {}
@@ -1109,25 +1109,45 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
                 transaction["updatedAt"] = transaction["updatedAt"].isoformat()
         
         # Separate by type (include ALL entrada and saida types)
-        entradas = [t for t in transactions if t.get('type') in ['entrada', 'entrada_vendas']]
-        saidas = [t for t in transactions if t.get('type') in ['saida', 'saida_vendas']]
+        entradas_vendas = [t for t in transactions if t.get('type') == 'entrada_vendas']
+        entradas_outras = [t for t in transactions if t.get('type') == 'entrada']
+        saidas_vendas = [t for t in transactions if t.get('type') == 'saida_vendas']
+        saidas_outras = [t for t in transactions if t.get('type') == 'saida']
+        
+        # Combine for totals
+        entradas_todas = entradas_vendas + entradas_outras
+        saidas_todas = saidas_vendas + saidas_outras
         
         # Calculate totals
-        total_entradas = sum(t.get('amount', 0) for t in entradas)
-        total_saidas = sum(t.get('amount', 0) for t in saidas)
+        total_entradas_vendas = sum(t.get('amount', 0) for t in entradas_vendas)
+        total_entradas_outras = sum(t.get('amount', 0) for t in entradas_outras)
+        total_entradas = total_entradas_vendas + total_entradas_outras
+        
+        total_saidas_vendas = sum(t.get('amount', 0) for t in saidas_vendas)
+        total_saidas_outras = sum(t.get('amount', 0) for t in saidas_outras)
+        total_saidas = total_saidas_vendas + total_saidas_outras
+        
         balance = total_entradas - total_saidas
         
         return {
             "period": {"start_date": start_date, "end_date": end_date},
             "summary": {
                 "total_entradas": total_entradas,
+                "total_entradas_vendas": total_entradas_vendas,
+                "total_entradas_outras": total_entradas_outras,
                 "total_saidas": total_saidas,
+                "total_saidas_vendas": total_saidas_vendas,
+                "total_saidas_outras": total_saidas_outras,
                 "balance": balance,
-                "entradas_count": len(entradas),
-                "saidas_count": len(saidas)
+                "entradas_vendas_count": len(entradas_vendas),
+                "entradas_outras_count": len(entradas_outras),
+                "saidas_vendas_count": len(saidas_vendas),
+                "saidas_outras_count": len(saidas_outras)
             },
-            "entradas": entradas,
-            "saidas": saidas,
+            "entradas_vendas": entradas_vendas,
+            "entradas_outras": entradas_outras,
+            "saidas_vendas": saidas_vendas,
+            "saidas_outras": saidas_outras,
             "all_transactions": transactions
         }
     except Exception as e:
