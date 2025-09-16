@@ -602,11 +602,8 @@ const PassengerControlDirect = () => {
     try {
       setLoading(true);
       
-      // CORREÇÃO: Apenas marcar como oculta no controle de passageiros
-      // NÃO deletar a transação de vendas
-      const response = await api.put(`/transactions/${reservationId}`, {
-        hiddenFromPassengerControl: true
-      });
+      // CORREÇÃO: Usar endpoint específico que apenas oculta do controle
+      const response = await api.patch(`/transactions/${reservationId}/hide-from-passenger-control`);
       
       if (response.status === 200) {
         toast({
