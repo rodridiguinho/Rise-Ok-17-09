@@ -145,18 +145,18 @@ const AdminSettings = () => {
       // Salvar as configurações da empresa
       const response = await api.post('/api/company/settings', companySettings);
       
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         toast({
           title: "Configurações da empresa salvas",
           description: "As informações da empresa foram atualizadas com sucesso.",
         });
       }
     } catch (error) {
-      // Por enquanto, apenas simular o sucesso até implementarmos o endpoint
-      console.log('Configurações salvas localmente:', companySettings);
+      console.error('Erro ao salvar configurações da empresa:', error);
       toast({
-        title: "Configurações da empresa salvas",
-        description: "As informações da empresa foram atualizadas com sucesso.",
+        variant: "destructive",
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as configurações da empresa. Tente novamente.",
       });
     }
   };
