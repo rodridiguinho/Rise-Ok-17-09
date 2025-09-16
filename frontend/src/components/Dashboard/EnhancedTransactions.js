@@ -1081,7 +1081,7 @@ const EnhancedTransactions = () => {
     console.log('📋 Selected transaction:', selectedTransaction);
     console.log('📝 New transaction data:', newTransaction);
     
-    if (!newTransaction.type || !newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.paymentMethod) {
+    if (!newTransaction.type || !newTransaction.category || !newTransaction.description || !newTransaction.amount || !newTransaction.paymentMethod || !newTransaction.account) {
       toast({
         variant: "destructive",
         title: "Erro",
