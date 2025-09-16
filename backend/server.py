@@ -854,15 +854,18 @@ async def create_transaction(transaction: TransactionCreate):
         if transaction.suppliers:
             for supplier in transaction.suppliers:
                 if supplier.get('paymentStatus') == 'Pago' and supplier.get('name') and supplier.get('value'):
+                    # CORREÇÃO: Usar saida_vendas quando a entrada for entrada_vendas
+                    expense_type = "saida_vendas" if transaction.type == "entrada_vendas" else "saida"
+                    
                     expense_transaction = {
                         "id": str(uuid.uuid4()),
                         "date": date.today().strftime("%Y-%m-%d"),
                         "time": datetime.now().strftime("%H:%M"),
-                        "type": "saida",
+                        "type": expense_type,  # CORREÇÃO: Tipo dinâmico baseado na entrada
                         "category": "Pagamento a Fornecedor",
                         "description": f"Pagamento a {supplier['name']} - Ref: {transaction.description}",
                         "amount": float(supplier['value']),
-                        "paymentMethod": transaction.paymentMethod or "Dinheiro",
+                        "paymentMethod": transaction.paymentMethod or "PIX",
                         "supplier": supplier['name'],
                         "saleReference": created_transaction.get('id', ''),
                         "additionalInfo": f"Gerado automaticamente para fornecedor: {supplier['name']}",
