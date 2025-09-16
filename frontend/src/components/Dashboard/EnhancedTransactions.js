@@ -2381,24 +2381,6 @@ const EnhancedTransactions = () => {
                         onChange={(e) => setNewTransaction({...newTransaction, clientReservationCode: e.target.value})}
                       />
                     </div>
-
-                    <div className="space-y-2">
-                      <Label>Cidade de Saída</Label>
-                      <Input
-                        placeholder="Ex: São Paulo (GRU)"
-                        value={newTransaction.departureCity}
-                        onChange={(e) => setNewTransaction({...newTransaction, departureCity: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Cidade de Chegada</Label>
-                      <Input
-                        placeholder="Ex: Rio de Janeiro (SDU)"
-                        value={newTransaction.arrivalCity}
-                        onChange={(e) => setNewTransaction({...newTransaction, arrivalCity: e.target.value})}
-                      />
-                    </div>
                   </div>
 
                   {/* Segunda linha - Datas e tipo de viagem */}
