@@ -450,7 +450,12 @@ const PassengerControlDirect = () => {
                     <div className="flex items-center text-sm">
                       <Calendar className="h-4 w-4 mr-2 text-purple-600" />
                       <span>
-                        {new Date(reservation.departureDate).toLocaleDateString('pt-BR')}
+                        Ida: {new Date(reservation.departureDate).toLocaleDateString('pt-BR')}
+                        {reservation.returnDate && reservation.tripType === 'ida-volta' && (
+                          <span className="ml-3 pl-3 border-l border-gray-300">
+                            Volta: {new Date(reservation.returnDate).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
                       </span>
                     </div>
                   )}
