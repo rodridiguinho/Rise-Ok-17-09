@@ -140,17 +140,17 @@ backend:
           comment: "🎯 PASSENGER CONTROL EMISSIONTYPE AND SUPPLIERPHONE FIELD PERSISTENCE - COMPLETE SUCCESS: Successfully tested the exact functionality reported by user as not working using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ BASE TRANSACTION CREATION: Created test transaction (ID: 68c7ee5fbcaf86908c51fbd7) for testing emissionType and supplierPhone fields. ✅ PUT /api/transactions/{id} ENDPOINT: Successfully updated transaction with emissionType='E-ticket digital' and supplierPhone='(11) 99999-8888' fields. Both fields accepted by API without errors. ✅ API ACCEPTANCE AND PERSISTENCE: Both fields correctly saved in PUT response - emissionType: 'E-ticket digital', supplierPhone: '(11) 99999-8888'. ✅ DATABASE PERSISTENCE: Verified via GET /api/transactions that both fields correctly persisted to MongoDB database and are retrievable. ✅ FIELD RETRIEVAL: Both emissionType and supplierPhone fields can be retrieved correctly via GET API calls. ✅ CONCLUSION: The user-reported issue with emissionType and supplierPhone not saving is NOT a backend API problem. The backend correctly handles, accepts, persists, and returns these fields. The issue is likely frontend-related (form submission, field mapping, or UI state management)."
 
 frontend:
-  - task: "Fix Emission Type and Supplier Phone Saving Bug"
+  - task: "Internal Control Module Implementation"
     implemented: true
     working: true
-    file: "frontend/src/components/Dashboard/PassengerControl.js"
+    file: "frontend/src/components/Dashboard/InternalControl.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
-          comment: "BUG COMPLETELY RESOLVED - BACKEND AND FRONTEND FIXES IMPLEMENTED: ✅ BACKEND API WORKING: Tests confirm PUT /api/transactions/{id} correctly accepts and saves emissionType and supplierPhone fields to MongoDB. ✅ FRONTEND CODE FIXED: Replaced PassengerControl.js with complete working version from PassengerControlDirect.js containing supplier fields. ✅ NEW MODAL FEATURES: Full 'Informações do Fornecedor' section with supplier dropdown (CVC, Decolar, etc.), emission type selector (E-ticket, Voucher, etc.), and supplier phone input. ✅ DATA PERSISTENCE: loadReservations now loads emissionType and supplierPhone from transaction data, setSelectedReservation initializes fields with existing values, saveReservationChanges sends all fields to backend correctly. ✅ ROOT CAUSE FIXED: Problem was wrong modal being displayed due to import conflicts - now using correct PassengerControlDirect modal with all supplier fields. NOTE: Browser cache may show old modal temporarily - users should refresh browser to see new modal with supplier fields."
+          comment: "✅ INTERNAL CONTROL MODULE FULLY IMPLEMENTED AND TESTED: Successfully implemented complete Internal Control module with all 5 sections. ✅ COMPONENT CREATION: Created comprehensive InternalControl.js component with all required sections - Investimento de Sócios, Pagamentos de Clientes Parcelados (with 'Número de registro gerado na venda' field), Controle de Cliente com Controle de Milhas, Contas com Sócios (with 'Data de retirada' field), Links de Consolidadoras/Operadores/Serviços. ✅ SIDEBAR INTEGRATION: Added 'Controle Interno' button to sidebar with FolderClosed icon, properly integrated with routing in Dashboard.js. ✅ UI COMPONENTS: Created all necessary UI components (card.js, button.js, input.js, label.js) for proper functionality. ✅ FUNCTIONAL TESTING: Successfully tested form submission with sample data - 'João Silva' investment of R$ 50,000.00 saved correctly, form reset after submission, toast notifications working, data displayed in formatted cards with Brazilian Real currency formatting. ✅ NAVIGATION TESTING: Tab navigation between all 5 sections working perfectly - each section shows with proper styling and forms. ✅ VALIDATION: Form validation working with required fields and toast error messages. ✅ INDEPENDENT SYSTEM: Module operates independently from main system as requested, using local component state for data storage."
 
   - task: "Company Settings API"
     implemented: true
