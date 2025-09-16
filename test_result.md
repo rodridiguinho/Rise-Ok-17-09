@@ -929,6 +929,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Internal Code Display in Automatic Outputs Testing - COMPLETED ✅"
     - "Critical Transaction Types Bug Fix - entrada_vendas to saida_vendas - COMPLETED ✅"
     - "Users API Endpoints Testing - COMPLETED ✅"
     - "Passenger Field Persistence Fixes - COMPLETED ✅"
@@ -948,11 +949,11 @@ test_plan:
     - "Analytics Error Investigation and Fix - COMPLETED ✅"
   stuck_tasks: []
   test_all: false
-  test_priority: "critical_bug_fix_completed"
+  test_priority: "internal_code_testing_completed"
 
 agent_communication:
     - agent: "testing"
-      message: "🎯 REVIEW REQUEST TRANSACTION VERIFICATION COMPLETED - ALL OBJECTIVES ACHIEVED: Successfully completed comprehensive transaction verification and test data identification using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ TRANSACTION LISTING: Retrieved 56 total transactions from database via GET /api/transactions endpoint. ✅ ORDERING VERIFICATION: Confirmed transactions are correctly ordered by date/time (most recent first) - verified from 2025-09-15 (Douglas Domingos da Silva) to 2025-01-15 (Venda com custo fornecedor - Teste 1). ✅ TEST TRANSACTION IDENTIFICATION: Found exactly 3 test transactions that can be safely removed: (1) ID: 68c8a2ae2186ca046c60f67e - 'Venda com custo fornecedor - Teste 3' (R$ 800.00), (2) ID: 68c8a2ae2186ca046c60f67d - 'Venda com custo fornecedor - Teste 2' (R$ 1500.00), (3) ID: 68c8a2ae2186ca046c60f67c - 'Venda com custo fornecedor - Teste 1' (R$ 2000.00). All contain 'teste' keyword and are clearly test data. ✅ SALES-PERFORMANCE ENDPOINT: GET /api/reports/sales-performance working perfectly for September 2025, showing accurate supplier costs calculation (R$ 69,684.75) and proper financial metrics. ✅ TRANSACTION ANALYSIS: System contains 22 entrada transactions, 34 saída transactions, with 3 transactions having supplier costs populated. All review request requirements successfully completed."
+      message: "✅ INTERNAL CODE DISPLAY TESTING COMPLETED SUCCESSFULLY: Tested the exact functionality from review request - creating entrada_vendas with internalReservationCode 'RT-2025-TEST123' and verifying that automatic saída outputs include the internal code in their descriptions. Both supplier payment ('Pagamento a Fornecedor Code Test - Ref: Venda teste código interno (RT-2025-TEST123)') and commission payment ('Comissão para Fernando Dos Anjos - Ref: Venda teste código interno (RT-2025-TEST123)') correctly display the internal code, ensuring complete traceability. The system is working exactly as requested - internal sale codes appear in automatic outputs."
     - agent: "testing"
       message: "🚨 SALES PERFORMANCE ENDPOINT INVESTIGATION COMPLETE - CRITICAL ISSUE IDENTIFIED: Successfully debugged why /api/reports/sales-performance returns zeros for analytics. ROOT CAUSE: The endpoint returns 404 Not Found because separate route files in /app/backend/routes/ are NOT being imported into main server.py. The endpoint exists with complete implementation in reports_routes.py but is inaccessible. SOLUTION: Import the reports router using app.include_router(reports_router) in server.py. FIELD MAPPING CONFIRMED: Analytics logic is working correctly - when transactions have supplierValue fields, calculations work properly (verified with test data showing R$ 1800.00 supplier costs). The issue is purely routing, not calculation logic."
     - agent: "testing"
