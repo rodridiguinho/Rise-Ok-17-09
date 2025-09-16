@@ -101,8 +101,8 @@ const PassengerControlDirect = () => {
       
       const entryTransactions = response.filter(transaction => 
         (transaction.type === 'entrada' || transaction.type === 'entrada_vendas') && 
-        transaction.internalReservationCode &&
-        (transaction.departureCity || transaction.arrivalCity)
+        transaction.internalReservationCode
+        // Removed city requirement since flight details are managed in the modal
       );
 
       const reservationsData = entryTransactions.map(transaction => ({
