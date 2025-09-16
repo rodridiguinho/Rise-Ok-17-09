@@ -917,6 +917,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Critical Transaction Types Bug Fix - entrada_vendas to saida_vendas - COMPLETED ✅"
     - "Users API Endpoints Testing - COMPLETED ✅"
     - "Passenger Field Persistence Fixes - COMPLETED ✅"
     - "Review Request New Functionalities Testing - COMPLETED ✅"
@@ -935,7 +936,7 @@ test_plan:
     - "Analytics Error Investigation and Fix - COMPLETED ✅"
   stuck_tasks: []
   test_all: false
-  test_priority: "users_api_completed"
+  test_priority: "critical_bug_fix_completed"
 
 agent_communication:
     - agent: "testing"
