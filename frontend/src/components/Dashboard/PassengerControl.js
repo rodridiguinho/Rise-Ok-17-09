@@ -583,7 +583,36 @@ const PassengerControlDirect = () => {
     return notifications.sort((a, b) => a.priority - b.priority);
   };
 
-  const notifications = getNotifications();
+  const deleteReservation = async (reservationId) => {
+    if (!confirm('Tem certeza que deseja excluir esta reserva? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.delete(`/transactions/${reservationId}`);
+      
+      if (response.status === 200) {
+        toast({
+          variant: "default",
+          title: "Reserva excluída",
+          description: "Reserva excluída com sucesso!"
+        });
+        
+        // Recarregar a lista de reservas
+        await loadReservations();
+      }
+    } catch (error) {
+      console.error('Erro ao excluir reserva:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.response?.data?.detail || "Erro ao excluir reserva"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
