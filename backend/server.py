@@ -1148,7 +1148,7 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
 
 @reports_router.get("/sales-performance")
 async def get_sales_performance(start_date: str = None, end_date: str = None):
-    """Analytics específico de vendas (som entradas e saídas relacionadas)"""
+    """Analytics específico de vendas (APENAS custos e comissões diretos das entradas)"""
     try:
         # Build date filter
         date_filter = {}
@@ -1160,61 +1160,38 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
                 ]
             }
         
-        # Get ALL transactions in period (both entrada and saida)
-        all_transactions = await db.transactions.find(date_filter).to_list(None)
+        # Get ONLY entrada transactions (sales)
+        entrada_transactions = await db.transactions.find({
+            **date_filter,
+            "type": "entrada"
+        }).to_list(None)
         
         # Convert ObjectIds to strings for JSON serialization
-        for transaction in all_transactions:
+        for transaction in entrada_transactions:
             transaction["id"] = str(transaction["_id"])
             transaction["_id"] = str(transaction["_id"])
-            # Convert datetime objects to strings
             if "createdAt" in transaction:
                 transaction["createdAt"] = transaction["createdAt"].isoformat()
             if "updatedAt" in transaction:
                 transaction["updatedAt"] = transaction["updatedAt"].isoformat()
         
-        # Separate entrada and saida transactions
-        entrada_transactions = [t for t in all_transactions if t.get('type') == 'entrada']
-        saida_transactions = [t for t in all_transactions if t.get('type') == 'saida']
-        
-        # Sales totals from entrada transactions
+        # Calculate metrics ONLY from entrada transactions (direct values)
         total_sales = sum(t.get("amount", 0) for t in entrada_transactions)
         total_quantity = len(entrada_transactions)
         
-        # Calculate commissions from both entrada (direct) and saida transactions
-        total_commissions = 0
-        
-        # From entrada transactions (direct commission field)
-        for transaction in entrada_transactions:
-            if transaction.get("commissionValue"):
-                total_commissions += transaction.get("commissionValue", 0)
-        
-        # From saida transactions (commission payments)
-        for transaction in saida_transactions:
-            description = transaction.get("description", "").lower()
-            category = transaction.get("category", "").lower()
-            if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
-                total_commissions += transaction.get("amount", 0)
-        
-        # Calculate supplier payments from both entrada (direct) and saida transactions
+        # Calculate supplier costs ONLY from direct supplierValue field
         total_supplier_payments = 0
-        
-        # From entrada transactions (direct supplier cost field)
         for transaction in entrada_transactions:
             if transaction.get("supplierValue"):
                 total_supplier_payments += transaction.get("supplierValue", 0)
         
-        # From saida transactions (supplier payments)
-        for transaction in saida_transactions:
-            description = transaction.get("description", "").lower()
-            category = transaction.get("category", "").lower()
-            supplier = transaction.get("supplier", "")
-            if ("fornecedor" in description or "fornecedor" in category or 
-                "pagamento a fornecedor" in category.lower() or
-                supplier):
-                total_supplier_payments += transaction.get("amount", 0)
+        # Calculate commissions ONLY from direct commissionValue field
+        total_commissions = 0
+        for transaction in entrada_transactions:
+            if transaction.get("commissionValue"):
+                total_commissions += transaction.get("commissionValue", 0)
         
-        # Net profit from sales
+        # Net profit from sales (direct costs only)
         net_sales_profit = total_sales - total_commissions - total_supplier_payments
         
         # Average ticket
