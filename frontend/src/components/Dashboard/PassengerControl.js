@@ -25,6 +25,7 @@ const PassengerControlDirect = () => {
   const [loading, setLoading] = useState(true);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [isAddPassengerOpen, setIsAddPassengerOpen] = useState(false);
+  const [isAddReservationModalOpen, setIsAddReservationModalOpen] = useState(false);
   const [newPassenger, setNewPassenger] = useState({
     name: '',
     document: '',
