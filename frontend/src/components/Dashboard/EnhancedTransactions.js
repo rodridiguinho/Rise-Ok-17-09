@@ -3267,8 +3267,8 @@ const EnhancedTransactions = () => {
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                            <span className={`text-lg font-bold ${transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
-                              {transaction.type === 'entrada' ? '+' : '-'} {formatCurrency(transaction.amount)}
+                            <span className={`text-lg font-bold ${(transaction.type === 'entrada' || transaction.type === 'entrada_vendas') ? 'text-green-600' : 'text-red-600'}`}>
+                              {(transaction.type === 'entrada' || transaction.type === 'entrada_vendas') ? '+' : '-'} {formatCurrency(transaction.amount)}
                             </span>
                           </div>
                         </div>
