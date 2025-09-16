@@ -1006,7 +1006,7 @@ async def get_transaction_summary():
 
 @reports_router.get("/sales-analysis")
 async def get_sales_analysis(start_date: str = None, end_date: str = None):
-    """Obter análise de vendas por período (inclui custos de todas as fontes)"""
+    """Obter análise de vendas por período - APENAS entrada_vendas e saida_vendas"""
     try:
         # Build date filter
         date_filter = {}
@@ -1018,7 +1018,7 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
                 ]
             }
         
-        # Get ALL transactions in period (both entrada and saida)
+        # Get ALL transactions in period
         all_transactions = await db.transactions.find(date_filter).to_list(None)
         
         # Convert ObjectIds to strings for JSON serialization
@@ -1031,44 +1031,37 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
             if "updatedAt" in transaction:
                 transaction["updatedAt"] = transaction["updatedAt"].isoformat()
         
-        # Separate entrada and saida transactions (include new types)
-        entrada_transactions = [t for t in all_transactions if t.get('type') in ['entrada', 'entrada_vendas']]
-        saida_transactions = [t for t in all_transactions if t.get('type') in ['saida', 'saida_vendas']]
+        # NOVA LÓGICA: APENAS entrada_vendas e saida_vendas (vendas puras)
+        entrada_vendas = [t for t in all_transactions if t.get('type') == 'entrada_vendas']
+        saida_vendas = [t for t in all_transactions if t.get('type') == 'saida_vendas']
         
         # Calculate sales metrics (handle None values)
-        total_sales = sum((t.get('saleValue') or 0) if t.get('saleValue') is not None else (t.get('amount') or 0) for t in entrada_transactions)
+        total_sales = sum((t.get('saleValue') or 0) if t.get('saleValue') is not None else (t.get('amount') or 0) for t in entrada_vendas)
         
-        # Calculate supplier costs from both entrada (direct) and saida transactions
+        # Calculate supplier costs APENAS from saida_vendas
         total_supplier_costs = 0
         
-        # From entrada transactions (direct supplier cost field)
-        for transaction in entrada_transactions:
+        # From entrada_vendas (direct supplier cost field)
+        for transaction in entrada_vendas:
             if transaction.get("supplierValue"):
                 total_supplier_costs += transaction.get("supplierValue", 0)
         
-        # From saida transactions (supplier payments)
-        for transaction in saida_transactions:
-            description = transaction.get("description", "").lower()
-            category = transaction.get("category", "").lower()
-            supplier = transaction.get("supplier", "")
-            if ("fornecedor" in description or "fornecedor" in category or 
-                "pagamento a fornecedor" in category.lower() or
-                supplier):
-                total_supplier_costs += transaction.get("amount", 0)
+        # From saida_vendas (supplier payments and sales commissions)
+        for transaction in saida_vendas:
+            total_supplier_costs += transaction.get("amount", 0)
         
-        # Calculate commissions ONLY from entrada transactions (direct commission field)
-        # Avoid double counting: don't include saida commissions as they duplicate commissionValue
+        # Calculate commissions ONLY from entrada_vendas (direct commission field)
         total_commissions = 0
         
-        # From entrada transactions (direct commission field only)
-        for transaction in entrada_transactions:
+        # From entrada_vendas (direct commission field only)
+        for transaction in entrada_vendas:
             if transaction.get("commissionValue"):
                 total_commissions += transaction.get("commissionValue", 0)
         
         net_profit = total_sales - total_supplier_costs - total_commissions
         
         # Count transactions
-        sales_count = len(entrada_transactions)
+        sales_count = len(entrada_vendas)
         average_sale = total_sales / sales_count if sales_count > 0 else 0
         
         return {
@@ -1081,7 +1074,8 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
                 "sales_count": sales_count,
                 "average_sale": average_sale
             },
-            "transactions": entrada_transactions
+            "transactions": entrada_vendas,
+            "supplier_payments": saida_vendas
         }
     except Exception as e:
         logging.error(f"Sales analysis error: {str(e)}")
