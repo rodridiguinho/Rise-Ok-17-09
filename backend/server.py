@@ -1559,7 +1559,7 @@ async def generate_expenses_manually(transaction_id: str):
                             "time": datetime.now().strftime("%H:%M"),
                             "type": expense_type,  # CORREÇÃO: Tipo dinâmico baseado na entrada
                             "category": "Pagamento a Fornecedor",
-                            "description": f"Pagamento a {supplier['name']} - Ref: {original_transaction.get('description', '')}",
+                            "description": f"Pagamento a {supplier['name']} - Ref: {original_transaction.get('description', '')}" + (f" ({original_transaction.get('internalReservationCode', '')})" if original_transaction.get('internalReservationCode') else ""),
                             "amount": float(supplier['value']),
                             "paymentMethod": original_transaction.get('paymentMethod', 'PIX'),
                             "supplier": supplier['name'],
