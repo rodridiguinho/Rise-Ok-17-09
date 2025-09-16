@@ -86,6 +86,8 @@ const Dashboard = () => {
         return <SalesRanking />;
       case 'transaction-migration':
         return <TransactionMigration />;
+      case 'internal-control':
+        return <InternalControl />;
       default:
         return <Overview />;
     }
