@@ -1550,15 +1550,18 @@ async def generate_expenses_manually(transaction_id: str):
                     })
                     
                     if not existing_expense:
+                        # CORREÇÃO: Usar saida_vendas quando a entrada for entrada_vendas
+                        expense_type = "saida_vendas" if original_transaction.get('type') == "entrada_vendas" else "saida"
+                        
                         expense_transaction = {
                             "id": str(uuid.uuid4()),
                             "date": date.today().strftime("%Y-%m-%d"),
                             "time": datetime.now().strftime("%H:%M"),
-                            "type": "saida",
+                            "type": expense_type,  # CORREÇÃO: Tipo dinâmico baseado na entrada
                             "category": "Pagamento a Fornecedor",
                             "description": f"Pagamento a {supplier['name']} - Ref: {original_transaction.get('description', '')}",
                             "amount": float(supplier['value']),
-                            "paymentMethod": original_transaction.get('paymentMethod', 'Dinheiro'),
+                            "paymentMethod": original_transaction.get('paymentMethod', 'PIX'),
                             "supplier": supplier['name'],
                             "saleReference": original_transaction.get('id', ''),
                             "additionalInfo": f"Gerado manualmente para fornecedor: {supplier['name']}",
