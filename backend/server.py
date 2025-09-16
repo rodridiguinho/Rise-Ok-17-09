@@ -1136,7 +1136,7 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
 
 @reports_router.get("/sales-performance")
 async def get_sales_performance(start_date: str = None, end_date: str = None):
-    """Analytics específico de vendas (entrada_vendas + saida_vendas + compatibilidade)"""
+    """Analytics específico de vendas - APENAS entrada_vendas + saida_vendas"""
     try:
         # Build date filter
         date_filter = {}
@@ -1160,29 +1160,9 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
             if "updatedAt" in transaction:
                 transaction["updatedAt"] = transaction["updatedAt"].isoformat()
         
-        # Separate transactions for sales analytics
-        # NOVA LÓGICA: entrada_vendas + saida_vendas + compatibilidade com dados antigos
+        # NOVA LÓGICA: APENAS entrada_vendas e saida_vendas (vendas puras)
         entrada_vendas = [t for t in all_transactions if t.get('type') == 'entrada_vendas']
         saida_vendas = [t for t in all_transactions if t.get('type') == 'saida_vendas']
-        
-        # COMPATIBILIDADE: Se não há entrada_vendas, usar entrada antiga (dados existentes)
-        if not entrada_vendas:
-            entrada_vendas = [t for t in all_transactions if t.get('type') == 'entrada']
-        
-        # COMPATIBILIDADE: Se não há saida_vendas, usar lógica antiga de filtrar saídas
-        if not saida_vendas:
-            saida_transactions = [t for t in all_transactions if t.get('type') == 'saida']
-            # Filtrar apenas saídas relacionadas a vendas (fornecedores/comissões)
-            saida_vendas = []
-            for transaction in saida_transactions:
-                description = transaction.get("description", "").lower()
-                category = transaction.get("category", "").lower()
-                supplier = transaction.get("supplier", "")
-                if (("fornecedor" in description or "fornecedor" in category or 
-                     "pagamento a fornecedor" in category.lower() or supplier) or
-                    ("comissão" in description or "comissao" in description or 
-                     "comissão" in category or "comissao" in category)):
-                    saida_vendas.append(transaction)
         
         # Calculate sales metrics
         total_sales = sum(t.get("amount", 0) for t in entrada_vendas)
@@ -1196,17 +1176,11 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
             if transaction.get("supplierValue"):
                 total_supplier_payments += transaction.get("supplierValue", 0)
         
-        # From saida_vendas (supplier payments)
+        # From saida_vendas (ALL saida_vendas are sales-related costs)
         for transaction in saida_vendas:
-            description = transaction.get("description", "").lower()
-            category = transaction.get("category", "").lower()
-            supplier = transaction.get("supplier", "")
-            if ("fornecedor" in description or "fornecedor" in category or 
-                "pagamento a fornecedor" in category.lower() or supplier):
-                total_supplier_payments += transaction.get("amount", 0)
+            total_supplier_payments += transaction.get("amount", 0)
         
         # Calculate commissions ONLY from entrada_vendas (direct commission field)
-        # Avoid double counting: don't include saida_vendas commissions as they duplicate commissionValue
         total_commissions = 0
         
         # From entrada_vendas (direct commission field only)
@@ -1239,11 +1213,12 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
                 "start_date": start_date,
                 "end_date": end_date
             },
-            "transactions": entrada_vendas
+            "entrada_vendas": entrada_vendas,
+            "saida_vendas": saida_vendas
         }
         
     except Exception as e:
-        logging.error(f"Error getting sales performance: {str(e)}")
+        logging.error(f"Sales performance error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error getting sales performance")
 
 class CompanySettings(BaseModel):
