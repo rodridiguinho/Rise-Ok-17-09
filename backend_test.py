@@ -1248,6 +1248,229 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_internal_code_display_in_automatic_outputs():
+    """Test Internal Code Display in Automatic Outputs - REVIEW REQUEST"""
+    print_test_header("TESTE DO CÓDIGO INTERNO NAS SAÍDAS AUTOMÁTICAS - REVIEW REQUEST")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for internal code testing", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for internal code testing failed", str(e))
+        return
+    
+    # Test 2: Create entrada_vendas with internal code - EXACT DATA FROM REVIEW REQUEST
+    print("\n🎯 TEST 1: CRIAR NOVA ENTRADA_VENDAS COM CÓDIGO INTERNO")
+    try:
+        # Exact transaction data from review request
+        entrada_vendas_transaction = {
+            "type": "entrada_vendas",
+            "description": "Venda teste código interno",
+            "amount": 1500,
+            "internalReservationCode": "RT-2025-TEST123",
+            "suppliers": [
+                {
+                    "name": "Fornecedor Code Test",
+                    "value": 1200,
+                    "paymentStatus": "Pago",
+                    "paymentDate": "2025-09-16"
+                }
+            ],
+            "seller": "Fernando Dos Anjos",
+            "commissionValue": 75,
+            "commissionPaymentStatus": "Pago",
+            "category": "Vendas de Passagens",
+            "paymentMethod": "PIX"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=entrada_vendas_transaction, timeout=10)
+        print(f"Entrada Vendas Response Status: {response.status_code}")
+        print(f"Entrada Vendas Response Text: {response.text[:1000]}...")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                entrada_transaction_id = data["id"]
+                print_result(True, "Entrada Vendas Creation - SUCCESS", 
+                           f"Transaction created with ID: {entrada_transaction_id}")
+                
+                # Verify internal reservation code is saved
+                if data.get("internalReservationCode") == "RT-2025-TEST123":
+                    print_result(True, "Internal Reservation Code - Saved correctly", 
+                               f"Code saved: {data.get('internalReservationCode')}")
+                else:
+                    print_result(False, "Internal Reservation Code - Not saved", 
+                               f"Expected: RT-2025-TEST123, Got: {data.get('internalReservationCode')}")
+                
+                # Verify suppliers data
+                suppliers = data.get("suppliers", [])
+                if len(suppliers) == 1 and suppliers[0].get("name") == "Fornecedor Code Test":
+                    print_result(True, "Suppliers Data - Saved correctly", 
+                               f"Supplier: {suppliers[0].get('name')}, Value: {suppliers[0].get('value')}")
+                else:
+                    print_result(False, "Suppliers Data - Not saved correctly", 
+                               f"Expected 1 supplier 'Fornecedor Code Test', Got: {suppliers}")
+                
+                # Verify seller and commission
+                if data.get("seller") == "Fernando Dos Anjos" and data.get("commissionValue") == 75:
+                    print_result(True, "Seller and Commission - Saved correctly", 
+                               f"Seller: {data.get('seller')}, Commission: R$ {data.get('commissionValue')}")
+                else:
+                    print_result(False, "Seller and Commission - Not saved correctly", 
+                               f"Expected: Fernando Dos Anjos/75, Got: {data.get('seller')}/{data.get('commissionValue')}")
+                
+                # Test 3: Verify automatic saídas generation with internal code
+                print("\n🎯 TEST 2: VERIFICAR DESCRIÇÕES DAS SAÍDAS GERADAS")
+                
+                # Wait a moment for automatic transactions to be created
+                import time
+                time.sleep(2)
+                
+                # Get all transactions to find the generated ones
+                list_response = requests.get(f"{API_URL}/transactions", timeout=10)
+                if list_response.status_code == 200:
+                    all_transactions = list_response.json()
+                    
+                    # Find generated saída transactions
+                    supplier_saida = None
+                    commission_saida = None
+                    
+                    for transaction in all_transactions:
+                        # Look for supplier payment
+                        if (transaction.get("type") == "saida_vendas" and 
+                            "Pagamento a Fornecedor Code Test" in transaction.get("description", "")):
+                            supplier_saida = transaction
+                        
+                        # Look for commission payment
+                        if (transaction.get("type") == "saida_vendas" and 
+                            "Comissão para Fernando Dos Anjos" in transaction.get("description", "")):
+                            commission_saida = transaction
+                    
+                    # Test 4: Verify supplier output description contains internal code
+                    if supplier_saida:
+                        expected_supplier_desc = "Pagamento a Fornecedor Code Test - Ref: Venda teste código interno (RT-2025-TEST123)"
+                        actual_supplier_desc = supplier_saida.get("description", "")
+                        
+                        if expected_supplier_desc == actual_supplier_desc:
+                            print_result(True, "Supplier Output Description - Internal code included", 
+                                       f"✅ Correct: {actual_supplier_desc}")
+                        else:
+                            print_result(False, "Supplier Output Description - Internal code missing/incorrect", 
+                                       f"❌ Expected: {expected_supplier_desc}\n❌ Got: {actual_supplier_desc}")
+                        
+                        # Verify supplier output type is saida_vendas (not saida)
+                        if supplier_saida.get("type") == "saida_vendas":
+                            print_result(True, "Supplier Output Type - Correct type", 
+                                       f"✅ Type: {supplier_saida.get('type')}")
+                        else:
+                            print_result(False, "Supplier Output Type - Incorrect type", 
+                                       f"❌ Expected: saida_vendas, Got: {supplier_saida.get('type')}")
+                        
+                        # Verify supplier output amount
+                        if supplier_saida.get("amount") == 1200:
+                            print_result(True, "Supplier Output Amount - Correct amount", 
+                                       f"✅ Amount: R$ {supplier_saida.get('amount')}")
+                        else:
+                            print_result(False, "Supplier Output Amount - Incorrect amount", 
+                                       f"❌ Expected: R$ 1200, Got: R$ {supplier_saida.get('amount')}")
+                    else:
+                        print_result(False, "Supplier Output - Not generated", 
+                                   "❌ Supplier payment transaction not found")
+                    
+                    # Test 5: Verify commission output description contains internal code
+                    if commission_saida:
+                        expected_commission_desc = "Comissão para Fernando Dos Anjos - Ref: Venda teste código interno (RT-2025-TEST123)"
+                        actual_commission_desc = commission_saida.get("description", "")
+                        
+                        if expected_commission_desc == actual_commission_desc:
+                            print_result(True, "Commission Output Description - Internal code included", 
+                                       f"✅ Correct: {actual_commission_desc}")
+                        else:
+                            print_result(False, "Commission Output Description - Internal code missing/incorrect", 
+                                       f"❌ Expected: {expected_commission_desc}\n❌ Got: {actual_commission_desc}")
+                        
+                        # Verify commission output type is saida_vendas (not saida)
+                        if commission_saida.get("type") == "saida_vendas":
+                            print_result(True, "Commission Output Type - Correct type", 
+                                       f"✅ Type: {commission_saida.get('type')}")
+                        else:
+                            print_result(False, "Commission Output Type - Incorrect type", 
+                                       f"❌ Expected: saida_vendas, Got: {commission_saida.get('type')}")
+                        
+                        # Verify commission output amount
+                        if commission_saida.get("amount") == 75:
+                            print_result(True, "Commission Output Amount - Correct amount", 
+                                       f"✅ Amount: R$ {commission_saida.get('amount')}")
+                        else:
+                            print_result(False, "Commission Output Amount - Incorrect amount", 
+                                       f"❌ Expected: R$ 75, Got: R$ {commission_saida.get('amount')}")
+                    else:
+                        print_result(False, "Commission Output - Not generated", 
+                                   "❌ Commission payment transaction not found")
+                    
+                    # Test 6: Verify saleReference is correct
+                    print("\n🎯 TEST 3: CONFIRMAR RASTREABILIDADE")
+                    
+                    if supplier_saida and commission_saida:
+                        # Check saleReference in both generated transactions
+                        supplier_sale_ref = supplier_saida.get("saleReference")
+                        commission_sale_ref = commission_saida.get("saleReference")
+                        
+                        if supplier_sale_ref == entrada_transaction_id:
+                            print_result(True, "Supplier saleReference - Correct reference", 
+                                       f"✅ saleReference: {supplier_sale_ref}")
+                        else:
+                            print_result(False, "Supplier saleReference - Incorrect reference", 
+                                       f"❌ Expected: {entrada_transaction_id}, Got: {supplier_sale_ref}")
+                        
+                        if commission_sale_ref == entrada_transaction_id:
+                            print_result(True, "Commission saleReference - Correct reference", 
+                                       f"✅ saleReference: {commission_sale_ref}")
+                        else:
+                            print_result(False, "Commission saleReference - Incorrect reference", 
+                                       f"❌ Expected: {entrada_transaction_id}, Got: {commission_sale_ref}")
+                        
+                        # Final verification: Internal code appears in both descriptions
+                        supplier_has_code = "RT-2025-TEST123" in supplier_saida.get("description", "")
+                        commission_has_code = "RT-2025-TEST123" in commission_saida.get("description", "")
+                        
+                        if supplier_has_code and commission_has_code:
+                            print_result(True, "🎯 INTERNAL CODE TRACEABILITY - COMPLETE SUCCESS", 
+                                       f"✅ Internal code RT-2025-TEST123 appears in both supplier and commission outputs\n✅ Supplier description: {supplier_saida.get('description')}\n✅ Commission description: {commission_saida.get('description')}")
+                        else:
+                            print_result(False, "🎯 INTERNAL CODE TRACEABILITY - FAILED", 
+                                       f"❌ Internal code RT-2025-TEST123 missing from outputs\n❌ Supplier has code: {supplier_has_code}\n❌ Commission has code: {commission_has_code}")
+                    
+                else:
+                    print_result(False, f"Transaction list retrieval failed - HTTP {list_response.status_code}", 
+                               list_response.text)
+                
+            else:
+                print_result(False, "Entrada Vendas Creation - No ID returned", str(data))
+        else:
+            print_result(False, f"Entrada Vendas Creation - FAILED - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Internal Code Testing - Exception occurred", str(e))
+
 def test_critical_transaction_types_bug_fix():
     """Test Critical Transaction Types Bug Fix - REVIEW REQUEST"""
     print_test_header("CRITICAL TRANSACTION TYPES BUG FIX - REVIEW REQUEST TESTING")
