@@ -1232,6 +1232,7 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
                 "total_supplier_payments": total_supplier_payments,
                 "net_sales_profit": net_sales_profit,
                 "average_ticket": average_ticket,
+                "average_sale": average_ticket,  # Add average_sale field for frontend compatibility
                 "sales_margin": sales_margin
             },
             "period": {
