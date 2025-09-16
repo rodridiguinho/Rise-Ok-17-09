@@ -1248,6 +1248,369 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_analysis_endpoints_corrections():
+    """Test Analysis Endpoints Corrections - REVIEW REQUEST"""
+    print_test_header("ANALYSIS ENDPOINTS CORRECTIONS - REVIEW REQUEST TESTING")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    test_period_start = "2025-09-01"
+    test_period_end = "2025-09-16"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for analysis endpoints testing", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for analysis endpoints testing failed", str(e))
+        return
+    
+    # Test 2: Sales Analysis Endpoint - Should use ONLY entrada_vendas and saida_vendas
+    print(f"\n🎯 TEST 1: SALES ANALYSIS ENDPOINT - ONLY entrada_vendas and saida_vendas")
+    try:
+        sales_analysis_url = f"{API_URL}/reports/sales-analysis?start_date={test_period_start}&end_date={test_period_end}"
+        response = requests.get(sales_analysis_url, timeout=10)
+        
+        print(f"Sales Analysis Response Status: {response.status_code}")
+        print(f"Sales Analysis URL: {sales_analysis_url}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Sales Analysis - Endpoint accessible", 
+                       f"GET /api/reports/sales-analysis working correctly")
+            
+            # Verify response structure
+            if "sales" in data:
+                sales_data = data["sales"]
+                required_fields = ["total_sales", "total_supplier_costs", "total_commissions", "net_profit", "sales_count", "average_sale"]
+                missing_fields = [f for f in required_fields if f not in sales_data]
+                
+                if not missing_fields:
+                    print_result(True, "Sales Analysis - Response structure", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Display sales analysis values
+                    total_sales = sales_data.get("total_sales", 0)
+                    total_supplier_costs = sales_data.get("total_supplier_costs", 0)
+                    total_commissions = sales_data.get("total_commissions", 0)
+                    net_profit = sales_data.get("net_profit", 0)
+                    sales_count = sales_data.get("sales_count", 0)
+                    
+                    print_result(True, "Sales Analysis - Values retrieved", 
+                               f"Total Sales: R$ {total_sales:,.2f}, Supplier Costs: R$ {total_supplier_costs:,.2f}, Commissions: R$ {total_commissions:,.2f}, Net Profit: R$ {net_profit:,.2f}, Sales Count: {sales_count}")
+                    
+                    # Store sales analysis values for comparison
+                    global sales_analysis_values
+                    sales_analysis_values = {
+                        "total_sales": total_sales,
+                        "total_supplier_costs": total_supplier_costs,
+                        "total_commissions": total_commissions,
+                        "net_profit": net_profit,
+                        "sales_count": sales_count
+                    }
+                    
+                else:
+                    print_result(False, "Sales Analysis - Response structure", 
+                               f"Missing required fields: {missing_fields}")
+            else:
+                print_result(False, "Sales Analysis - Response structure", 
+                           "Missing 'sales' object in response")
+                
+            # Verify transaction types (should only include entrada_vendas and saida_vendas)
+            if "transactions" in data and "supplier_payments" in data:
+                entrada_vendas = data.get("transactions", [])
+                saida_vendas = data.get("supplier_payments", [])
+                
+                print_result(True, "Sales Analysis - Transaction segregation", 
+                           f"Found {len(entrada_vendas)} entrada_vendas and {len(saida_vendas)} saida_vendas transactions")
+                
+                # Verify transaction types are correct
+                entrada_types_correct = all(t.get("type") == "entrada_vendas" for t in entrada_vendas)
+                saida_types_correct = all(t.get("type") == "saida_vendas" for t in saida_vendas)
+                
+                if entrada_types_correct and saida_types_correct:
+                    print_result(True, "Sales Analysis - Transaction types validation", 
+                               "All transactions have correct types (entrada_vendas/saida_vendas only)")
+                else:
+                    print_result(False, "Sales Analysis - Transaction types validation", 
+                               "Some transactions have incorrect types")
+            
+        else:
+            print_result(False, f"Sales Analysis - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Sales Analysis endpoint test failed", str(e))
+    
+    # Test 3: Sales Performance Endpoint - Should use ONLY entrada_vendas and saida_vendas
+    print(f"\n🎯 TEST 2: SALES PERFORMANCE ENDPOINT - ONLY entrada_vendas and saida_vendas")
+    try:
+        sales_performance_url = f"{API_URL}/reports/sales-performance?start_date={test_period_start}&end_date={test_period_end}"
+        response = requests.get(sales_performance_url, timeout=10)
+        
+        print(f"Sales Performance Response Status: {response.status_code}")
+        print(f"Sales Performance URL: {sales_performance_url}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Sales Performance - Endpoint accessible", 
+                       f"GET /api/reports/sales-performance working correctly")
+            
+            # Verify response structure
+            if "sales" in data:
+                sales_data = data["sales"]
+                required_fields = ["total_sales", "total_quantity", "sales_count", "total_commissions", "total_supplier_payments", "net_sales_profit", "average_ticket", "sales_margin"]
+                missing_fields = [f for f in required_fields if f not in sales_data]
+                
+                if not missing_fields:
+                    print_result(True, "Sales Performance - Response structure", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Display sales performance values
+                    total_sales = sales_data.get("total_sales", 0)
+                    total_supplier_payments = sales_data.get("total_supplier_payments", 0)
+                    total_commissions = sales_data.get("total_commissions", 0)
+                    net_sales_profit = sales_data.get("net_sales_profit", 0)
+                    sales_count = sales_data.get("sales_count", 0)
+                    
+                    print_result(True, "Sales Performance - Values retrieved", 
+                               f"Total Sales: R$ {total_sales:,.2f}, Supplier Payments: R$ {total_supplier_payments:,.2f}, Commissions: R$ {total_commissions:,.2f}, Net Profit: R$ {net_sales_profit:,.2f}, Sales Count: {sales_count}")
+                    
+                    # Store sales performance values for comparison
+                    global sales_performance_values
+                    sales_performance_values = {
+                        "total_sales": total_sales,
+                        "total_supplier_costs": total_supplier_payments,  # Map to same field name
+                        "total_commissions": total_commissions,
+                        "net_profit": net_sales_profit,  # Map to same field name
+                        "sales_count": sales_count
+                    }
+                    
+                else:
+                    print_result(False, "Sales Performance - Response structure", 
+                               f"Missing required fields: {missing_fields}")
+            else:
+                print_result(False, "Sales Performance - Response structure", 
+                           "Missing 'sales' object in response")
+                
+            # Verify transaction types (should only include entrada_vendas and saida_vendas)
+            if "entrada_vendas" in data and "saida_vendas" in data:
+                entrada_vendas = data.get("entrada_vendas", [])
+                saida_vendas = data.get("saida_vendas", [])
+                
+                print_result(True, "Sales Performance - Transaction segregation", 
+                           f"Found {len(entrada_vendas)} entrada_vendas and {len(saida_vendas)} saida_vendas transactions")
+                
+                # Verify transaction types are correct
+                entrada_types_correct = all(t.get("type") == "entrada_vendas" for t in entrada_vendas)
+                saida_types_correct = all(t.get("type") == "saida_vendas" for t in saida_vendas)
+                
+                if entrada_types_correct and saida_types_correct:
+                    print_result(True, "Sales Performance - Transaction types validation", 
+                               "All transactions have correct types (entrada_vendas/saida_vendas only)")
+                else:
+                    print_result(False, "Sales Performance - Transaction types validation", 
+                               "Some transactions have incorrect types")
+            
+        else:
+            print_result(False, f"Sales Performance - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Sales Performance endpoint test failed", str(e))
+    
+    # Test 4: Complete Analysis Endpoint - Should use ALL types
+    print(f"\n🎯 TEST 3: COMPLETE ANALYSIS ENDPOINT - ALL transaction types")
+    try:
+        complete_analysis_url = f"{API_URL}/reports/complete-analysis?start_date={test_period_start}&end_date={test_period_end}"
+        response = requests.get(complete_analysis_url, timeout=10)
+        
+        print(f"Complete Analysis Response Status: {response.status_code}")
+        print(f"Complete Analysis URL: {complete_analysis_url}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Complete Analysis - Endpoint accessible", 
+                       f"GET /api/reports/complete-analysis working correctly")
+            
+            # Verify response structure
+            if "summary" in data:
+                summary_data = data["summary"]
+                required_fields = ["total_entradas", "total_entradas_vendas", "total_entradas_outras", "total_saidas", "total_saidas_vendas", "total_saidas_outras", "balance"]
+                missing_fields = [f for f in required_fields if f not in summary_data]
+                
+                if not missing_fields:
+                    print_result(True, "Complete Analysis - Response structure", 
+                               f"All required fields present: {required_fields}")
+                    
+                    # Display complete analysis values
+                    total_entradas = summary_data.get("total_entradas", 0)
+                    total_entradas_vendas = summary_data.get("total_entradas_vendas", 0)
+                    total_entradas_outras = summary_data.get("total_entradas_outras", 0)
+                    total_saidas = summary_data.get("total_saidas", 0)
+                    total_saidas_vendas = summary_data.get("total_saidas_vendas", 0)
+                    total_saidas_outras = summary_data.get("total_saidas_outras", 0)
+                    balance = summary_data.get("balance", 0)
+                    
+                    print_result(True, "Complete Analysis - Values retrieved", 
+                               f"Total Entradas: R$ {total_entradas:,.2f} (Vendas: R$ {total_entradas_vendas:,.2f}, Outras: R$ {total_entradas_outras:,.2f})")
+                    print_result(True, "Complete Analysis - Values retrieved (continued)", 
+                               f"Total Saídas: R$ {total_saidas:,.2f} (Vendas: R$ {total_saidas_vendas:,.2f}, Outras: R$ {total_saidas_outras:,.2f}), Balance: R$ {balance:,.2f}")
+                    
+                    # Store complete analysis values for comparison
+                    global complete_analysis_values
+                    complete_analysis_values = {
+                        "total_entradas": total_entradas,
+                        "total_entradas_vendas": total_entradas_vendas,
+                        "total_saidas": total_saidas,
+                        "balance": balance
+                    }
+                    
+                else:
+                    print_result(False, "Complete Analysis - Response structure", 
+                               f"Missing required fields: {missing_fields}")
+            else:
+                print_result(False, "Complete Analysis - Response structure", 
+                           "Missing 'summary' object in response")
+                
+            # Verify all transaction types are included
+            transaction_sections = ["entradas_vendas", "entradas_outras", "saidas_vendas", "saidas_outras"]
+            for section in transaction_sections:
+                if section in data:
+                    transactions = data.get(section, [])
+                    print_result(True, f"Complete Analysis - {section} section", 
+                               f"Found {len(transactions)} {section} transactions")
+                else:
+                    print_result(False, f"Complete Analysis - {section} section", 
+                               f"Missing {section} section in response")
+            
+        else:
+            print_result(False, f"Complete Analysis - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Complete Analysis endpoint test failed", str(e))
+    
+    # Test 5: Cross-validation between endpoints
+    print(f"\n🎯 TEST 4: CROSS-VALIDATION BETWEEN ENDPOINTS")
+    try:
+        # Verify Sales Analysis = Sales Performance (same period, same logic)
+        if 'sales_analysis_values' in globals() and 'sales_performance_values' in globals():
+            analysis_sales = sales_analysis_values.get("total_sales", 0)
+            performance_sales = sales_performance_values.get("total_sales", 0)
+            
+            if abs(analysis_sales - performance_sales) < 0.01:  # Allow for small floating point differences
+                print_result(True, "Cross-validation - Sales Analysis = Sales Performance", 
+                           f"Both endpoints return same sales total: R$ {analysis_sales:,.2f}")
+            else:
+                print_result(False, "Cross-validation - Sales Analysis ≠ Sales Performance", 
+                           f"Sales Analysis: R$ {analysis_sales:,.2f}, Sales Performance: R$ {performance_sales:,.2f}")
+            
+            # Verify supplier costs match
+            analysis_costs = sales_analysis_values.get("total_supplier_costs", 0)
+            performance_costs = sales_performance_values.get("total_supplier_costs", 0)
+            
+            if abs(analysis_costs - performance_costs) < 0.01:
+                print_result(True, "Cross-validation - Supplier costs match", 
+                           f"Both endpoints return same supplier costs: R$ {analysis_costs:,.2f}")
+            else:
+                print_result(False, "Cross-validation - Supplier costs don't match", 
+                           f"Sales Analysis: R$ {analysis_costs:,.2f}, Sales Performance: R$ {performance_costs:,.2f}")
+        
+        # Verify Complete Analysis > Sales Analysis (includes other revenues/expenses)
+        if 'sales_analysis_values' in globals() and 'complete_analysis_values' in globals():
+            analysis_sales = sales_analysis_values.get("total_sales", 0)
+            complete_entradas = complete_analysis_values.get("total_entradas", 0)
+            
+            if complete_entradas >= analysis_sales:
+                print_result(True, "Cross-validation - Complete Analysis ≥ Sales Analysis", 
+                           f"Complete entradas (R$ {complete_entradas:,.2f}) ≥ Sales analysis (R$ {analysis_sales:,.2f})")
+            else:
+                print_result(False, "Cross-validation - Complete Analysis < Sales Analysis", 
+                           f"Complete entradas (R$ {complete_entradas:,.2f}) < Sales analysis (R$ {analysis_sales:,.2f}) - This shouldn't happen")
+        
+        # Verify entrada_vendas and saida_vendas are counted correctly
+        if 'complete_analysis_values' in globals():
+            entradas_vendas = complete_analysis_values.get("total_entradas_vendas", 0)
+            if entradas_vendas > 0:
+                print_result(True, "Cross-validation - entrada_vendas counted", 
+                           f"entrada_vendas transactions found and counted: R$ {entradas_vendas:,.2f}")
+            else:
+                print_result(False, "Cross-validation - entrada_vendas not counted", 
+                           "No entrada_vendas transactions found in the test period")
+        
+    except Exception as e:
+        print_result(False, "Cross-validation test failed", str(e))
+    
+    # Test 6: Final validation summary
+    print(f"\n🎯 TEST 5: FINAL VALIDATION SUMMARY")
+    try:
+        validation_results = []
+        
+        # Check if all endpoints are working
+        endpoints_working = True
+        if 'sales_analysis_values' not in globals():
+            endpoints_working = False
+            validation_results.append("❌ Sales Analysis endpoint failed")
+        else:
+            validation_results.append("✅ Sales Analysis endpoint working")
+            
+        if 'sales_performance_values' not in globals():
+            endpoints_working = False
+            validation_results.append("❌ Sales Performance endpoint failed")
+        else:
+            validation_results.append("✅ Sales Performance endpoint working")
+            
+        if 'complete_analysis_values' not in globals():
+            endpoints_working = False
+            validation_results.append("❌ Complete Analysis endpoint failed")
+        else:
+            validation_results.append("✅ Complete Analysis endpoint working")
+        
+        # Check logic corrections
+        logic_correct = True
+        if ('sales_analysis_values' in globals() and 'sales_performance_values' in globals()):
+            analysis_sales = sales_analysis_values.get("total_sales", 0)
+            performance_sales = sales_performance_values.get("total_sales", 0)
+            if abs(analysis_sales - performance_sales) < 0.01:
+                validation_results.append("✅ Sales Analysis = Sales Performance (correct logic)")
+            else:
+                logic_correct = False
+                validation_results.append("❌ Sales Analysis ≠ Sales Performance (logic error)")
+        
+        if ('sales_analysis_values' in globals() and 'complete_analysis_values' in globals()):
+            analysis_sales = sales_analysis_values.get("total_sales", 0)
+            complete_entradas = complete_analysis_values.get("total_entradas", 0)
+            if complete_entradas >= analysis_sales:
+                validation_results.append("✅ Complete Analysis ≥ Sales Analysis (includes other revenues)")
+            else:
+                logic_correct = False
+                validation_results.append("❌ Complete Analysis < Sales Analysis (logic error)")
+        
+        # Print final results
+        for result in validation_results:
+            print(f"    {result}")
+        
+        if endpoints_working and logic_correct:
+            print_result(True, "🎯 ANALYSIS ENDPOINTS CORRECTIONS - ALL TESTS PASSED", 
+                       "All analysis endpoints working correctly with proper logic for entrada_vendas/saida_vendas")
+        else:
+            print_result(False, "🎯 ANALYSIS ENDPOINTS CORRECTIONS - SOME TESTS FAILED", 
+                       "Some analysis endpoints or logic corrections need attention")
+        
+    except Exception as e:
+        print_result(False, "Final validation summary failed", str(e))
+
 def test_review_request_transaction_verification():
     """Test Review Request - Verificar transações existentes e identificar transações de teste"""
     print_test_header("REVIEW REQUEST - Verificar Transações Existentes e Identificar Transações de Teste")
