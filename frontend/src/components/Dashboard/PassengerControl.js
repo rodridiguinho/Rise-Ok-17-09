@@ -516,8 +516,145 @@ const PassengerControlDirect = () => {
     };
   };
 
+  // Função para gerar notificações baseadas nas reservas
+  const getNotifications = () => {
+    const notifications = [];
+    const today = new Date();
+    
+    reservations.forEach(reservation => {
+      const travelStatus = getTravelStatus(reservation);
+      const passengerName = reservation.client || reservation.passengers[0]?.name || 'Cliente';
+      
+      // Notificações para viagens hoje
+      if (travelStatus.status === 'today') {
+        notifications.push({
+          id: `today-${reservation.id}`,
+          type: 'urgent',
+          icon: '🚨',
+          title: 'Viagem HOJE!',
+          message: `${passengerName} tem ${travelStatus.displayLabel.toLowerCase()} hoje (${reservation.internalCode})`,
+          reservation: reservation,
+          priority: 1
+        });
+      }
+      
+      // Notificações para viagens amanhã
+      if (travelStatus.status === 'tomorrow') {
+        notifications.push({
+          id: `tomorrow-${reservation.id}`,
+          type: 'warning',
+          icon: '⚠️',
+          title: 'Viagem Amanhã',
+          message: `${passengerName} tem ${travelStatus.displayLabel.toLowerCase()} amanhã (${reservation.internalCode})`,
+          reservation: reservation,
+          priority: 2
+        });
+      }
+      
+      // Notificações para viagens em 2-7 dias (importantes)
+      if (travelStatus.status === 'upcoming' && typeof travelStatus.daysCount === 'number' && travelStatus.daysCount <= 7) {
+        notifications.push({
+          id: `upcoming-${reservation.id}`,
+          type: 'info',
+          icon: '📅',
+          title: 'Viagem Próxima',
+          message: `${passengerName} tem ${travelStatus.displayLabel.toLowerCase()} em ${travelStatus.daysCount} dias (${reservation.internalCode})`,
+          reservation: reservation,
+          priority: 3
+        });
+      }
+      
+      // Notificações para clientes aguardando volta
+      if (travelStatus.phase === 'return') {
+        const daysUntilReturn = travelStatus.daysCount;
+        notifications.push({
+          id: `return-${reservation.id}`,
+          type: 'return',
+          icon: '🔄',
+          title: 'Aguardando Volta',
+          message: `${passengerName} está na viagem, volta ${daysUntilReturn === 0 ? 'hoje' : daysUntilReturn === 1 ? 'amanhã' : `em ${daysUntilReturn} dias`} (${reservation.internalCode})`,
+          reservation: reservation,
+          priority: travelStatus.status === 'today' ? 1 : travelStatus.status === 'tomorrow' ? 2 : 3
+        });
+      }
+    });
+    
+    // Ordenar por prioridade
+    return notifications.sort((a, b) => a.priority - b.priority);
+  };
+
+  const notifications = getNotifications();
+
   return (
     <div className="space-y-6">
+      {/* Notificações */}
+      {notifications.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center mb-4">
+            <Bell className="h-5 w-5 mr-2 text-orange-600" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              🔔 Notificações de Viagem ({notifications.length})
+            </h2>
+          </div>
+          
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {notifications.map(notification => (
+              <div 
+                key={notification.id}
+                className={`p-3 rounded-lg border-l-4 ${
+                  notification.type === 'urgent' ? 'bg-red-50 border-red-500' :
+                  notification.type === 'warning' ? 'bg-orange-50 border-orange-500' :
+                  notification.type === 'return' ? 'bg-blue-50 border-blue-500' :
+                  'bg-blue-50 border-blue-500'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-lg">{notification.icon}</span>
+                    <div>
+                      <h4 className={`font-medium ${
+                        notification.type === 'urgent' ? 'text-red-800' :
+                        notification.type === 'warning' ? 'text-orange-800' :
+                        notification.type === 'return' ? 'text-blue-800' :
+                        'text-blue-800'
+                      }`}>
+                        {notification.title}
+                      </h4>
+                      <p className={`text-sm ${
+                        notification.type === 'urgent' ? 'text-red-700' :
+                        notification.type === 'warning' ? 'text-orange-700' :
+                        notification.type === 'return' ? 'text-blue-700' :
+                        'text-blue-700'
+                      }`}>
+                        {notification.message}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => {
+                      // Scroll to the specific reservation
+                      const reservationElement = document.querySelector(`[data-reservation-id="${notification.reservation.id}"]`);
+                      if (reservationElement) {
+                        reservationElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        reservationElement.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                        setTimeout(() => {
+                          reservationElement.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                        }, 3000);
+                      }
+                    }}
+                    variant="outline"
+                    className="text-xs px-2 py-1 h-auto"
+                  >
+                    Ver Reserva
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
