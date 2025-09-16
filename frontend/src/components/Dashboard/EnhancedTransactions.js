@@ -1602,8 +1602,9 @@ const EnhancedTransactions = () => {
                     📋 Informações Adicionais
                   </h4>
                 </div>
+              </div>
 
-                {/* Multiple Products - MOVED UP */}
+              {/* Multiple Products - MOVED UP */}
               <div className="lg:col-span-3 border-b pb-4 mb-4">
                 <h3 className="text-lg font-semibold mb-4">📦 Produtos/Serviços da Venda</h3>
                 {newTransaction.products.map((product, index) => (
