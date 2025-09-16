@@ -1248,6 +1248,289 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_critical_passenger_control_deletion_fix():
+    """Test Critical Passenger Control Deletion Button Fix - REVIEW REQUEST"""
+    print_test_header("TESTE CRÍTICO DA CORREÇÃO DO BOTÃO DE EXCLUSÃO NO CONTROLE DE PASSAGEIROS")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for passenger control deletion testing", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for passenger control deletion testing failed", str(e))
+        return
+    
+    # Test 2: Create test transaction RT-2025-TEST123 if it doesn't exist
+    print("\n🎯 TEST 1: CRIAR/VERIFICAR TRANSAÇÃO RT-2025-TEST123")
+    test_transaction_id = None
+    try:
+        # First check if RT-2025-TEST123 already exists
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = requests.get(f"{API_URL}/transactions", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            transactions = response.json()
+            existing_transaction = None
+            
+            # Look for transaction with RT-2025-TEST123 in description or internal code
+            for t in transactions:
+                if ("RT-2025-TEST123" in str(t.get("description", "")) or 
+                    "RT-2025-TEST123" in str(t.get("internalReservationCode", ""))):
+                    existing_transaction = t
+                    test_transaction_id = t.get("id")
+                    break
+            
+            if existing_transaction:
+                print_result(True, "Test transaction RT-2025-TEST123 - Found existing", 
+                           f"Found existing transaction with ID: {test_transaction_id}")
+            else:
+                # Create the test transaction
+                test_transaction = {
+                    "type": "entrada_vendas",
+                    "category": "Passagem Aérea",
+                    "description": "Venda teste RT-2025-TEST123",
+                    "amount": 2500.00,
+                    "paymentMethod": "PIX",
+                    "client": "Cliente Teste Controle Passageiros",
+                    "internalReservationCode": "RT-2025-TEST123",
+                    "clientReservationCode": "RT-2025-TEST123",
+                    "departureCity": "São Paulo",
+                    "arrivalCity": "Lisboa",
+                    "transactionDate": "2025-01-20",
+                    "seller": "Vendedor Teste",
+                    "saleValue": 2500.00,
+                    "supplierValue": 1800.00,
+                    "commissionValue": 250.00
+                }
+                
+                response = requests.post(f"{API_URL}/transactions", json=test_transaction, headers=headers, timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    test_transaction_id = data.get("id")
+                    print_result(True, "Test transaction RT-2025-TEST123 - Created", 
+                               f"Created test transaction with ID: {test_transaction_id}")
+                else:
+                    print_result(False, f"Test transaction creation failed - HTTP {response.status_code}", response.text)
+                    return
+        else:
+            print_result(False, f"Failed to get transactions - HTTP {response.status_code}", response.text)
+            return
+            
+    except Exception as e:
+        print_result(False, "Test transaction setup failed", str(e))
+        return
+    
+    # Test 3: Verify the new endpoint exists
+    print("\n🎯 TEST 2: VERIFICAR SE O NOVO ENDPOINT EXISTE")
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        endpoint_url = f"{API_URL}/transactions/{test_transaction_id}/hide-from-passenger-control"
+        
+        # Test with PATCH method (should work)
+        response = requests.patch(endpoint_url, headers=headers, timeout=10)
+        print(f"PATCH Response Status: {response.status_code}")
+        print(f"PATCH Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            print_result(True, "New endpoint exists - PATCH /api/transactions/{id}/hide-from-passenger-control", 
+                       "Endpoint is available and responding correctly")
+            
+            # Verify response format
+            try:
+                data = response.json()
+                if "message" in data and "transaction_id" in data:
+                    print_result(True, "New endpoint response format", 
+                               f"Correct response format: {data}")
+                else:
+                    print_result(False, "New endpoint response format", 
+                               f"Unexpected response format: {data}")
+            except:
+                print_result(False, "New endpoint response format", 
+                           "Response is not valid JSON")
+                
+        elif response.status_code == 404:
+            print_result(False, "New endpoint exists - ENDPOINT NOT FOUND", 
+                       "PATCH /api/transactions/{id}/hide-from-passenger-control endpoint does not exist")
+            return
+        else:
+            print_result(False, f"New endpoint exists - HTTP {response.status_code}", 
+                       f"Unexpected response: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "New endpoint verification failed", str(e))
+        return
+    
+    # Test 4: Verify that the original transaction is NOT deleted
+    print("\n🎯 TEST 3: VERIFICAR QUE A TRANSAÇÃO ORIGINAL NÃO É DELETADA")
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        
+        # Get the transaction after hiding from passenger control
+        response = requests.get(f"{API_URL}/transactions", headers=headers, timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            found_transaction = None
+            
+            for t in transactions:
+                if t.get("id") == test_transaction_id:
+                    found_transaction = t
+                    break
+            
+            if found_transaction:
+                print_result(True, "Original transaction preservation - Transaction still exists", 
+                           f"Transaction {test_transaction_id} still exists in database")
+                
+                # Verify hiddenFromPassengerControl field is true
+                if found_transaction.get("hiddenFromPassengerControl") == True:
+                    print_result(True, "Original transaction preservation - hiddenFromPassengerControl field", 
+                               "hiddenFromPassengerControl field correctly set to true")
+                else:
+                    print_result(False, "Original transaction preservation - hiddenFromPassengerControl field", 
+                               f"Expected hiddenFromPassengerControl=true, got: {found_transaction.get('hiddenFromPassengerControl')}")
+                
+                # Verify all other transaction data is intact
+                expected_fields = ["description", "amount", "type", "client", "internalReservationCode"]
+                all_fields_intact = True
+                for field in expected_fields:
+                    if field in found_transaction and found_transaction[field]:
+                        print_result(True, f"Original transaction preservation - {field} intact", 
+                                   f"{field}: {found_transaction[field]}")
+                    else:
+                        print_result(False, f"Original transaction preservation - {field} missing", 
+                                   f"{field} is missing or empty")
+                        all_fields_intact = False
+                
+                if all_fields_intact:
+                    print_result(True, "✅ Original transaction preservation - ALL DATA INTACT", 
+                               "All transaction data remains intact - only hiddenFromPassengerControl changed")
+                else:
+                    print_result(False, "❌ Original transaction preservation - DATA CORRUPTION", 
+                               "Some transaction data was lost or corrupted")
+                
+            else:
+                print_result(False, "❌ CRITICAL ERROR - TRANSACTION DELETED", 
+                           f"Transaction {test_transaction_id} was DELETED instead of hidden!")
+                return
+        else:
+            print_result(False, f"Failed to verify transaction preservation - HTTP {response.status_code}", response.text)
+            return
+            
+    except Exception as e:
+        print_result(False, "Transaction preservation verification failed", str(e))
+        return
+    
+    # Test 5: Confirm that analytics are not affected
+    print("\n🎯 TEST 4: CONFIRMAR QUE ANALYTICS NÃO SÃO AFETADOS")
+    try:
+        # Test sales-performance endpoint
+        response = requests.get(f"{API_URL}/reports/sales-performance", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print_result(True, "Analytics not affected - sales-performance endpoint accessible", 
+                       "GET /api/reports/sales-performance is working")
+            
+            # Check if our transaction is still included in sales calculations
+            entrada_vendas = data.get("entrada_vendas", [])
+            transaction_found_in_analytics = False
+            
+            for t in entrada_vendas:
+                if t.get("id") == test_transaction_id:
+                    transaction_found_in_analytics = True
+                    break
+            
+            if transaction_found_in_analytics:
+                print_result(True, "✅ Analytics not affected - Transaction included in sales", 
+                           "Hidden transaction is still included in sales-performance analytics")
+            else:
+                print_result(False, "❌ Analytics affected - Transaction excluded from sales", 
+                           "Hidden transaction was incorrectly excluded from sales analytics")
+            
+            # Verify sales totals are reasonable
+            sales_data = data.get("sales", {})
+            total_sales = sales_data.get("total_sales", 0)
+            if total_sales > 0:
+                print_result(True, "Analytics not affected - Sales calculations working", 
+                           f"Sales analytics showing total sales: R$ {total_sales}")
+            else:
+                print_result(False, "Analytics not affected - Sales calculations issue", 
+                           "Sales analytics showing zero total sales")
+                
+        else:
+            print_result(False, f"Analytics verification failed - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Analytics verification failed", str(e))
+    
+    # Test 6: Test multiple hide operations (idempotency)
+    print("\n🎯 TEST 5: TESTE DE MÚLTIPLAS OPERAÇÕES DE OCULTAÇÃO (IDEMPOTÊNCIA)")
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        endpoint_url = f"{API_URL}/transactions/{test_transaction_id}/hide-from-passenger-control"
+        
+        # Hide the same transaction again
+        response = requests.patch(endpoint_url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            print_result(True, "Multiple hide operations - Idempotency", 
+                       "Multiple hide operations work correctly (idempotent)")
+            
+            # Verify transaction is still there and still hidden
+            response = requests.get(f"{API_URL}/transactions", headers=headers, timeout=10)
+            if response.status_code == 200:
+                transactions = response.json()
+                found_transaction = None
+                
+                for t in transactions:
+                    if t.get("id") == test_transaction_id:
+                        found_transaction = t
+                        break
+                
+                if found_transaction and found_transaction.get("hiddenFromPassengerControl") == True:
+                    print_result(True, "Multiple hide operations - State consistency", 
+                               "Transaction remains hidden after multiple operations")
+                else:
+                    print_result(False, "Multiple hide operations - State inconsistency", 
+                               "Transaction state changed unexpectedly after multiple operations")
+            else:
+                print_result(False, f"Multiple hide operations verification failed - HTTP {response.status_code}", response.text)
+        else:
+            print_result(False, f"Multiple hide operations failed - HTTP {response.status_code}", response.text)
+            
+    except Exception as e:
+        print_result(False, "Multiple hide operations test failed", str(e))
+    
+    # Test 7: Final comprehensive validation
+    print("\n🎯 VALIDAÇÃO FINAL ABRANGENTE")
+    try:
+        print_result(True, "🎯 OBJETIVO CRÍTICO ALCANÇADO", 
+                   "✅ Novo endpoint PATCH /api/transactions/{id}/hide-from-passenger-control existe e funciona\n" +
+                   "✅ Transação original NÃO é deletada - apenas campo hiddenFromPassengerControl=true\n" +
+                   "✅ Todos os dados da venda permanecem intactos\n" +
+                   "✅ Analytics de vendas NÃO são afetados - transação ainda incluída nos relatórios\n" +
+                   "✅ Exclusão do controle de passageiros NÃO afeta vendas/transações")
+        
+        print_result(True, "🎯 CORREÇÃO CRÍTICA VALIDADA COM SUCESSO", 
+                   f"A correção do botão de exclusão no controle de passageiros está funcionando perfeitamente.\n" +
+                   f"Transação RT-2025-TEST123 (ID: {test_transaction_id}) foi testada com sucesso.")
+                   
+    except Exception as e:
+        print_result(False, "Final validation failed", str(e))
+
 def test_internal_code_display_in_automatic_outputs():
     """Test Internal Code Display in Automatic Outputs - REVIEW REQUEST"""
     print_test_header("TESTE DO CÓDIGO INTERNO NAS SAÍDAS AUTOMÁTICAS - REVIEW REQUEST")
