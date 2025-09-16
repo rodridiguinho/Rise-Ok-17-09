@@ -104,7 +104,8 @@ const PassengerControlDirect = () => {
       
       const entryTransactions = response.filter(transaction => 
         (transaction.type === 'entrada' || transaction.type === 'entrada_vendas') && 
-        transaction.internalReservationCode
+        transaction.internalReservationCode &&
+        !transaction.hiddenFromPassengerControl  // CORREÇÃO: Filtrar reservas ocultas
         // Removed city requirement since flight details are managed in the modal
       );
 
