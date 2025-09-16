@@ -92,6 +92,11 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
       label: 'Migração de Dados',
       icon: RefreshCw,
     },
+    {
+      id: 'internal-control',
+      label: 'Controle Interno',
+      icon: FolderClosed,
+    },
   ];
 
   return (
