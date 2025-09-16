@@ -1170,77 +1170,50 @@ const PassengerControlDirect = () => {
       {/* Modal - Adicionar Reserva Manualmente */}
       {isAddReservationModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto m-4">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                  <Plus className="mr-2 h-6 w-6 text-green-600" />
-                  Adicionar Nova Reserva
+                <h3 className="text-xl font-bold text-gray-800">
+                  ➕ Adicionar Nova Reserva
                 </h3>
                 <button
                   onClick={() => setIsAddReservationModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
-                  <X className="h-6 w-6" />
+                  ×
                 </button>
               </div>
             </div>
             
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Básico */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-700 border-b pb-2">📋 Informações Básicas</h4>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Código Interno *</label>
-                    <input
-                      type="text"
-                      placeholder="RT-2025-XXXX"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Cliente *</label>
-                    <input
-                      type="text"
-                      placeholder="Nome do cliente"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Cia Aérea</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="">Selecione...</option>
-                      <option value="GOL">GOL</option>
-                      <option value="LATAM">LATAM</option>
-                      <option value="Azul">Azul</option>
-                      <option value="TAP">TAP</option>
-                    </select>
-                  </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Código Interno *</label>
+                  <input
+                    type="text"
+                    placeholder="RT-2025-XXXX"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
                 </div>
                 
-                {/* Datas */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-700 border-b pb-2">📅 Datas</h4>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Data de Partida</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Data de Retorno</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
+                  <input
+                    type="text"
+                    placeholder="Nome do cliente"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Cia Aérea</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    <option value="">Selecione...</option>
+                    <option value="GOL">GOL</option>
+                    <option value="LATAM">LATAM</option>
+                    <option value="Azul">Azul</option>
+                    <option value="TAP">TAP</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -1254,8 +1227,7 @@ const PassengerControlDirect = () => {
               </button>
               <button
                 onClick={() => {
-                  // TODO: Implementar salvamento da reserva
-                  alert('Funcionalidade será implementada em breve!');
+                  alert('Modal funcionando! Funcionalidade será implementada.');
                   setIsAddReservationModalOpen(false);
                 }}
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
