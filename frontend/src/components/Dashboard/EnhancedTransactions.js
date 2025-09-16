@@ -2784,6 +2784,7 @@ const EnhancedTransactions = () => {
                       {transaction.seller && <span>Vendedor: {transaction.seller}</span>}
                       {transaction.supplier && <span>Fornecedor: {transaction.supplier}</span>}
                       <span>Pagamento: {transaction.paymentMethod}</span>
+                      {transaction.account && <span>Conta: {transaction.account}</span>}
                       {transaction.productType && <span>Produto: {transaction.productType}</span>}
                       {transaction.internalReservationCode && (
                         <span className="font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
