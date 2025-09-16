@@ -1470,7 +1470,7 @@ const EnhancedTransactions = () => {
                 <>
                   <div className="lg:col-span-3 border-b pb-4 mb-4">
                     <h3 className="text-lg font-semibold mb-4">💰 Informações da Receita</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label>Valor da Transação *</Label>
                         <Input
