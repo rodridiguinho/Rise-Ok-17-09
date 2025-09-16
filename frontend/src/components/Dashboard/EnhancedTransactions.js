@@ -112,6 +112,15 @@ const CityInput = ({ value, onChange, placeholder, id, airportCities }) => {
 };
 
 const EnhancedTransactions = () => {
+  // Account options for payments/receipts
+  const accountOptions = [
+    'Itau',
+    'Infinit', 
+    'Mercado Pago',
+    'Inter',
+    'Dinheiro'
+  ];
+
   const [transactions, setTransactions] = useState([]);
   const [clients, setClients] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
