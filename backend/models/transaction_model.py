@@ -19,6 +19,8 @@ class Passenger(BaseModel):
 class TransactionType(str, Enum):
     ENTRADA = "entrada"
     SAIDA = "saida"
+    ENTRADA_VENDAS = "entrada_vendas"
+    SAIDA_VENDAS = "saida_vendas"
 
 
 class TransactionStatus(str, Enum):
