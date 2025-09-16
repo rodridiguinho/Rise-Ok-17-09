@@ -103,6 +103,18 @@
 user_problem_statement: "Implementar o módulo de Controle Interno com 5 seções independentes: 1. Investimento de Sócios, 2. Pagamentos de Clientes Parcelados (com campo 'Número de registro gerado na venda'), 3. Controle de Cliente com Controle de Milhas, 4. Contas com Sócios (com campo 'Data de retirada'), 5. Links de Consolidadoras/Operadores/Serviços. Cada seção deve ter funcionalidade 'Adicionar mais 1' e integração no sidebar. Sistema deve ser independente do resto da aplicação, apenas para controle interno."
 
 backend:
+  - task: "Internal Code Display in Automatic Outputs Testing"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 INTERNAL CODE DISPLAY IN AUTOMATIC OUTPUTS - COMPLETE SUCCESS: Successfully tested the exact functionality from review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ ENTRADA_VENDAS CREATION: Created entrada_vendas transaction with exact test data (type: 'entrada_vendas', description: 'Venda teste código interno', amount: 1500, internalReservationCode: 'RT-2025-TEST123', suppliers: [{'name': 'Fornecedor Code Test', 'value': 1200, 'paymentStatus': 'Pago', 'paymentDate': '2025-09-16'}], seller: 'Fernando Dos Anjos', commissionValue: 75, commissionPaymentStatus: 'Pago'). Transaction created successfully with ID: 68c9a7db4ad106220788151d. ✅ INTERNAL RESERVATION CODE PERSISTENCE: Internal code RT-2025-TEST123 correctly saved and persisted in database. ✅ AUTOMATIC SAÍDAS GENERATION: System correctly generated 2 automatic expense transactions (supplier payment + commission) with proper internal code inclusion. ✅ SUPPLIER OUTPUT DESCRIPTION: Contains internal code in correct format: 'Pagamento a Fornecedor Code Test - Ref: Venda teste código interno (RT-2025-TEST123)' - exactly as requested in review. ✅ COMMISSION OUTPUT DESCRIPTION: Contains internal code in correct format: 'Comissão para Fernando Dos Anjos - Ref: Venda teste código interno (RT-2025-TEST123)' - exactly as requested in review. ✅ OUTPUT TYPES VALIDATION: Both generated outputs have correct type 'saida_vendas' (not 'saida'). ✅ OUTPUT AMOUNTS VALIDATION: Correct amounts (R$ 1200.00 for supplier, R$ 75.00 for commission). ✅ TRACEABILITY CONFIRMATION: Internal code RT-2025-TEST123 appears in both supplier and commission output descriptions, providing complete traceability as requested. ✅ SALE REFERENCE: Commission transaction correctly references original entrada_vendas transaction. 🎯 OBJECTIVE ACHIEVED: Internal sale code appears in automatic outputs exactly as requested. The system correctly includes internalReservationCode in parentheses in both supplier and commission descriptions, ensuring complete traceability of sales transactions."
+
   - task: "Transaction Verification and Test Data Identification"
     implemented: true
     working: true
