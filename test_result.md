@@ -941,6 +941,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Critical Passenger Control Deletion Button Fix - COMPLETED ✅"
     - "Internal Code Display in Automatic Outputs Testing - COMPLETED ✅"
     - "Critical Transaction Types Bug Fix - entrada_vendas to saida_vendas - COMPLETED ✅"
     - "Users API Endpoints Testing - COMPLETED ✅"
