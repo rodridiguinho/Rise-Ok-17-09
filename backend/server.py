@@ -1120,9 +1120,9 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
             if "updatedAt" in transaction:
                 transaction["updatedAt"] = transaction["updatedAt"].isoformat()
         
-        # Separate by type
-        entradas = [t for t in transactions if t.get('type') == 'entrada']
-        saidas = [t for t in transactions if t.get('type') == 'saida']
+        # Separate by type (include ALL entrada and saida types)
+        entradas = [t for t in transactions if t.get('type') in ['entrada', 'entrada_vendas']]
+        saidas = [t for t in transactions if t.get('type') in ['saida', 'saida_vendas']]
         
         # Calculate totals
         total_entradas = sum(t.get('amount', 0) for t in entradas)
