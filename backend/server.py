@@ -1512,7 +1512,7 @@ async def delete_transaction(transaction_id: str):
         logging.error(f"Delete transaction error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao excluir transação: {str(e)}")
 
-@app.post("/api/company/settings")
+@api_router.post("/company/settings")
 async def save_company_settings(settings: CompanySettings):
     try:
         settings_dict = settings.dict()
