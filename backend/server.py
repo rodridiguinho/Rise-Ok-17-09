@@ -1227,6 +1227,7 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
             "sales": {
                 "total_sales": total_sales,
                 "total_quantity": total_quantity,
+                "sales_count": total_quantity,  # Add sales_count field for compatibility
                 "total_commissions": total_commissions,
                 "total_supplier_payments": total_supplier_payments,
                 "net_sales_profit": net_sales_profit,
