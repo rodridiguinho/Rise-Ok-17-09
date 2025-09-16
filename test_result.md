@@ -962,7 +962,7 @@ test_plan:
     - "Analytics Error Investigation and Fix - COMPLETED ✅"
   stuck_tasks: []
   test_all: false
-  test_priority: "internal_code_testing_completed"
+  test_priority: "critical_passenger_control_deletion_completed"
 
 agent_communication:
     - agent: "testing"
