@@ -143,7 +143,7 @@ const AdminSettings = () => {
   const handleSaveCompanySettings = async () => {
     try {
       // Salvar as configurações da empresa
-      const response = await api.post('/api/company/settings', companySettings);
+      const response = await api.post('/company/settings', companySettings);
       
       if (response.status === 200 || response.status === 201) {
         // Recarregar as configurações após salvar
