@@ -1264,7 +1264,7 @@ class CompanySettings(BaseModel):
     website: Optional[str] = None
 
 # Company settings endpoints
-@app.get("/api/company/settings")
+@api_router.get("/company/settings")
 async def get_company_settings():
     try:
         # Try to get existing settings
@@ -1288,7 +1288,7 @@ async def get_company_settings():
             }
             return default_settings
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar configurações da empresa: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao obter configurações da empresa: {str(e)}")
 
 @api_router.put("/transactions/{transaction_id}")
 async def update_transaction(transaction_id: str, transaction: TransactionCreate, current_user: dict = Depends(get_current_user)):
