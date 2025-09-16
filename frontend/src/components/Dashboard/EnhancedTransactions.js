@@ -2808,10 +2808,9 @@ const EnhancedTransactions = () => {
                       {transaction.airportTaxes && (
                         <span>Taxas: {formatCurrency(transaction.airportTaxes)}</span>
                       )}
-                      {transaction.tripType && (
-                        <span className="flex items-center">
-                          {transaction.tripType === 'Lazer' ? <Heart className="h-3 w-3 mr-1" /> : <Briefcase className="h-3 w-3 mr-1" />}
-                          {transaction.tripType}
+                      {transaction.supplierValue && (
+                        <span className="flex items-center text-orange-600">
+                          💰 Valor Fornecedor: R$ {parseFloat(transaction.supplierValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       )}
                     </div>
