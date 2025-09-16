@@ -174,6 +174,7 @@ const EnhancedTransactions = () => {
     description: '',
     amount: '',
     paymentMethod: '',
+    account: '', // Nova campo para conta bancária
     client: '',
     supplier: '',
     referenceTransactionCode: '',
