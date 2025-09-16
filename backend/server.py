@@ -1056,20 +1056,14 @@ async def get_sales_analysis(start_date: str = None, end_date: str = None):
                 supplier):
                 total_supplier_costs += transaction.get("amount", 0)
         
-        # Calculate commissions from both entrada (direct) and saida transactions
+        # Calculate commissions ONLY from entrada transactions (direct commission field)
+        # Avoid double counting: don't include saida commissions as they duplicate commissionValue
         total_commissions = 0
         
-        # From entrada transactions (direct commission field)
+        # From entrada transactions (direct commission field only)
         for transaction in entrada_transactions:
             if transaction.get("commissionValue"):
                 total_commissions += transaction.get("commissionValue", 0)
-        
-        # From saida transactions (commission payments)
-        for transaction in saida_transactions:
-            description = transaction.get("description", "").lower()
-            category = transaction.get("category", "").lower()
-            if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
-                total_commissions += transaction.get("amount", 0)
         
         net_profit = total_sales - total_supplier_costs - total_commissions
         
