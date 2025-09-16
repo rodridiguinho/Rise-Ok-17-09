@@ -66,6 +66,7 @@ class TransactionUpdate(BaseModel):
     transactionDate: Optional[date] = None
     transactionTime: Optional[str] = None
     status: Optional[TransactionStatus] = None
+    hiddenFromPassengerControl: Optional[bool] = None  # CORREÇÃO: Campo para ocultar do controle de passageiros
 
     @validator('amount')
     def amount_must_be_positive(cls, v):
