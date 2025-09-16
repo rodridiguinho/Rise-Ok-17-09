@@ -887,15 +887,18 @@ async def create_transaction(transaction: TransactionCreate):
         if (transaction.commissionValue and transaction.seller and 
             transaction.commissionPaymentStatus == 'Pago'):
             
+            # CORREÇÃO: Usar saida_vendas quando a entrada for entrada_vendas
+            commission_type = "saida_vendas" if transaction.type == "entrada_vendas" else "saida"
+            
             commission_expense = {
                 "id": str(uuid.uuid4()),
                 "date": date.today().strftime("%Y-%m-%d"),
                 "time": datetime.now().strftime("%H:%M"),
-                "type": "saida",
+                "type": commission_type,  # CORREÇÃO: Tipo dinâmico baseado na entrada
                 "category": "Comissão de Vendedor",
                 "description": f"Comissão para {transaction.seller} - Ref: {transaction.description}",
                 "amount": float(transaction.commissionValue),
-                "paymentMethod": transaction.paymentMethod or "Dinheiro",
+                "paymentMethod": transaction.paymentMethod or "PIX",
                 "seller": transaction.seller,
                 "saleReference": created_transaction.get('id', ''),
                 "additionalInfo": f"Comissão gerada automaticamente para vendedor: {transaction.seller}",
