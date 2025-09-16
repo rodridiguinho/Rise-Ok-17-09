@@ -52,7 +52,29 @@ const SalesAnalytics = () => {
 
   useEffect(() => {
     fetchAnalytics();
-  }, []);
+  }, []); // Execute na montagem inicial
+
+  // CORREÇÃO: Recarregar dados quando o componente se torna visível
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchAnalytics();
+    };
+
+    // Recarregar quando a janela recebe foco ou quando o componente é renderizado
+    window.addEventListener('focus', handleFocus);
+    
+    // Força reload quando o componente é renderizado (mudança de aba)
+    const timer = setTimeout(() => {
+      if (!analytics) {
+        fetchAnalytics();
+      }
+    }, 100);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearTimeout(timer);
+    };
+  }, [analytics]); // Depende do estado analytics
 
   const fetchAnalytics = async () => {
     try {
