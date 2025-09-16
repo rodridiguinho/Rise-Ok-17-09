@@ -1,23 +1,32 @@
 <analysis>
-The AI engineer's trajectory involved significant work on the Controle de Passageiros system, including UI enhancements, data persistence, and bug fixes. A recurring and challenging issue was persistent frontend caching, which often prevented UI updates from rendering despite backend and frontend code changes, necessitating repeated cache clearing and component re-evaluation. The engineer successfully added comprehensive flight and passenger details, addressed airport autocomplete, and resolved timezone calculation errors.
+The AI engineer's work primarily focused on refining and expanding the Rise Travel cash control system, iteratively addressing user feedback and fixing regressions. Initial efforts targeted sales analytics, resolving a 404 error by correctly registering the  endpoint. A major challenge was consistent data display across different report types, leading to multiple adjustments in backend logic (e.g., , ) to ensure correct aggregation of supplier costs and commissions, and frontend rendering (e.g., , ).
 
-Several regressions occurred, causing frustration and requiring careful rollbacks to previous stable versions, particularly concerning supplier and passenger data display and saving. The engineer also fixed user creation, implemented a dedicated sales analytics module, and improved login persistence. The most recent task focused on refining the passenger management UI with a detailed line-by-line layout and adding a delete passenger function. The immediate problem is that the  endpoint for the sales analytics is not being registered in the backend, leading to a 404 error.
+A significant architectural change was introducing new transaction types (, ) to logically separate sales-related transactions from general operational expenses, requiring updates across backend models and frontend forms. Critical bugs included the disappearance of passenger reservations due to incorrect filtering and negative values for entry transactions, which were meticulously traced and fixed. The engineer also simplified the transaction creation form and implemented a data migration feature. The most recent task involves building a new Controle Interno module, starting with frontend component creation and sidebar integration. Persistent issues often involved frontend cache or misaligned frontend/backend data expectations, necessitating careful debugging and reiteration.
 </analysis>
 
 <product_requirements>
-The Rise Travel application is a cash control system for a travel agency, cloning . It utilizes a React frontend, FastAPI backend, and MongoDB to manage users, clients, and suppliers. Key features include full CRUD for transactions with travel-specific fields, auto-profit calculation, and a timezone-aware flight schedule system with layover support. The UI/UX is mobile-responsive using Shadcn UI.
+The Rise Travel application, a cash control system for a travel agency, manages users, clients, and suppliers with a React frontend, FastAPI backend, and MongoDB. Core functionalities include transaction CRUD with travel-specific fields, auto-profit calculation, and a timezone-aware flight schedule system. UI/UX is mobile-responsive with Shadcn UI.
 
-Phase 2, Controle de Passageiros, displays reservation cards, showing client, route, dates, and passenger counts. User requests expanded this to include detailed flight information, scales, editable passenger data (nationality, passport), and new fields for supplier selection (initially from a list, later changed to manual input), free-text emission type, and supplier phone. Further enhancements for the Gerenciar modal included manual input fields for product type, client reservation code, specific flight timings (departure/arrival/duration for outbound/return, plus stopover details), a highly structured line-by-line layout, and a passenger deletion option. Additional requirements include persistent login, a sales-only analytics module (excluding general expenses) that correctly aggregates commission and supplier costs from output transactions, and functional user creation.
+Phase 2, Controle de Passageiros, was expanded to include detailed flight info, scales, editable passenger data, and fields for supplier, emission type, and reservation number. The Gerenciar modal required a line-by-line layout with flight timings, stopovers, and a passenger deletion option. Additional requirements included persistent login, sales-only analytics (excluding general expenses, correctly aggregating sales-related costs), and functional user creation. Recent focus shifted to refining analytics accuracy, specifically:
+-   Correct financial and sales analytics periodization (month start to current day).
+-   Accurate inclusion of supplier costs and sales quantities in reports.
+-   Consistent commission calculation across analytics and ranking.
+-   Simplifying the new transaction form by removing flight details, while preserving them in Passenger Control.
+-   Adding a bank account selection field for all transaction types.
+-   Ensuring automatic reservation generation in Passenger Control.
+-   Adding a manual reservation creation button.
+-   Implementing a new Controle Interno module with five distinct sections for internal financial and operational tracking.
 </product_requirements>
 
 <key_technical_concepts>
--   **React**: Frontend framework for dynamic UI.
--   **FastAPI**: Python backend with Pydantic for data models.
+-   **React**: Frontend framework for dynamic UI, state management (, ).
+-   **FastAPI**: Python backend, Pydantic for data validation/serialization.
 -   **MongoDB**: NoSQL database for flexible data storage.
 -   **Shadcn UI & Tailwind CSS**: UI components and styling.
 -   **Axios**: HTTP client with interceptors for API calls and authentication.
 -   **JWT Authentication**: Token-based user authentication.
--   **State Management**: React's  and  for component state.
+-   **Supervisor**: Process control system for managing frontend/backend services.
+-   **Kubernetes Ingress**: Manages routing with  prefix for backend.
 </key_technical_concepts>
 
 <code_architecture>
@@ -26,48 +35,83 @@ The application follows a standard full-stack architecture: React frontend, Fast
 
 -   :
     -   **Summary**: Main FastAPI application.
-    -   **Changes**: Initial updates extended  model for passenger and flight details. Authentication () was added to . User endpoints are directly handled here.
+    -   **Changes**:
+        -   Registered  for sales analytics endpoints.
+        -   Adjusted  to sort by date/time (most recent first).
+        -   Refined  (Financial Analytics) to include all new transaction types (, ) in its sums.
+        -   Refined  (Sales Analytics) to include  and .
+        -   Corrected  (Sales Ranking) to include  in its filter and to only sum  from / types, preventing double-counting.
+        -   Moved  (GET and POST) from  to  for consistency.
 -   :
-    -   **Summary**: Defines Pydantic schema for transactions, including  model.
-    -   **Changes**: Expanded for  model and .
+    -   **Summary**: Defines Pydantic schema for transactions.
+    -   **Changes**:  enum expanded to include  and .
 -   :
     -   **Summary**: Handles reporting.
-    -   **Changes**: A new endpoint, , was defined for sales analytics. Its logic was refined to calculate , , , , and , with an improved search mechanism to include output transactions for commissions and supplier payments by checking , , and  fields.
+    -   **Changes**: Assumed to contain the logic for  and , which were correctly registered and refined through  modifications.
 -   :
-    -   **Summary**: Manages expense categories.
-    -   **Changes**:  was fixed to save to , and  was added.
+    -   **Summary**: Manages expense categories and company settings.
+    -   **Changes**:
+        -   Corrected  to properly handle backend responses (accept 201 status) and reload settings after save.
+        -   Adjusted API calls from  to  to avoid double  prefix when used with .
 -   :
     -   **Summary**: Main dashboard layout.
-    -   **Changes**: Repeatedly modified to correct the import of the  component, ensuring the correct detailed version of the modal was loaded, despite persistent caching challenges.
+    -   **Changes**: Added routing logic for  and  components.
 -   :
     -   **Summary**: Transaction CRUD.
-    -   **Changes**:  and  were updated to include more Brazilian cities (e.g., Guarulhos) for improved autocomplete and timezone calculations.
+    -   **Changes**:
+        -   Transaction creation form: Added new transaction types (, , , ).
+        -   Category dropdown: Corrected to show Receitas for .
+        -   Transaction display: Fixed  to show positive sign.
+        -   Transaction display: Altered to show  field (or  if present) instead of  (Lazer/Negócios).
+        -   Transaction filters: Added specific filters for each of the 4 new transaction types.
+        -   Added  selection field to transaction forms (entry/exit/supplier sections) and to transaction display.
+        -   Simplified the transaction form by removing fields for , , and all flight timing details.
+        -   Fixed commission display logic to prevent duplication for  transactions.
 -   :
-    -   **Summary**: Manages passenger reservations and the Gerenciar modal. This file saw extensive modifications.
-    -   **Changes**: It was enhanced to display and manage comprehensive flight details, multiple passengers, supplier data (manual input for emission type/phone), and a manual  field. The Adicionar Novo Passageiro modal was updated with all necessary fields. Crucially, the Gerenciar modal's layout was meticulously restructured into a line-by-line format, including detailed flight timings (departure/arrival/duration for outbound/return), optional stopover cities, and arrival/departure times with calculated durations. A function  with a corresponding UI button was implemented.
+    -   **Summary**: Displays financial analytics.
+    -   **Changes**: Adjusted to set default  to the first day of the current month and  to the current date.
+-   :
+    -   **Summary**: Manages passenger reservations and the Gerenciar modal.
+    -   **Changes**:
+        -   Filter logic updated to include both  and  to display all relevant reservations.
+        -   Filter logic for reservations was made optional for  and  to accommodate simplified transaction form.
+        -   Added Adicionar Reserva button and its modal, including import for  icon.
 -   :
     -   **Summary**: Displays sales analytics.
-    -   **Changes**: Updated to use the new  endpoint for sales-only metrics.
+    -   **Changes**: Adjusted to set default  to the first day of the current month and  to the current date. Expected  and .
 -   :
-    -   **Summary**: Handles user creation and management.
-    -   **Changes**: Was confirmed to interact correctly with the backend .
+    -   **Summary**: Displays sales ranking by seller.
+    -   **Changes**: Frontend logic implicitly relies on  backend endpoint fix to retrieve all relevant transactions.
 -   :
-    -   **Summary**: Centralized Axios instance.
-    -   **Changes**: An Axios interceptor was improved to handle 401 errors more gracefully, attempting reauthentication to ensure persistent login.
+    -   **Summary**: Navigation sidebar.
+    -   **Changes**: Added new menu items for Migração de Dados and Controle Interno.
+-   :
+    -   **Summary**: **(NEWLY CREATED)** Component for selectively migrating old transactions to new / types. Provides automatic suggestions and manual classification.
+-   :
+    -   **Summary**: **(NEWLY CREATED)** Placeholder component for the new Controle Interno module.
+-   :
+    -   **Summary**: **(NEWLY CREATED)** UI component for badges.
+    -   **Changes**: Created to handle dynamic coloring of transaction type badges. (Though the specific color logic was likely in  directly for now).
 </code_architecture>
 
 <pending_tasks>
--   Import  (from ) into  to correctly register the  endpoint.
--   Address persistent frontend cache issues for the passenger control modal (if they reappear).
--   Implement remaining Passenger Control features: full reminder system, save extra services.
+-   Test the manual Adicionar Reserva button functionality in .
+-   Implement remaining Passenger Control features: full reminder system, save extra services, improved layout (filters by airline, name, reservation number, monthly dates, icons).
+-   Populate the newly created  component with the five specified sections and their forms for managing internal financial and operational data.
+-   Implement the Adicionar mais 1 button functionality for each section within .
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was addressing two recent user feedback points:
-1.  **Adding a delete button for passengers**: The user requested functionality to remove passengers from an existing reservation. The AI engineer located the passenger listing logic in  and implemented a UI button with a  icon alongside each passenger entry. A corresponding  function was developed and integrated to handle the removal of a passenger from the reservation, likely by updating the transaction in the backend.
-2.  **Sales Analytics showing zero values**: The user reported that the Sales Analytics section displayed 0,00 for supplier costs and commissions. Upon investigation, the AI engineer performed a backend test using  against the  endpoint. This test revealed a **404 Not Found** error for the endpoint. The root cause was identified as the  (which defines the  endpoint in ) not being explicitly imported and registered within the main FastAPI application in .
+Immediately before this summary request, the AI engineer was tasked with implementing a new Controle Interno module. This module is entirely for internal tracking, separate from sales analytics and cash flow, and will contain five distinct sections:
+1.  **Investimento de Sócios** (Partner Investment)
+2.  **Pagamentos de Clientes Parcelados** (Installment Client Payments)
+3.  **Controle de Cliente com Controle de Milhas** (Client Miles Control)
+4.  **Contas com Sócios** (Partner Accounts)
+5.  **Links de Consolidadoras, Operadores, Serviços e Usuários** (Consolidator, Operator, Service, and User Links)
+
+Each section requires specific fields as detailed by the user, and a Add 1 more button for multiple entries. The engineer confirmed the request and the inclusion of two additional fields: Número de registro gerado na venda for client payments and Data de retirada for partner accounts. The work commenced by creating the new frontend component . The next step is to integrate this component into the application's sidebar, making it accessible via a new Controle Interno button. This work is ongoing, with only the component file created so far.
 </current_work>
 
 <optional_next_step>
-Import the  from  into .
+Add the new Controle Interno button to the sidebar ().
 </optional_next_step>
