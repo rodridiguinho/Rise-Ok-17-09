@@ -1148,7 +1148,7 @@ async def get_complete_analysis(start_date: str = None, end_date: str = None):
 
 @reports_router.get("/sales-performance")
 async def get_sales_performance(start_date: str = None, end_date: str = None):
-    """Analytics específico de vendas (som entradas e saídas relacionadas)"""
+    """Analytics específico de vendas (entrada_vendas + saida_vendas + compatibilidade)"""
     try:
         # Build date filter
         date_filter = {}
@@ -1160,59 +1160,77 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
                 ]
             }
         
-        # Get ALL transactions in period (both entrada and saida)
+        # Get ALL transactions in period
         all_transactions = await db.transactions.find(date_filter).to_list(None)
         
         # Convert ObjectIds to strings for JSON serialization
         for transaction in all_transactions:
             transaction["id"] = str(transaction["_id"])
             transaction["_id"] = str(transaction["_id"])
-            # Convert datetime objects to strings
             if "createdAt" in transaction:
                 transaction["createdAt"] = transaction["createdAt"].isoformat()
             if "updatedAt" in transaction:
                 transaction["updatedAt"] = transaction["updatedAt"].isoformat()
         
-        # Separate entrada and saida transactions
-        entrada_transactions = [t for t in all_transactions if t.get('type') == 'entrada']
-        saida_transactions = [t for t in all_transactions if t.get('type') == 'saida']
+        # Separate transactions for sales analytics
+        # NOVA LÓGICA: entrada_vendas + saida_vendas + compatibilidade com dados antigos
+        entrada_vendas = [t for t in all_transactions if t.get('type') == 'entrada_vendas']
+        saida_vendas = [t for t in all_transactions if t.get('type') == 'saida_vendas']
         
-        # Sales totals from entrada transactions
-        total_sales = sum(t.get("amount", 0) for t in entrada_transactions)
-        total_quantity = len(entrada_transactions)
+        # COMPATIBILIDADE: Se não há entrada_vendas, usar entrada antiga (dados existentes)
+        if not entrada_vendas:
+            entrada_vendas = [t for t in all_transactions if t.get('type') == 'entrada']
         
-        # Calculate commissions from both entrada (direct) and saida transactions
-        total_commissions = 0
+        # COMPATIBILIDADE: Se não há saida_vendas, usar lógica antiga de filtrar saídas
+        if not saida_vendas:
+            saida_transactions = [t for t in all_transactions if t.get('type') == 'saida']
+            # Filtrar apenas saídas relacionadas a vendas (fornecedores/comissões)
+            saida_vendas = []
+            for transaction in saida_transactions:
+                description = transaction.get("description", "").lower()
+                category = transaction.get("category", "").lower()
+                supplier = transaction.get("supplier", "")
+                if (("fornecedor" in description or "fornecedor" in category or 
+                     "pagamento a fornecedor" in category.lower() or supplier) or
+                    ("comissão" in description or "comissao" in description or 
+                     "comissão" in category or "comissao" in category)):
+                    saida_vendas.append(transaction)
         
-        # From entrada transactions (direct commission field)
-        for transaction in entrada_transactions:
-            if transaction.get("commissionValue"):
-                total_commissions += transaction.get("commissionValue", 0)
+        # Calculate sales metrics
+        total_sales = sum(t.get("amount", 0) for t in entrada_vendas)
+        total_quantity = len(entrada_vendas)
         
-        # From saida transactions (commission payments)
-        for transaction in saida_transactions:
-            description = transaction.get("description", "").lower()
-            category = transaction.get("category", "").lower()
-            if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
-                total_commissions += transaction.get("amount", 0)
-        
-        # Calculate supplier payments from both entrada (direct) and saida transactions
+        # Calculate supplier costs from entrada_vendas (direct) and saida_vendas
         total_supplier_payments = 0
         
-        # From entrada transactions (direct supplier cost field)
-        for transaction in entrada_transactions:
+        # From entrada_vendas (direct supplier cost field)
+        for transaction in entrada_vendas:
             if transaction.get("supplierValue"):
                 total_supplier_payments += transaction.get("supplierValue", 0)
         
-        # From saida transactions (supplier payments)
-        for transaction in saida_transactions:
+        # From saida_vendas (supplier payments)
+        for transaction in saida_vendas:
             description = transaction.get("description", "").lower()
             category = transaction.get("category", "").lower()
             supplier = transaction.get("supplier", "")
             if ("fornecedor" in description or "fornecedor" in category or 
-                "pagamento a fornecedor" in category.lower() or
-                supplier):
+                "pagamento a fornecedor" in category.lower() or supplier):
                 total_supplier_payments += transaction.get("amount", 0)
+        
+        # Calculate commissions from entrada_vendas (direct) and saida_vendas
+        total_commissions = 0
+        
+        # From entrada_vendas (direct commission field)
+        for transaction in entrada_vendas:
+            if transaction.get("commissionValue"):
+                total_commissions += transaction.get("commissionValue", 0)
+        
+        # From saida_vendas (commission payments)
+        for transaction in saida_vendas:
+            description = transaction.get("description", "").lower()
+            category = transaction.get("category", "").lower()
+            if "comissão" in description or "comissao" in description or "comissão" in category or "comissao" in category:
+                total_commissions += transaction.get("amount", 0)
         
         # Net profit from sales
         net_sales_profit = total_sales - total_commissions - total_supplier_payments
@@ -1227,19 +1245,19 @@ async def get_sales_performance(start_date: str = None, end_date: str = None):
             "sales": {
                 "total_sales": total_sales,
                 "total_quantity": total_quantity,
-                "sales_count": total_quantity,  # Add sales_count field for compatibility
+                "sales_count": total_quantity,
                 "total_commissions": total_commissions,
                 "total_supplier_payments": total_supplier_payments,
                 "net_sales_profit": net_sales_profit,
                 "average_ticket": average_ticket,
-                "average_sale": average_ticket,  # Add average_sale field for frontend compatibility
+                "average_sale": average_ticket,
                 "sales_margin": sales_margin
             },
             "period": {
                 "start_date": start_date,
                 "end_date": end_date
             },
-            "transactions": entrada_transactions  # Include transactions for frontend display
+            "transactions": entrada_vendas
         }
         
     except Exception as e:
