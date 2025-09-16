@@ -2819,7 +2819,8 @@ const EnhancedTransactions = () => {
                           🏢 Fornecedor: {transaction.supplier}
                         </span>
                       )}
-                      {transaction.commissionValue && transaction.commissionValue > 0 && (
+                      {/* Show commission only once */}
+                      {transaction.commissionValue && transaction.commissionValue > 0 && transaction.type.includes('entrada') && (
                         <span className="flex items-center text-green-600">
                           💳 Comissão: R$ {parseFloat(transaction.commissionValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
