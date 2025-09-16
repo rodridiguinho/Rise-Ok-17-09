@@ -86,6 +86,11 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
       label: 'Configurações',
       icon: Settings,
     },
+    {
+      id: 'transaction-migration',
+      label: 'Migração de Dados',
+      icon: RefreshCw,
+    },
   ];
 
   return (
