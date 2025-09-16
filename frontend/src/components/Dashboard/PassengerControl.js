@@ -615,6 +615,8 @@ const PassengerControlDirect = () => {
     }
   };
 
+  const notifications = getNotifications();
+
   return (
     <div className="space-y-6">
       {/* Notificações */}
