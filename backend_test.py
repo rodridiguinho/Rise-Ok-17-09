@@ -1248,6 +1248,203 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_critical_transaction_types_bug_fix():
+    """Test Critical Transaction Types Bug Fix - REVIEW REQUEST"""
+    print_test_header("CRITICAL TRANSACTION TYPES BUG FIX - REVIEW REQUEST TESTING")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for critical transaction types bug fix testing", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for critical transaction types bug fix testing failed", str(e))
+        return
+    
+    # Test 2: Create entrada_vendas with paid supplier - EXACT REVIEW REQUEST DATA
+    print("\n🎯 TEST 1: CREATE ENTRADA_VENDAS WITH PAID SUPPLIER")
+    try:
+        entrada_vendas_transaction = {
+            "type": "entrada_vendas",
+            "description": "TESTE CORREÇÃO BUG - Venda com fornecedor",
+            "amount": 1000,
+            "suppliers": [
+                {
+                    "name": "Fornecedor Teste",
+                    "value": 800,
+                    "paymentStatus": "Pago",
+                    "paymentDate": "2025-09-16"
+                }
+            ],
+            "seller": "Fernando Dos Anjos",
+            "commissionValue": 50,
+            "commissionPaymentStatus": "Pago"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=entrada_vendas_transaction, timeout=10)
+        print(f"Entrada_vendas Response Status: {response.status_code}")
+        print(f"Entrada_vendas Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                entrada_transaction_id = data["id"]
+                print_result(True, "Entrada_vendas Creation - SUCCESS", 
+                           f"Entrada_vendas created with ID: {entrada_transaction_id}")
+                
+                # Verify the transaction type is correct
+                if data.get("type") == "entrada_vendas":
+                    print_result(True, "Entrada_vendas - Type validation", 
+                               f"Transaction type correctly saved: {data.get('type')}")
+                else:
+                    print_result(False, "Entrada_vendas - Type validation", 
+                               f"Expected: entrada_vendas, Got: {data.get('type')}")
+                
+                # Check if automatic saídas were generated
+                if "generatedExpenses" in data:
+                    generated_count = data.get("generatedExpenses", 0)
+                    print_result(True, "Entrada_vendas - Automatic saídas generation", 
+                               f"Generated {generated_count} automatic expense transactions")
+                    
+                    if generated_count == 2:
+                        print_result(True, "Entrada_vendas - Expected saídas count", 
+                                   "Generated 2 saídas as expected (supplier payment + commission)")
+                    else:
+                        print_result(False, "Entrada_vendas - Expected saídas count", 
+                                   f"Expected 2 saídas, got {generated_count}")
+                else:
+                    print_result(False, "Entrada_vendas - Automatic saídas generation", 
+                               "No automatic expense transactions were generated")
+                
+                # Test 3: Verify generated saídas are type="saida_vendas" (CRITICAL)
+                print("\n🎯 TEST 2: VERIFY GENERATED SAÍDAS ARE TYPE='SAIDA_VENDAS'")
+                try:
+                    # Get all transactions to find the generated ones
+                    list_response = requests.get(f"{API_URL}/transactions", timeout=10)
+                    if list_response.status_code == 200:
+                        all_transactions = list_response.json()
+                        
+                        # Find transactions that reference our original transaction
+                        generated_saidas = []
+                        for t in all_transactions:
+                            if (t.get("originalTransactionId") == entrada_transaction_id or
+                                t.get("saleReference") == entrada_transaction_id):
+                                generated_saidas.append(t)
+                        
+                        print_result(True, "Generated saídas - Found transactions", 
+                                   f"Found {len(generated_saidas)} generated transactions")
+                        
+                        # CRITICAL TEST: Verify all generated saídas are type="saida_vendas"
+                        saida_vendas_count = 0
+                        saida_count = 0
+                        
+                        for saida in generated_saidas:
+                            transaction_type = saida.get("type")
+                            description = saida.get("description", "")
+                            
+                            print_result(True, f"Generated saída analysis", 
+                                       f"Type: {transaction_type}, Description: {description}")
+                            
+                            if transaction_type == "saida_vendas":
+                                saida_vendas_count += 1
+                                print_result(True, f"✅ CORRECT TYPE - saida_vendas", 
+                                           f"Generated saída has correct type: {transaction_type}")
+                            elif transaction_type == "saida":
+                                saida_count += 1
+                                print_result(False, f"❌ INCORRECT TYPE - saida", 
+                                           f"Generated saída has incorrect type: {transaction_type} (should be saida_vendas)")
+                            else:
+                                print_result(False, f"❌ UNKNOWN TYPE", 
+                                           f"Generated saída has unknown type: {transaction_type}")
+                        
+                        # CRITICAL VALIDATION: All should be saida_vendas
+                        if saida_vendas_count == 2 and saida_count == 0:
+                            print_result(True, "🎯 CRITICAL BUG FIX VALIDATION - SUCCESS", 
+                                       f"✅ ALL GENERATED SAÍDAS ARE TYPE='saida_vendas' ({saida_vendas_count}/2)")
+                            print_result(True, "🎯 BUG FIX CONFIRMED", 
+                                       "entrada_vendas → generates saida_vendas automatically (NOT 'saida')")
+                        else:
+                            print_result(False, "🎯 CRITICAL BUG FIX VALIDATION - FAILED", 
+                                       f"❌ Expected 2 saida_vendas, got {saida_vendas_count} saida_vendas and {saida_count} saida")
+                            print_result(False, "🎯 BUG NOT FIXED", 
+                                       "entrada_vendas is still generating 'saida' instead of 'saida_vendas'")
+                        
+                        # Store generated saídas for analysis testing
+                        global generated_saidas_for_analysis
+                        generated_saidas_for_analysis = generated_saidas
+                        
+                    else:
+                        print_result(False, f"Transaction list retrieval failed - HTTP {list_response.status_code}", 
+                                   list_response.text)
+                except Exception as e:
+                    print_result(False, "Generated saídas verification failed", str(e))
+                
+            else:
+                print_result(False, "Entrada_vendas Creation - No ID returned", str(data))
+        else:
+            print_result(False, f"Entrada_vendas Creation - FAILED - HTTP {response.status_code}", 
+                       f"Error: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Entrada_vendas Creation - Exception occurred", str(e))
+    
+    # Test 4: Verify analyses include new saídas
+    print("\n🎯 TEST 3: VERIFY ANALYSES INCLUDE NEW SAÍDAS")
+    try:
+        # Test sales-performance endpoint
+        sales_performance_response = requests.get(f"{API_URL}/reports/sales-performance?start_date=2025-09-01&end_date=2025-09-30", timeout=10)
+        if sales_performance_response.status_code == 200:
+            sales_data = sales_performance_response.json()
+            print_result(True, "Sales Performance Analysis - Endpoint accessible", 
+                       f"GET /api/reports/sales-performance returned HTTP 200")
+            
+            # Check if saida_vendas are included in analysis
+            if "saida_vendas" in sales_performance_response.text:
+                print_result(True, "Sales Performance Analysis - Includes saida_vendas", 
+                           "Analysis includes saida_vendas transactions")
+            else:
+                print_result(False, "Sales Performance Analysis - Missing saida_vendas", 
+                           "Analysis does not include saida_vendas transactions")
+        else:
+            print_result(False, f"Sales Performance Analysis - HTTP {sales_performance_response.status_code}", 
+                       sales_performance_response.text)
+        
+        # Test complete-analysis endpoint
+        complete_analysis_response = requests.get(f"{API_URL}/reports/complete-analysis?start_date=2025-09-01&end_date=2025-09-30", timeout=10)
+        if complete_analysis_response.status_code == 200:
+            complete_data = complete_analysis_response.json()
+            print_result(True, "Complete Analysis - Endpoint accessible", 
+                       f"GET /api/reports/complete-analysis returned HTTP 200")
+            
+            # Check if saida_vendas are included in saídas
+            if "saidas_vendas" in complete_analysis_response.text:
+                print_result(True, "Complete Analysis - Includes saidas_vendas", 
+                           "Analysis includes saidas_vendas in saídas section")
+            else:
+                print_result(False, "Complete Analysis - Missing saidas_vendas", 
+                           "Analysis does not include saidas_vendas in saídas section")
+        else:
+            print_result(False, f"Complete Analysis - HTTP {complete_analysis_response.status_code}", 
+                       complete_analysis_response.text)
+            
+    except Exception as e:
+        print_result(False, "Analysis endpoints verification failed", str(e))
+
 def test_analysis_endpoints_corrections():
     """Test Analysis Endpoints Corrections - REVIEW REQUEST"""
     print_test_header("ANALYSIS ENDPOINTS CORRECTIONS - REVIEW REQUEST TESTING")
