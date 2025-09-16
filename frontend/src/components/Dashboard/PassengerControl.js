@@ -746,11 +746,11 @@ const PassengerControlDirect = () => {
                   <h5 className="text-md font-semibold text-orange-700">✈️ 9. Voo de Ida</h5>
                 </div>
 
-                {/* QUARTA LINHA: Horários Ida + Escala Ida */}
+                {/* QUINTA LINHA: Horários Ida + Escala Ida */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   <div className="bg-white p-4 rounded-lg border-l-4 border-yellow-500 shadow-sm">
                     <Label className="text-sm font-medium text-yellow-700 mb-2 block">
-                      🛫 9. Horário Saída - Ida
+                      🛫 10. Horário Saída - Ida
                     </Label>
                     <Input
                       type="time"
@@ -762,7 +762,7 @@ const PassengerControlDirect = () => {
                   
                   <div className="bg-white p-4 rounded-lg border-l-4 border-orange-500 shadow-sm">
                     <Label className="text-sm font-medium text-orange-700 mb-2 block">
-                      🛬 10. Horário Chegada - Ida
+                      🛬 11. Horário Chegada - Ida
                     </Label>
                     <Input
                       type="time"
@@ -774,7 +774,7 @@ const PassengerControlDirect = () => {
                   
                   <div className="bg-white p-4 rounded-lg border-l-4 border-green-500 shadow-sm">
                     <Label className="text-sm font-medium text-green-700 mb-2 block">
-                      ⏱️ 11. Duração - Ida (Automático)
+                      ⏱️ 12. Duração - Ida (Automático)
                     </Label>
                     <Input
                       value={outboundFlightDuration}
@@ -786,7 +786,7 @@ const PassengerControlDirect = () => {
                   
                   <div className="bg-white p-4 rounded-lg border-l-4 border-red-500 shadow-sm">
                     <Label className="text-sm font-medium text-red-700 mb-2 block">
-                      🔄 12. Tem Escala na Ida?
+                      🔄 13. Tem Escala na Ida?
                     </Label>
                     <div className="flex items-center">
                       <input
