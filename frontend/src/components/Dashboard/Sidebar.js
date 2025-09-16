@@ -16,7 +16,8 @@ import {
   Crown,
   Plane,
   UserCheck,
-  RefreshCw
+  RefreshCw,
+  FolderClosed
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen, isMobile }) => {
