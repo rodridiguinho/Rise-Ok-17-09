@@ -94,7 +94,16 @@ const Dashboard = () => {
   };
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab);
+    // Force re-render of analytics components by clearing their state
+    if (tab === 'sales-analytics' || tab === 'financial-analytics') {
+      // Add a small delay to ensure clean state transitions
+      setTimeout(() => {
+        setActiveTab(tab);
+      }, 50);
+    } else {
+      setActiveTab(tab);
+    }
+    
     // Close sidebar on mobile after selection
     if (isMobile) {
       setSidebarOpen(false);
