@@ -100,7 +100,7 @@ const PassengerControlDirect = () => {
       const response = await transactionsAPI.getTransactions();
       
       const entryTransactions = response.filter(transaction => 
-        transaction.type === 'entrada' && 
+        (transaction.type === 'entrada' || transaction.type === 'entrada_vendas') && 
         transaction.internalReservationCode &&
         (transaction.departureCity || transaction.arrivalCity)
       );
