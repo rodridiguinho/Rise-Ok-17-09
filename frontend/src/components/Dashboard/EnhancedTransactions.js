@@ -2440,6 +2440,7 @@ const EnhancedTransactions = () => {
                     <h4 className="font-medium text-gray-700 mb-4 border-b border-gray-200 pb-2">
                       📋 Informações Adicionais
                     </h4>
+                  </div>
                 </div>
 
                 {/* Multiple Products - MOVED UP */}
