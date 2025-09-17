@@ -252,8 +252,13 @@ const PassengerControlDirect = () => {
         description: `${newPassenger.name} foi adicionado à reserva e salvo no sistema`,
       });
 
-      // CORREÇÃO: Recarregar dados para mostrar passageiros atualizados
-      await loadReservations();
+      // CORREÇÃO: Atualizar dados localmente sem recarregar tudo para evitar card desaparecer
+      setReservations(prev => 
+        prev.map(res => res.id === selectedReservation.id ? updatedReservation : res)
+      );
+      
+      // CORREÇÃO CRÍTICA: Atualizar selectedReservation para mostrar dados no modal
+      setSelectedReservation(updatedReservation);
 
     } catch (error) {
       console.error('Erro ao adicionar passageiro:', error);
