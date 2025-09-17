@@ -1635,12 +1635,38 @@ const PassengerControlDirect = () => {
                       <Label className="text-sm font-medium text-purple-700 mb-2 block">
                         ⏱️ Tempo de Conexão:
                       </Label>
-                      <Input
-                        value={connectionDuration}
-                        onChange={(e) => setConnectionDuration(e.target.value)}
-                        placeholder="Ex: 1h 30min"
-                        className="text-sm"
-                      />
+                      <div className="flex space-x-2">
+                        <Input
+                          value={connectionDuration}
+                          onChange={(e) => setConnectionDuration(e.target.value)}
+                          placeholder="Ex: 1h 30min"
+                          className="text-sm flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (stopoverArrivalTime && stopoverDepartureTime) {
+                              const [arrHour, arrMin] = stopoverArrivalTime.split(':').map(Number);
+                              const [depHour, depMin] = stopoverDepartureTime.split(':').map(Number);
+                              
+                              let arrMinutes = arrHour * 60 + arrMin;
+                              let depMinutes = depHour * 60 + depMin;
+                              
+                              let connectionMinutes = depMinutes - arrMinutes;
+                              if (connectionMinutes < 0) connectionMinutes += 24 * 60;
+                              
+                              const hours = Math.floor(connectionMinutes / 60);
+                              const minutes = connectionMinutes % 60;
+                              
+                              setConnectionDuration(`${hours}h${minutes > 0 ? ` ${minutes}min` : ''}`);
+                            }
+                          }}
+                          className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
+                          title="Calcular tempo de conexão"
+                        >
+                          🧮 Calc
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
