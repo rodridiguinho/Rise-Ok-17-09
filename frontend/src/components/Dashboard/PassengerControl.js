@@ -938,7 +938,132 @@ const PassengerControlDirect = () => {
                 </div>
               </div>
             );
-          })}
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Notificações */}
+      {notifications.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center mb-4">
+            <Bell className="h-5 w-5 mr-2 text-orange-600" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              🔔 Notificações de Viagem ({notifications.length})
+            </h2>
+          </div>
+          
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {notifications.map(notification => (
+              <div 
+                key={notification.id}
+                className={`p-3 rounded-lg border-l-4 ${
+                  notification.type === 'urgent' ? 'bg-red-50 border-red-500' :
+                  notification.type === 'warning' ? 'bg-orange-50 border-orange-500' :
+                  notification.type === 'return' ? 'bg-blue-50 border-blue-500' :
+                  'bg-blue-50 border-blue-500'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-lg">{notification.icon}</span>
+                    <div>
+                      <h4 className={`font-medium ${
+                        notification.type === 'urgent' ? 'text-red-800' :
+                        notification.type === 'warning' ? 'text-orange-800' :
+                        notification.type === 'return' ? 'text-blue-800' :
+                        'text-blue-800'
+                      }`}>
+                        {notification.title}
+                      </h4>
+                      <p className={`text-sm ${
+                        notification.type === 'urgent' ? 'text-red-700' :
+                        notification.type === 'warning' ? 'text-orange-700' :
+                        notification.type === 'return' ? 'text-blue-700' :
+                        'text-blue-700'
+                      }`}>
+                        {notification.message}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => {
+                      // Scroll to the specific reservation
+                      const reservationElement = document.querySelector(`[data-reservation-id="${notification.reservation.id}"]`);
+                      if (reservationElement) {
+                        reservationElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        reservationElement.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                        setTimeout(() => {
+                          reservationElement.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                        }, 3000);
+                      }
+                    }}
+                    variant="outline"
+                    className="text-xs px-2 py-1 h-auto"
+                  >
+                    Ver Reserva
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <UserCheck className="mr-3 h-8 w-8 text-blue-600" />
+            Controle de Passageiros - VERSÃO DIRETA
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Gerencie passageiros, fornecedores e informações de viagem
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setIsAddReservationModalOpen(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Adicionar Reserva</span>
+          </button>
+          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded">
+            {reservations.length} Reservas Ativas
+          </span>
+        </div>
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Plane className="h-8 w-8 animate-bounce mx-auto mb-2" />
+            <p>Carregando reservas...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Reservations Grid */}
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {reservations.map((reservation) => {
+            // Determinar se precisa criar cards separados para IDA e VOLTA
+            const hasReturnDate = reservation.returnDate && reservation.tripType === 'ida-volta';
+            
+            if (hasReturnDate) {
+              // Criar dois cards: um para IDA e um para VOLTA
+              return [
+                // CARD IDA
+                renderReservationCard(reservation, 'ida', `${reservation.id}-ida`),
+                // CARD VOLTA  
+                renderReservationCard(reservation, 'volta', `${reservation.id}-volta`)
+              ];
+            } else {
+              // Criar apenas um card para IDA
+              return renderReservationCard(reservation, 'ida', reservation.id);
+            }
+          }).flat()}
         </div>
       )}
 
