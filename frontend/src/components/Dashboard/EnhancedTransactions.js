@@ -2851,10 +2851,15 @@ const EnhancedTransactions = () => {
                           🏢 Fornecedor: {transaction.supplier}
                         </span>
                       )}
-                      {/* Show commission only once */}
-                      {transaction.commissionValue && transaction.commissionValue > 0 && transaction.type.includes('entrada') && (
+                      {/* Show commission for all transactions that have it - CORREÇÃO para mostrar em todas */}
+                      {transaction.commissionValue && transaction.commissionValue > 0 && (
                         <span className="flex items-center text-green-600">
                           💳 Comissão: R$ {parseFloat(transaction.commissionValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {transaction.saleValue && transaction.commissionValue && (
+                            <span className="ml-1">
+                              ({((parseFloat(transaction.commissionValue) / parseFloat(transaction.saleValue)) * 100).toFixed(2)}%)
+                            </span>
+                          )}
                         </span>
                       )}
                     </div>
