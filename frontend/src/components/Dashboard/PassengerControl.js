@@ -108,17 +108,6 @@ const PassengerControlDirect = () => {
         !transaction.hiddenFromPassengerControl  // CORREÇÃO: Filtrar reservas ocultas
         // Removed city requirement since flight details are managed in the modal
       );
-
-      console.log('🔍 DEBUG - Found entry transactions:', entryTransactions.length);
-      
-      // DEBUG: Log transactions with returnDate
-      const withReturnDate = entryTransactions.filter(t => t.returnDate);
-      console.log('📅 DEBUG - Transactions with returnDate:', withReturnDate.length);
-      if (withReturnDate.length > 0) {
-        withReturnDate.forEach(t => {
-          console.log(`  - ${t.internalReservationCode}: departureDate=${t.departureDate}, returnDate=${t.returnDate}, tripType=${t.tripType}`);
-        });
-      }
       
       const reservationsData = entryTransactions.map(transaction => ({
         id: transaction.id,
