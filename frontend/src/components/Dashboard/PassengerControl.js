@@ -324,6 +324,14 @@ const PassengerControlDirect = () => {
             errors: apiError.response?.data?.errors,
             fullErrorData: apiError.response?.data
           });
+          
+          // Log cada erro individualmente para melhor visibilidade
+          if (apiError.response?.data?.detail && Array.isArray(apiError.response.data.detail)) {
+            console.error('📋 DEBUG - ERROS DE VALIDAÇÃO INDIVIDUAIS:');
+            apiError.response.data.detail.forEach((error, index) => {
+              console.error(`   ${index + 1}. ${JSON.stringify(error)}`);
+            });
+          }
         }
         
         toast({
