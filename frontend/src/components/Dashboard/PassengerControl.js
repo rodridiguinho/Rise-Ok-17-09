@@ -92,6 +92,100 @@ const CityInput = ({ value, onChange, placeholder, id, airportCities }) => {
 const PassengerControlDirect = () => {
   console.log('🔥 PassengerControlDirect component loaded successfully!');
   const [reservations, setReservations] = useState([]);
+
+  // DADOS: Airport Cities Database
+  const airportCities = [
+    "Campinas (VCP)", "Viracopos (VCP)",
+    "Sao Paulo (GRU)", "Sao Paulo (CGH)", "Rio de Janeiro (GIG)", "Rio de Janeiro (SDU)", 
+    "Salvador (SSA)", "Brasilia (BSB)", "Fortaleza (FOR)", "Recife (REC)", "Manaus (MAO)", 
+    "Belem (BEL)", "Porto Alegre (POA)", "Curitiba (CWB)", "Goiania (GYN)", "Joao Pessoa (JPA)", 
+    "Maceio (MCZ)", "Natal (NAT)", "Vitoria (VIX)", "Florianopolis (FLN)", "Campo Grande (CGR)", 
+    "Cuiaba (CGB)", "Foz do Iguacu (IGU)", "Uberlandia (UDI)", "Ribeirao Preto (RAO)",
+    "Londrina (LDB)", "Maringa (MGF)", "Cascavel (CAC)", "Ponta Grossa (PGZ)",
+    "Sao Jose do Rio Preto (SJP)", "Bauru (BAU)", "Presidente Prudente (PPB)", 
+    "Aracatuba (ARU)", "Marilia (MII)", "Imperatriz (IMP)", "Juazeiro do Norte (JDO)",
+    "Petrolina (PNZ)", "Dourados (DOU)", "Corumbá (CMG)", "Rondonópolis (ROO)",
+    "Alta Floresta (AFL)", "Santos Dumont (SDU)", "Congonhas (CGH)", "Guarulhos (GRU)",
+    // Internacional
+    "Lisboa (LIS)", "Porto (OPO)", "Madrid (MAD)", "Barcelona (BCN)", "Paris (CDG)", 
+    "Roma (FCO)", "Milan (MXP)", "Londres (LHR)", "Londres (LGW)", "Amsterdam (AMS)",
+    "Frankfurt (FRA)", "Munich (MUC)", "Zurich (ZUR)", "Vienna (VIE)", "Praga (PRG)",
+    "New York (JFK)", "New York (LGA)", "Los Angeles (LAX)", "Chicago (ORD)", 
+    "Miami (MIA)", "Orlando (MCO)", "Las Vegas (LAS)", "San Francisco (SFO)",
+    "Buenos Aires (EZE)", "Buenos Aires (AEP)", "Santiago (SCL)", "Lima (LIM)",
+    "Bogota (BOG)", "Caracas (CCS)", "Montevideo (MVD)", "Asuncion (ASU)"
+  ];
+
+  // DADOS: Timezone Database
+  const timezoneDB = {
+    "São Paulo": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Sao Paulo": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Rio de Janeiro": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Salvador": { timezone: "America/Bahia", utc: -3, country: "Brasil" },
+    "Brasília": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Brasilia": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Fortaleza": { timezone: "America/Fortaleza", utc: -3, country: "Brasil" },
+    "Recife": { timezone: "America/Recife", utc: -3, country: "Brasil" },
+    "Manaus": { timezone: "America/Manaus", utc: -4, country: "Brasil" },
+    "Curitiba": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Porto Alegre": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Cascavel": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Campo Grande": { timezone: "America/Campo_Grande", utc: -4, country: "Brasil" },
+    "Cuiabá": { timezone: "America/Cuiaba", utc: -4, country: "Brasil" },
+    "Cuiaba": { timezone: "America/Cuiaba", utc: -4, country: "Brasil" },
+    // Internacional
+    "Lisboa": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
+    "Porto": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
+    "Madrid": { timezone: "Europe/Madrid", utc: 1, country: "Espanha" },
+    "Paris": { timezone: "Europe/Paris", utc: 1, country: "França" },
+    "Londres": { timezone: "Europe/London", utc: 0, country: "Reino Unido" },
+    "New York": { timezone: "America/New_York", utc: -5, country: "EUA" },
+    "Los Angeles": { timezone: "America/Los_Angeles", utc: -8, country: "EUA" },
+    "Buenos Aires": { timezone: "America/Argentina/Buenos_Aires", utc: -3, country: "Argentina" }
+  };
+
+  // FUNÇÃO: Calcular duração de voo baseado no fuso horário
+  const calculateFlightDuration = (departureCity, arrivalCity, departureTime, arrivalTime) => {
+    if (!departureCity || !arrivalCity || !departureTime || !arrivalTime) return '';
+    
+    try {
+      const depCityClean = departureCity.split(' (')[0];
+      const arrCityClean = arrivalCity.split(' (')[0];
+      
+      const depTimezone = timezoneDB[depCityClean];
+      const arrTimezone = timezoneDB[arrCityClean];
+      
+      if (!depTimezone || !arrTimezone) return 'Cidades não encontradas';
+      
+      // Converter horários para minutos
+      const [depHour, depMin] = departureTime.split(':').map(Number);
+      const [arrHour, arrMin] = arrivalTime.split(':').map(Number);
+      
+      let depMinutes = depHour * 60 + depMin;
+      let arrMinutes = arrHour * 60 + arrMin;
+      
+      // Ajustar para fuso horário (diferença UTC)
+      const timezoneOffset = (arrTimezone.utc - depTimezone.utc) * 60;
+      arrMinutes -= timezoneOffset;
+      
+      // Calcular duração
+      let durationMinutes = arrMinutes - depMinutes;
+      
+      // Se negativo, adicionar 24h (voo no dia seguinte)
+      if (durationMinutes < 0) {
+        durationMinutes += 24 * 60;
+      }
+      
+      const hours = Math.floor(durationMinutes / 60);
+      const minutes = durationMinutes % 60;
+      
+      return `${hours}h${minutes > 0 ? ` ${minutes}min` : ''}`;
+      
+    } catch (error) {
+      console.error('Erro no cálculo de duração:', error);
+      return 'Erro no cálculo';
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [isAddPassengerOpen, setIsAddPassengerOpen] = useState(false);
