@@ -1479,12 +1479,30 @@ const PassengerControlDirect = () => {
                       <Label className="text-sm font-medium text-purple-700 mb-2 block">
                         ⏱️ Duração do Voo:
                       </Label>
-                      <Input
-                        value={outboundFlightDuration}
-                        onChange={(e) => setOutboundFlightDuration(e.target.value)}
-                        placeholder="Ex: 2h 30min"
-                        className="text-sm"
-                      />
+                      <div className="flex space-x-2">
+                        <Input
+                          value={outboundFlightDuration}
+                          onChange={(e) => setOutboundFlightDuration(e.target.value)}
+                          placeholder="Ex: 2h 30min"
+                          className="text-sm flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const duration = calculateFlightDuration(
+                              departureCity, 
+                              arrivalCity, 
+                              outboundDepartureTime, 
+                              outboundArrivalTime
+                            );
+                            setOutboundFlightDuration(duration);
+                          }}
+                          className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
+                          title="Calcular automaticamente"
+                        >
+                          🧮 Calc
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
