@@ -775,10 +775,10 @@ const PassengerControlDirect = () => {
           <div className="bg-slate-50 p-3 rounded-lg mb-4">
             <h4 className="text-xs font-bold text-slate-700 mb-2 flex items-center">
               <Users className="h-3 w-3 mr-1" />
-              👥 TODOS OS PASSAGEIROS ({reservation.passengers.length}):
+              👥 TODOS OS PASSAGEIROS ({displayPassengers.length}):
             </h4>
             <div className="space-y-2">
-              {reservation.passengers.map((passenger, index) => (
+              {displayPassengers.map((passenger, index) => (
                 <div key={index} className="bg-white p-2 rounded text-xs border-l-2 border-indigo-300">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
