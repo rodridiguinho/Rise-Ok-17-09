@@ -234,6 +234,9 @@ const PassengerControlDirect = () => {
         description: `${newPassenger.name} foi adicionado à reserva e salvo no sistema`,
       });
 
+      // CORREÇÃO: Recarregar dados para mostrar passageiros atualizados
+      await loadReservations();
+
     } catch (error) {
       console.error('Erro ao adicionar passageiro:', error);
       toast({
