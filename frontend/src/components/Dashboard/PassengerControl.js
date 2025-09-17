@@ -1382,29 +1382,29 @@ const PassengerControlDirect = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  {/* Cidade de Origem */}
+                  {/* Cidade de Origem - COM AUTOCOMPLETE */}
                   <div className="bg-white p-3 rounded border-l-4 border-blue-500">
                     <Label className="text-sm font-medium text-blue-700 mb-2 block">
                       🏙️ Cidade de Origem:
                     </Label>
-                    <Input
+                    <CityInput
                       value={departureCity}
-                      onChange={(e) => setDepartureCity(e.target.value)}
-                      placeholder="Cidade de partida"
-                      className="text-sm"
+                      onChange={setDepartureCity}
+                      placeholder="Digite para buscar cidade..."
+                      airportCities={airportCities}
                     />
                   </div>
                   
-                  {/* Cidade de Destino */}
+                  {/* Cidade de Destino - COM AUTOCOMPLETE */}
                   <div className="bg-white p-3 rounded border-l-4 border-red-500">
                     <Label className="text-sm font-medium text-red-700 mb-2 block">
                       🏙️ Cidade de Destino:
                     </Label>
-                    <Input
+                    <CityInput
                       value={arrivalCity}
-                      onChange={(e) => setArrivalCity(e.target.value)}
-                      placeholder="Cidade de chegada"
-                      className="text-sm"
+                      onChange={setArrivalCity}
+                      placeholder="Digite para buscar cidade..."
+                      airportCities={airportCities}
                     />
                   </div>
                 </div>
