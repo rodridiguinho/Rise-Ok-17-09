@@ -284,6 +284,15 @@ const PassengerControlDirect = () => {
         connectionDuration: connectionDuration
       };
 
+      // DEBUG: Console log para verificar dados sendo enviados
+      console.log('🔍 DEBUG - Dados sendo enviados para salvar:', {
+        id: selectedReservation.id,
+        tripType: tripType,
+        departureDate: departureDate,
+        returnDate: returnDate,
+        updatedData: updatedData
+      });
+
       await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
 
       // Atualizar a lista local
