@@ -116,8 +116,9 @@ const PassengerControlDirect = () => {
     "Bogota (BOG)", "Caracas (CCS)", "Montevideo (MVD)", "Asuncion (ASU)"
   ];
 
-  // DADOS: Timezone Database
+  // DADOS: Timezone Database (EXPANDIDO)
   const timezoneDB = {
+    // Brasil - principais cidades
     "São Paulo": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Sao Paulo": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Rio de Janeiro": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
@@ -129,19 +130,56 @@ const PassengerControlDirect = () => {
     "Manaus": { timezone: "America/Manaus", utc: -4, country: "Brasil" },
     "Curitiba": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Porto Alegre": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Belem": { timezone: "America/Belem", utc: -3, country: "Brasil" },
+    "Belém": { timezone: "America/Belem", utc: -3, country: "Brasil" },
+    "Goiania": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Goiânia": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Vitoria": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Vitória": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Florianopolis": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Florianópolis": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    
+    // Brasil - cidades menores
     "Cascavel": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Ponta Grossa": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Londrina": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Maringa": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Maringá": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
     "Campo Grande": { timezone: "America/Campo_Grande", utc: -4, country: "Brasil" },
     "Cuiabá": { timezone: "America/Cuiaba", utc: -4, country: "Brasil" },
     "Cuiaba": { timezone: "America/Cuiaba", utc: -4, country: "Brasil" },
-    // Internacional
+    "Campinas": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Viracopos": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Guarulhos": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Congonhas": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    "Santos Dumont": { timezone: "America/Sao_Paulo", utc: -3, country: "Brasil" },
+    
+    // Internacional - Europa
     "Lisboa": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
     "Porto": { timezone: "Europe/Lisbon", utc: 0, country: "Portugal" },
     "Madrid": { timezone: "Europe/Madrid", utc: 1, country: "Espanha" },
+    "Barcelona": { timezone: "Europe/Madrid", utc: 1, country: "Espanha" },
     "Paris": { timezone: "Europe/Paris", utc: 1, country: "França" },
+    "Roma": { timezone: "Europe/Rome", utc: 1, country: "Itália" },
+    "Milan": { timezone: "Europe/Rome", utc: 1, country: "Itália" },
     "Londres": { timezone: "Europe/London", utc: 0, country: "Reino Unido" },
+    "Amsterdam": { timezone: "Europe/Amsterdam", utc: 1, country: "Holanda" },
+    "Frankfurt": { timezone: "Europe/Berlin", utc: 1, country: "Alemanha" },
+    "Munich": { timezone: "Europe/Berlin", utc: 1, country: "Alemanha" },
+    "Zurich": { timezone: "Europe/Zurich", utc: 1, country: "Suíça" },
+    
+    // Internacional - Américas
     "New York": { timezone: "America/New_York", utc: -5, country: "EUA" },
     "Los Angeles": { timezone: "America/Los_Angeles", utc: -8, country: "EUA" },
-    "Buenos Aires": { timezone: "America/Argentina/Buenos_Aires", utc: -3, country: "Argentina" }
+    "Miami": { timezone: "America/New_York", utc: -5, country: "EUA" },
+    "Orlando": { timezone: "America/New_York", utc: -5, country: "EUA" },
+    "Chicago": { timezone: "America/Chicago", utc: -6, country: "EUA" },
+    "San Francisco": { timezone: "America/Los_Angeles", utc: -8, country: "EUA" },
+    "Las Vegas": { timezone: "America/Los_Angeles", utc: -8, country: "EUA" },
+    "Buenos Aires": { timezone: "America/Argentina/Buenos_Aires", utc: -3, country: "Argentina" },
+    "Santiago": { timezone: "America/Santiago", utc: -3, country: "Chile" },
+    "Lima": { timezone: "America/Lima", utc: -5, country: "Peru" },
+    "Bogota": { timezone: "America/Bogota", utc: -5, country: "Colômbia" }
   };
 
   // FUNÇÃO: Calcular duração de voo baseado no fuso horário
