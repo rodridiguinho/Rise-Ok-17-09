@@ -11485,14 +11485,321 @@ def test_review_request_sales_analysis_endpoints():
             except Exception as e:
                 print_result(False, f"Cleanup - Delete transaction {transaction_id}", str(e))
 
+def test_passenger_control_investigation():
+    """🎯 INVESTIGAÇÃO CRÍTICA - DADOS DE PASSAGEIROS NAS TRANSAÇÕES - REVIEW REQUEST"""
+    print_test_header("🎯 INVESTIGAÇÃO CRÍTICA - DADOS DE PASSAGEIROS NAS TRANSAÇÕES")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "🎯 PASSENGER INVESTIGATION - Authentication", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"🎯 PASSENGER INVESTIGATION - Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "🎯 PASSENGER INVESTIGATION - Authentication failed", str(e))
+        return
+    
+    # Test 2: Get all transactions and search for specific ones mentioned in review request
+    print("\n🎯 TEST 1: BUSCAR TRANSAÇÕES ESPECÍFICAS (RT-2025-3644, RT-2025-3926, RT-2025-1764)")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "Get all transactions", 
+                       f"Successfully retrieved {len(transactions)} transactions from database")
+            
+            # Search for specific transactions mentioned in review request
+            target_codes = ["RT-2025-3644", "RT-2025-3926", "RT-2025-1764"]
+            found_transactions = []
+            
+            for transaction in transactions:
+                # Check various code fields
+                internal_code = transaction.get("internalReservationCode", "")
+                client_code = transaction.get("clientReservationCode", "")
+                description = transaction.get("description", "")
+                
+                for target_code in target_codes:
+                    if (target_code in internal_code or 
+                        target_code in client_code or 
+                        target_code in description):
+                        found_transactions.append({
+                            "transaction": transaction,
+                            "target_code": target_code,
+                            "found_in": "internalReservationCode" if target_code in internal_code else 
+                                       "clientReservationCode" if target_code in client_code else "description"
+                        })
+                        break
+            
+            if found_transactions:
+                print_result(True, "Specific transactions search", 
+                           f"Found {len(found_transactions)} target transactions")
+                
+                # Analyze each found transaction for passenger data
+                for item in found_transactions:
+                    transaction = item["transaction"]
+                    target_code = item["target_code"]
+                    found_in = item["found_in"]
+                    
+                    print(f"\n📋 ANALYZING TRANSACTION: {target_code}")
+                    print(f"   Found in field: {found_in}")
+                    print(f"   Transaction ID: {transaction.get('id', 'N/A')}")
+                    print(f"   Description: {transaction.get('description', 'N/A')}")
+                    print(f"   Client: {transaction.get('client', 'N/A')}")
+                    print(f"   Amount: R$ {transaction.get('amount', 0)}")
+                    
+                    # Check passengers field
+                    passengers = transaction.get("passengers", [])
+                    if passengers:
+                        print_result(True, f"Transaction {target_code} - Passengers field", 
+                                   f"Found {len(passengers)} passengers: {passengers}")
+                    else:
+                        print_result(False, f"Transaction {target_code} - Passengers field", 
+                                   "Passengers field is empty or missing")
+                    
+                    # Check if transaction is hidden from passenger control
+                    hidden = transaction.get("hiddenFromPassengerControl", False)
+                    if hidden:
+                        print_result(True, f"Transaction {target_code} - Hidden status", 
+                                   "Transaction is HIDDEN from passenger control")
+                    else:
+                        print_result(True, f"Transaction {target_code} - Visible status", 
+                                   "Transaction is VISIBLE in passenger control")
+                    
+                    # Show complete transaction structure for debugging
+                    print(f"   Complete transaction structure:")
+                    for key, value in transaction.items():
+                        if key in ["passengers", "hiddenFromPassengerControl", "internalReservationCode", 
+                                  "clientReservationCode", "tripType", "departureDate", "returnDate"]:
+                            print(f"     {key}: {value}")
+            else:
+                print_result(False, "Specific transactions search", 
+                           f"None of the target transactions ({target_codes}) found in database")
+                
+                # Show sample of available transactions for debugging
+                print("\n📋 SAMPLE OF AVAILABLE TRANSACTIONS (first 5):")
+                for i, transaction in enumerate(transactions[:5]):
+                    print(f"   {i+1}. ID: {transaction.get('id', 'N/A')}")
+                    print(f"      Description: {transaction.get('description', 'N/A')}")
+                    print(f"      Internal Code: {transaction.get('internalReservationCode', 'N/A')}")
+                    print(f"      Client Code: {transaction.get('clientReservationCode', 'N/A')}")
+                    print(f"      Passengers: {transaction.get('passengers', [])}")
+        else:
+            print_result(False, f"Get all transactions failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Get all transactions failed", str(e))
+        return
+    
+    # Test 3: Test addPassenger functionality by creating a transaction with passengers
+    print("\n🎯 TEST 2: TESTAR FUNÇÃO addPassenger - CRIAR TRANSAÇÃO COM PASSAGEIROS")
+    try:
+        # Create a transaction with passenger data
+        test_transaction = {
+            "type": "entrada_vendas",
+            "category": "Passagem Aérea",
+            "description": "Teste Investigação Passageiros",
+            "amount": 2500.00,
+            "paymentMethod": "PIX",
+            "client": "Cliente Teste Passageiros",
+            "internalReservationCode": "RT-2025-TEST-PASS",
+            "departureDate": "2025-02-15",
+            "returnDate": "2025-02-25",
+            "tripType": "ida-volta",
+            "passengers": [
+                {
+                    "name": "João Silva",
+                    "document": "123.456.789-00",
+                    "birthDate": "1985-05-15",
+                    "phone": "(11) 99999-1111"
+                },
+                {
+                    "name": "Maria Silva",
+                    "document": "987.654.321-00", 
+                    "birthDate": "1990-08-20",
+                    "phone": "(11) 99999-2222"
+                }
+            ],
+            "transactionDate": "2025-01-15"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=test_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                test_transaction_id = data["id"]
+                print_result(True, "Create transaction with passengers", 
+                           f"Transaction created successfully with ID: {test_transaction_id}")
+                
+                # Verify passengers were saved
+                saved_passengers = data.get("passengers", [])
+                if saved_passengers and len(saved_passengers) == 2:
+                    print_result(True, "Passengers data persistence", 
+                               f"All {len(saved_passengers)} passengers saved correctly")
+                    
+                    # Verify passenger details
+                    for i, passenger in enumerate(saved_passengers):
+                        expected_names = ["João Silva", "Maria Silva"]
+                        if passenger.get("name") == expected_names[i]:
+                            print_result(True, f"Passenger {i+1} data validation", 
+                                       f"Name: {passenger.get('name')}, Document: {passenger.get('document')}")
+                        else:
+                            print_result(False, f"Passenger {i+1} data validation", 
+                                       f"Expected: {expected_names[i]}, Got: {passenger.get('name')}")
+                else:
+                    print_result(False, "Passengers data persistence", 
+                               f"Expected 2 passengers, got {len(saved_passengers)}: {saved_passengers}")
+                
+                # Verify transaction appears in passenger control (not hidden)
+                hidden_status = data.get("hiddenFromPassengerControl", False)
+                if not hidden_status:
+                    print_result(True, "Passenger control visibility", 
+                               "Transaction is visible in passenger control (not hidden)")
+                else:
+                    print_result(False, "Passenger control visibility", 
+                               "Transaction is hidden from passenger control")
+                
+            else:
+                print_result(False, "Create transaction with passengers", f"No ID returned: {data}")
+        else:
+            print_result(False, f"Create transaction with passengers failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Create transaction with passengers failed", str(e))
+    
+    # Test 4: Test hide from passenger control functionality
+    print("\n🎯 TEST 3: TESTAR BOTÃO EXCLUIR - PATCH /api/transactions/{id}/hide-from-passenger-control")
+    try:
+        if 'test_transaction_id' in locals():
+            headers = {"Authorization": f"Bearer {auth_token}"}
+            response = requests.patch(f"{API_URL}/transactions/{test_transaction_id}/hide-from-passenger-control", 
+                                    headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                print_result(True, "Hide from passenger control", 
+                           f"Successfully hidden transaction: {data.get('message', 'No message')}")
+                
+                # Verify the transaction is now hidden
+                verify_response = requests.get(f"{API_URL}/transactions", timeout=10)
+                if verify_response.status_code == 200:
+                    transactions = verify_response.json()
+                    hidden_transaction = None
+                    for t in transactions:
+                        if t.get("id") == test_transaction_id:
+                            hidden_transaction = t
+                            break
+                    
+                    if hidden_transaction:
+                        is_hidden = hidden_transaction.get("hiddenFromPassengerControl", False)
+                        if is_hidden:
+                            print_result(True, "Hide functionality verification", 
+                                       "Transaction is now correctly marked as hidden")
+                        else:
+                            print_result(False, "Hide functionality verification", 
+                                       "Transaction is NOT marked as hidden after PATCH operation")
+                    else:
+                        print_result(False, "Hide functionality verification", 
+                                   "Transaction not found for verification")
+            else:
+                print_result(False, f"Hide from passenger control failed - HTTP {response.status_code}", response.text)
+        else:
+            print_result(False, "Hide from passenger control", "No test transaction ID available")
+    except Exception as e:
+        print_result(False, "Hide from passenger control failed", str(e))
+    
+    # Test 5: Analyze existing transactions for passenger data patterns
+    print("\n🎯 TEST 4: ANÁLISE GERAL DOS DADOS DE PASSAGEIROS NO BANCO")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            
+            # Statistics
+            total_transactions = len(transactions)
+            transactions_with_passengers = 0
+            transactions_hidden_from_control = 0
+            transactions_with_travel_data = 0
+            
+            passenger_counts = []
+            
+            for transaction in transactions:
+                passengers = transaction.get("passengers", [])
+                if passengers:
+                    transactions_with_passengers += 1
+                    passenger_counts.append(len(passengers))
+                
+                if transaction.get("hiddenFromPassengerControl", False):
+                    transactions_hidden_from_control += 1
+                
+                if (transaction.get("departureDate") or 
+                    transaction.get("returnDate") or 
+                    transaction.get("tripType")):
+                    transactions_with_travel_data += 1
+            
+            print_result(True, "Database analysis - Total transactions", 
+                       f"Found {total_transactions} total transactions")
+            
+            print_result(True, "Database analysis - Transactions with passengers", 
+                       f"{transactions_with_passengers} transactions have passenger data")
+            
+            if passenger_counts:
+                avg_passengers = sum(passenger_counts) / len(passenger_counts)
+                print_result(True, "Database analysis - Passenger statistics", 
+                           f"Average passengers per transaction: {avg_passengers:.1f}, Max: {max(passenger_counts)}")
+            
+            print_result(True, "Database analysis - Hidden transactions", 
+                       f"{transactions_hidden_from_control} transactions hidden from passenger control")
+            
+            print_result(True, "Database analysis - Travel data", 
+                       f"{transactions_with_travel_data} transactions have travel-related data")
+            
+            # Show some examples of transactions with passengers
+            if transactions_with_passengers > 0:
+                print("\n📋 EXAMPLES OF TRANSACTIONS WITH PASSENGERS:")
+                count = 0
+                for transaction in transactions:
+                    if transaction.get("passengers") and count < 3:
+                        passengers = transaction.get("passengers", [])
+                        print(f"   Transaction ID: {transaction.get('id')}")
+                        print(f"   Description: {transaction.get('description')}")
+                        print(f"   Passengers ({len(passengers)}): {[p.get('name', 'No name') for p in passengers]}")
+                        print(f"   Hidden: {transaction.get('hiddenFromPassengerControl', False)}")
+                        count += 1
+            
+            # Final diagnosis
+            if transactions_with_passengers == 0:
+                print_result(False, "🚨 ROOT CAUSE IDENTIFIED", 
+                           "NO TRANSACTIONS IN DATABASE HAVE PASSENGER DATA - This explains why cards show '0 Passageiro(s)'")
+            else:
+                print_result(True, "Database has passenger data", 
+                           f"{transactions_with_passengers} transactions have passenger data, but cards may not be displaying them correctly")
+                
+        else:
+            print_result(False, f"Database analysis failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Database analysis failed", str(e))
+
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - INVESTIGAÇÃO ESPECÍFICA CARDS IDA/VOLTA")
+    print("🚀 Starting Backend API Test Suite - INVESTIGAÇÃO CRÍTICA DADOS DE PASSAGEIROS")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the IDA/VOLTA cards investigation (highest priority)
-    test_ida_volta_cards_investigation()
+    # Run the passenger control investigation (highest priority)
+    test_passenger_control_investigation()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Complete - INVESTIGAÇÃO IDA/VOLTA CONCLUÍDA")
+    print("🏁 Backend API Test Suite Complete - INVESTIGAÇÃO PASSAGEIROS CONCLUÍDA")
     print("="*80)
