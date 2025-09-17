@@ -309,16 +309,27 @@ const PassengerControlDirect = () => {
         console.log('✅ DEBUG - API chamada concluída com sucesso. Resposta:', apiResponse);
       } catch (apiError) {
         console.error('❌ DEBUG - ERRO NA API:', apiError);
-        console.error('❌ DEBUG - ERRO DETALHES:', {
+        console.error('❌ DEBUG - ERRO DETALHES COMPLETO:', {
           message: apiError.message,
-          response: apiError.response?.data,
-          status: apiError.response?.status
+          status: apiError.response?.status,
+          statusText: apiError.response?.statusText,
+          responseData: apiError.response?.data,
+          fullResponse: apiError.response
         });
+        
+        // Expandir detalhes específicos do erro 422
+        if (apiError.response?.status === 422) {
+          console.error('🚨 DEBUG - ERRO 422 VALIDAÇÃO:', {
+            detail: apiError.response?.data?.detail,
+            errors: apiError.response?.data?.errors,
+            fullErrorData: apiError.response?.data
+          });
+        }
         
         toast({
           variant: "destructive",
           title: "Erro ao salvar",
-          description: `Erro na API: ${apiError.message}`,
+          description: `Erro na API: ${apiError.message} (Status: ${apiError.response?.status})`,
         });
         return; // Para por aqui se der erro
       }
