@@ -11527,10 +11527,10 @@ def test_passenger_control_investigation():
             found_transactions = []
             
             for transaction in transactions:
-                # Check various code fields
-                internal_code = transaction.get("internalReservationCode", "")
-                client_code = transaction.get("clientReservationCode", "")
-                description = transaction.get("description", "")
+                # Check various code fields (handle None values)
+                internal_code = transaction.get("internalReservationCode") or ""
+                client_code = transaction.get("clientReservationCode") or ""
+                description = transaction.get("description") or ""
                 
                 for target_code in target_codes:
                     if (target_code in internal_code or 
