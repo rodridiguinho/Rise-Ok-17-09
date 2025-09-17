@@ -310,7 +310,10 @@ const PassengerControlDirect = () => {
         stopoverCity: stopoverCity,
         stopoverArrivalTime: stopoverArrivalTime,
         stopoverDepartureTime: stopoverDepartureTime,
-        connectionDuration: connectionDuration
+        connectionDuration: connectionDuration,
+        
+        // CORREÇÃO CRÍTICA: Incluir passageiros no salvamento
+        passengers: selectedReservation.passengers
       };
 
       await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
