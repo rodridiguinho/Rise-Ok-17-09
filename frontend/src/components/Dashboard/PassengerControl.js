@@ -849,7 +849,8 @@ const PassengerControlDirect = () => {
               ))}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Passengers Count */}
         <div className="flex items-center justify-between">
