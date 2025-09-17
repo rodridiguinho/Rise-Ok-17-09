@@ -1540,12 +1540,30 @@ const PassengerControlDirect = () => {
                         <Label className="text-sm font-medium text-indigo-700 mb-2 block">
                           ⏱️ Duração do Voo:
                         </Label>
-                        <Input
-                          value={returnFlightDuration}
-                          onChange={(e) => setReturnFlightDuration(e.target.value)}
-                          placeholder="Ex: 2h 15min"
-                          className="text-sm"
-                        />
+                        <div className="flex space-x-2">
+                          <Input
+                            value={returnFlightDuration}
+                            onChange={(e) => setReturnFlightDuration(e.target.value)}
+                            placeholder="Ex: 2h 15min"
+                            className="text-sm flex-1"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const duration = calculateFlightDuration(
+                                arrivalCity, // Volta é invertida
+                                departureCity, // Volta é invertida
+                                returnDepartureTime, 
+                                returnArrivalTime
+                              );
+                              setReturnFlightDuration(duration);
+                            }}
+                            className="px-3 py-1 bg-indigo-600 text-white rounded text-xs hover:bg-indigo-700"
+                            title="Calcular automaticamente"
+                          >
+                            🧮 Calc
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
