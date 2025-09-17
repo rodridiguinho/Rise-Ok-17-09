@@ -1248,6 +1248,191 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_critical_rui_data_recovery():
+    """🚨 RECUPERAÇÃO URGENTE - Encontrar e restaurar dados do Rui perdidos - REVIEW REQUEST"""
+    print_test_header("🚨 RECUPERAÇÃO URGENTE - Encontrar e restaurar dados do Rui perdidos")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "🔐 AUTENTICAÇÃO PARA RECUPERAÇÃO DE DADOS", 
+                       f"✅ Login realizado com sucesso: {test_email}")
+        else:
+            print_result(False, f"❌ FALHA NA AUTENTICAÇÃO - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "❌ ERRO NA AUTENTICAÇÃO", str(e))
+        return
+    
+    # Test 2: BUSCAR TRANSAÇÃO DO RUI - GET /api/transactions
+    print("\n🎯 MISSÃO 1: BUSCAR TRANSAÇÃO DO RUI")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=15)
+        if response.status_code == 200:
+            all_transactions = response.json()
+            total_transactions = len(all_transactions)
+            print_result(True, "📊 BUSCA DE TRANSAÇÕES - Dados recuperados", 
+                       f"✅ Total de {total_transactions} transações encontradas no banco de dados")
+            
+            # Procurar por transações do Rui
+            rui_transactions = []
+            for transaction in all_transactions:
+                client = transaction.get('client', '').lower()
+                description = transaction.get('description', '').lower()
+                
+                # Buscar por "Rui" ou "Rui Manuel" no cliente
+                if 'rui' in client:
+                    rui_transactions.append(transaction)
+                # Buscar por "Emissão Portugal" na descrição
+                elif 'emissão portugal' in description or 'emissao portugal' in description:
+                    rui_transactions.append(transaction)
+                # Buscar por valor R$ 14.000,00
+                elif transaction.get('amount') == 14000.0 or transaction.get('amount') == 14000:
+                    rui_transactions.append(transaction)
+            
+            if rui_transactions:
+                print_result(True, "🎯 TRANSAÇÕES DO RUI ENCONTRADAS", 
+                           f"✅ Encontradas {len(rui_transactions)} transação(ões) relacionada(s) ao Rui")
+                
+                for i, transaction in enumerate(rui_transactions, 1):
+                    print(f"\n📋 TRANSAÇÃO {i} ENCONTRADA:")
+                    print(f"   🆔 ID: {transaction.get('id', 'N/A')}")
+                    print(f"   👤 Cliente: {transaction.get('client', 'N/A')}")
+                    print(f"   📝 Descrição: {transaction.get('description', 'N/A')}")
+                    print(f"   💰 Valor: R$ {transaction.get('amount', 0):,.2f}")
+                    print(f"   📅 Data: {transaction.get('date', 'N/A')}")
+                    print(f"   🔒 Oculta do Controle: {transaction.get('hiddenFromPassengerControl', False)}")
+                    
+                    # Verificar se está oculta do controle de passageiros
+                    if transaction.get('hiddenFromPassengerControl') == True:
+                        print_result(False, f"⚠️ TRANSAÇÃO {i} ESTÁ OCULTA", 
+                                   f"❌ hiddenFromPassengerControl: true - PRECISA SER RESTAURADA")
+                        
+                        # Test 3: RESTAURAR TRANSAÇÃO OCULTA
+                        print(f"\n🔧 RESTAURANDO TRANSAÇÃO {i}...")
+                        try:
+                            headers = {"Authorization": f"Bearer {auth_token}"}
+                            restore_response = requests.patch(
+                                f"{API_URL}/transactions/{transaction['id']}/hide-from-passenger-control",
+                                headers=headers,
+                                timeout=10
+                            )
+                            
+                            if restore_response.status_code == 200:
+                                print_result(True, f"✅ TRANSAÇÃO {i} RESTAURADA", 
+                                           f"✅ Transação do Rui restaurada com sucesso")
+                            else:
+                                print_result(False, f"❌ FALHA AO RESTAURAR TRANSAÇÃO {i}", 
+                                           f"HTTP {restore_response.status_code}: {restore_response.text}")
+                        except Exception as e:
+                            print_result(False, f"❌ ERRO AO RESTAURAR TRANSAÇÃO {i}", str(e))
+                    else:
+                        print_result(True, f"✅ TRANSAÇÃO {i} VISÍVEL", 
+                                   f"✅ hiddenFromPassengerControl: {transaction.get('hiddenFromPassengerControl', False)} - Transação está visível")
+            else:
+                print_result(False, "❌ NENHUMA TRANSAÇÃO DO RUI ENCONTRADA", 
+                           f"❌ Não foram encontradas transações com 'Rui', 'Emissão Portugal' ou valor R$ 14.000,00")
+                
+                # Busca mais ampla por qualquer menção a "Rui"
+                print("\n🔍 BUSCA AMPLIADA POR 'RUI'...")
+                broader_search = []
+                for transaction in all_transactions:
+                    # Buscar em todos os campos de texto
+                    searchable_text = f"{transaction.get('client', '')} {transaction.get('description', '')} {transaction.get('supplier', '')} {transaction.get('seller', '')}".lower()
+                    if 'rui' in searchable_text:
+                        broader_search.append(transaction)
+                
+                if broader_search:
+                    print_result(True, "🔍 BUSCA AMPLIADA - Resultados encontrados", 
+                               f"✅ Encontradas {len(broader_search)} transação(ões) com menção a 'Rui'")
+                    for transaction in broader_search:
+                        print(f"   🆔 ID: {transaction.get('id')}, Cliente: {transaction.get('client')}, Descrição: {transaction.get('description')}")
+                else:
+                    print_result(False, "❌ BUSCA AMPLIADA - Nenhum resultado", 
+                               "❌ Nenhuma transação encontrada com qualquer menção a 'Rui'")
+        else:
+            print_result(False, f"❌ FALHA AO BUSCAR TRANSAÇÕES - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "❌ ERRO NA BUSCA DE TRANSAÇÕES", str(e))
+    
+    # Test 4: LISTAR TRANSAÇÕES POR CRITÉRIOS ESPECÍFICOS
+    print("\n🎯 MISSÃO 2: BUSCA POR CRITÉRIOS ESPECÍFICOS")
+    try:
+        # Buscar por valor exato R$ 14.000,00
+        value_14k_transactions = [t for t in all_transactions if t.get('amount') in [14000.0, 14000]]
+        if value_14k_transactions:
+            print_result(True, "💰 TRANSAÇÕES DE R$ 14.000,00", 
+                       f"✅ Encontradas {len(value_14k_transactions)} transação(ões) com valor R$ 14.000,00")
+            for transaction in value_14k_transactions:
+                print(f"   🆔 ID: {transaction.get('id')}, Cliente: {transaction.get('client')}, Descrição: {transaction.get('description')}")
+        else:
+            print_result(False, "💰 TRANSAÇÕES DE R$ 14.000,00", 
+                       "❌ Nenhuma transação encontrada com valor R$ 14.000,00")
+        
+        # Buscar por "Portugal" na descrição
+        portugal_transactions = [t for t in all_transactions if 'portugal' in t.get('description', '').lower()]
+        if portugal_transactions:
+            print_result(True, "🇵🇹 TRANSAÇÕES COM 'PORTUGAL'", 
+                       f"✅ Encontradas {len(portugal_transactions)} transação(ões) com 'Portugal' na descrição")
+            for transaction in portugal_transactions:
+                print(f"   🆔 ID: {transaction.get('id')}, Cliente: {transaction.get('client')}, Descrição: {transaction.get('description')}")
+        else:
+            print_result(False, "🇵🇹 TRANSAÇÕES COM 'PORTUGAL'", 
+                       "❌ Nenhuma transação encontrada com 'Portugal' na descrição")
+        
+        # Buscar transações ocultas do controle de passageiros
+        hidden_transactions = [t for t in all_transactions if t.get('hiddenFromPassengerControl') == True]
+        if hidden_transactions:
+            print_result(True, "🔒 TRANSAÇÕES OCULTAS DO CONTROLE", 
+                       f"⚠️ Encontradas {len(hidden_transactions)} transação(ões) oculta(s) do controle de passageiros")
+            for transaction in hidden_transactions:
+                print(f"   🆔 ID: {transaction.get('id')}, Cliente: {transaction.get('client')}, Descrição: {transaction.get('description')}, Valor: R$ {transaction.get('amount', 0):,.2f}")
+        else:
+            print_result(True, "🔒 TRANSAÇÕES OCULTAS DO CONTROLE", 
+                       "✅ Nenhuma transação está oculta do controle de passageiros")
+        
+    except Exception as e:
+        print_result(False, "❌ ERRO NA BUSCA POR CRITÉRIOS ESPECÍFICOS", str(e))
+    
+    # Test 5: RESUMO FINAL DA RECUPERAÇÃO
+    print("\n🎯 RESUMO FINAL DA RECUPERAÇÃO DE DADOS")
+    try:
+        if 'rui_transactions' in locals() and rui_transactions:
+            print_result(True, "✅ MISSÃO DE RECUPERAÇÃO - DADOS ENCONTRADOS", 
+                       f"✅ Encontrados dados do Rui: {len(rui_transactions)} transação(ões)")
+            
+            # Verificar se alguma foi restaurada
+            restored_count = 0
+            for transaction in rui_transactions:
+                if transaction.get('hiddenFromPassengerControl') == True:
+                    restored_count += 1
+            
+            if restored_count > 0:
+                print_result(True, "🔧 RESTAURAÇÃO EXECUTADA", 
+                           f"✅ {restored_count} transação(ões) do Rui foram processadas para restauração")
+            else:
+                print_result(True, "✅ DADOS JÁ VISÍVEIS", 
+                           "✅ Todas as transações do Rui já estão visíveis no sistema")
+        else:
+            print_result(False, "❌ MISSÃO DE RECUPERAÇÃO - DADOS NÃO ENCONTRADOS", 
+                       "❌ Não foram encontrados dados do cliente Rui no sistema")
+            print_result(False, "🚨 SITUAÇÃO CRÍTICA", 
+                       "🚨 Os dados do Rui podem ter sido permanentemente perdidos ou não existem no banco atual")
+    except Exception as e:
+        print_result(False, "❌ ERRO NO RESUMO FINAL", str(e))
+
 def test_critical_422_error_investigation():
     """INVESTIGAÇÃO CRÍTICA - Erro 422 no PUT /api/transactions - REVIEW REQUEST"""
     print_test_header("INVESTIGAÇÃO CRÍTICA - Erro 422 no PUT /api/transactions")
