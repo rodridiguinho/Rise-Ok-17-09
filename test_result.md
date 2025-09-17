@@ -269,6 +269,18 @@ frontend:
           agent: "testing"
           comment: "✅ COMPANY SETTINGS API REVIEW REQUEST TESTING COMPLETED: Successfully tested all company settings functionality as specified in review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ GET /api/company/settings: Successfully retrieves company configuration with all expected fields (name, email, phone, address, city, state, zipCode, cnpj, website). Current settings loaded correctly: Company='Rise Travel Updated', Email='new-email@risetravel.com', Phone='(11) 98888-8888'. ✅ POST /api/company/settings: Successfully saves updated company data with all fields correctly updated and returned in response. Message: 'Configurações da empresa salvas com sucesso'. ✅ SETTINGS PERSISTENCE: All company settings correctly persisted after updates - verified by subsequent GET request showing all updated values persist correctly. The company settings API fully meets all review request requirements with complete data integrity and persistence."
 
+  - task: "Airport Data Enhancement - Brazilian Cities"
+    implemented: true
+    working: true
+    file: "frontend/src/components/Dashboard/EnhancedTransactions.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "🌍 DADOS DE AEROPORTOS EXPANDIDOS COM SUCESSO: ✅ CASCAVEL ADICIONADO: Cascavel (CAC) incluída na lista airportCities e timezoneData com timezone America/Sao_Paulo UTC-3. ✅ CIDADES BRASILEIRAS EXPANDIDAS: Adicionadas 10 novas cidades brasileiras com códigos de aeroposto e fusos horários corretos: Ponta Grossa (PGZ), Imperatriz (IMP), Juazeiro do Norte (JDO), Petrolina (PNZ), Dourados (DOU), Corumbá (CMG), Rondonópolis (ROO), Alta Floresta (AFL). ✅ FUSOS HORÁRIOS CORRETOS: Todas as novas cidades têm fusos horários adequados (America/Sao_Paulo UTC-3, America/Campo_Grande UTC-4, America/Cuiaba UTC-4, America/Fortaleza UTC-3, America/Recife UTC-3). ✅ PROBLEMA RESOLVIDO: Cascavel agora aparece nos campos de cidade e cálculos de horário funcionam corretamente."
+
   - task: "Enhanced Transaction with New Product Structure"
     implemented: true
     working: true
