@@ -10426,13 +10426,13 @@ def test_review_request_sales_analysis_endpoints():
                 print_result(False, f"Cleanup - Delete transaction {transaction_id}", str(e))
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - CRITICAL PASSENGER CONTROL DELETION FIX")
+    print("🚀 Starting Backend API Test Suite - SUPPLIER FIELDS INVESTIGATION RT-2025-5989")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the specific review request test for critical passenger control deletion fix
-    test_critical_passenger_control_deletion_fix()
+    # Run the specific review request test for supplier fields investigation
+    test_supplier_fields_investigation_rt_2025_5989()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Complete - CRITICAL PASSENGER CONTROL DELETION TESTED")
+    print("🏁 Backend API Test Suite Complete - SUPPLIER FIELDS INVESTIGATION COMPLETED")
     print("="*80)
