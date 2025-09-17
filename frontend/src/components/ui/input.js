@@ -11,6 +11,11 @@ export const Input = ({
   step,
   ...props 
 }) => {
+  // Classe CSS para remover spinners/setinhas dos inputs numéricos
+  const inputClasses = `flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-gray-300 focus:ring-blue-500 focus:border-blue-500 ${
+    type === 'number' ? '[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]' : ''
+  } ${className}`;
+
   return (
     <input
       type={type}
@@ -20,7 +25,7 @@ export const Input = ({
       disabled={disabled}
       required={required}
       step={step}
-      className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-gray-300 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+      className={inputClasses}
       {...props}
     />
   );
