@@ -1248,6 +1248,249 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_critical_422_error_investigation():
+    """INVESTIGAÇÃO CRÍTICA - Erro 422 no PUT /api/transactions - REVIEW REQUEST"""
+    print_test_header("INVESTIGAÇÃO CRÍTICA - Erro 422 no PUT /api/transactions")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for 422 error investigation", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for 422 error investigation failed", str(e))
+        return
+    
+    # Test 2: Try to find the specific transaction ID mentioned in review request
+    print("\n🎯 TEST 1: LOCATE TRANSACTION ID 68c82cb493e52856876947e4")
+    target_transaction_id = "68c82cb493e52856876947e4"
+    
+    try:
+        # Get all transactions to find the target one
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            target_transaction = None
+            
+            for transaction in transactions:
+                if transaction.get("id") == target_transaction_id:
+                    target_transaction = transaction
+                    break
+            
+            if target_transaction:
+                print_result(True, "Target transaction found", 
+                           f"Found transaction {target_transaction_id}: {target_transaction.get('description', 'No description')}")
+                print(f"Current transaction data: {json.dumps(target_transaction, indent=2)}")
+            else:
+                print_result(False, "Target transaction not found", 
+                           f"Transaction {target_transaction_id} not found in database")
+                print(f"Available transaction IDs: {[t.get('id') for t in transactions[:5]]}")
+                
+                # Create a test transaction to use instead
+                print("\n🎯 CREATING TEST TRANSACTION FOR 422 ERROR INVESTIGATION")
+                test_transaction = {
+                    "type": "entrada",
+                    "category": "Passagem Aérea",
+                    "description": "Test transaction for 422 error investigation",
+                    "amount": 1500.00,
+                    "paymentMethod": "PIX",
+                    "tripType": "ida-volta",
+                    "departureDate": "2025-12-29",
+                    "returnDate": "2026-01-19"
+                }
+                
+                create_response = requests.post(f"{API_URL}/transactions", json=test_transaction, timeout=10)
+                if create_response.status_code == 200:
+                    created_data = create_response.json()
+                    target_transaction_id = created_data.get("id")
+                    target_transaction = created_data
+                    print_result(True, "Test transaction created", 
+                               f"Created transaction {target_transaction_id} for testing")
+                else:
+                    print_result(False, f"Failed to create test transaction - HTTP {create_response.status_code}", 
+                               create_response.text)
+                    return
+        else:
+            print_result(False, f"Failed to get transactions - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Error locating target transaction", str(e))
+        return
+    
+    # Test 3: Test the EXACT PUT request that's failing with 422 error
+    print("\n🎯 TEST 2: REPRODUCE EXACT 422 ERROR WITH SPECIFIC DATA")
+    
+    # Exact data from review request that's causing 422 error
+    failing_update_data = {
+        "tripType": "ida-volta",
+        "departureDate": "2025-12-29", 
+        "returnDate": "2026-01-19",
+        "passengers": [],
+        "supplier": "",
+        "airline": "",
+        "travelNotes": "",
+        "emissionType": "E-ticket",
+        "supplierPhone": "",
+        "reservationNumber": "",
+        "productType": "",
+        "clientReservationCode": "",
+        "departureCity": "",
+        "arrivalCity": ""
+    }
+    
+    try:
+        # Add authentication header
+        headers = {}
+        if auth_token:
+            headers["Authorization"] = f"Bearer {auth_token}"
+        
+        print(f"Attempting PUT request to: {API_URL}/transactions/{target_transaction_id}")
+        print(f"Request data: {json.dumps(failing_update_data, indent=2)}")
+        print(f"Headers: {headers}")
+        
+        response = requests.put(f"{API_URL}/transactions/{target_transaction_id}", 
+                              json=failing_update_data, 
+                              headers=headers,
+                              timeout=10)
+        
+        print(f"PUT Response Status: {response.status_code}")
+        print(f"PUT Response Headers: {dict(response.headers)}")
+        print(f"PUT Response Text: {response.text}")
+        
+        if response.status_code == 422:
+            print_result(True, "422 Error reproduced successfully", 
+                       f"Successfully reproduced the 422 error as reported")
+            
+            # Parse the error details
+            try:
+                error_data = response.json()
+                print_result(True, "422 Error details captured", 
+                           f"Error response: {json.dumps(error_data, indent=2)}")
+                
+                # Identify specific validation failures
+                if "detail" in error_data:
+                    if isinstance(error_data["detail"], list):
+                        print("\n🔍 SPECIFIC VALIDATION ERRORS:")
+                        for i, error in enumerate(error_data["detail"]):
+                            field = error.get("loc", ["unknown"])[-1] if error.get("loc") else "unknown"
+                            message = error.get("msg", "No message")
+                            value = error.get("input", "No input")
+                            print_result(False, f"Validation Error {i+1} - Field: {field}", 
+                                       f"Message: {message}, Input: {value}")
+                    else:
+                        print_result(True, "422 Error message", 
+                                   f"Error detail: {error_data['detail']}")
+                
+            except json.JSONDecodeError:
+                print_result(False, "422 Error parsing failed", 
+                           f"Could not parse error response as JSON: {response.text}")
+                
+        elif response.status_code == 200:
+            print_result(False, "422 Error NOT reproduced", 
+                       f"Expected 422 error but got 200 success. Update worked: {response.text}")
+        else:
+            print_result(False, f"Unexpected response - HTTP {response.status_code}", 
+                       f"Expected 422 but got {response.status_code}: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "PUT request failed with exception", str(e))
+    
+    # Test 4: Test with minimal required fields to identify what's missing
+    print("\n🎯 TEST 3: IDENTIFY MISSING REQUIRED FIELDS")
+    
+    # Try with basic required fields first
+    minimal_update_data = {
+        "type": "entrada",
+        "category": "Passagem Aérea", 
+        "description": "Test update with minimal fields",
+        "amount": 1500.00,
+        "paymentMethod": "PIX"
+    }
+    
+    try:
+        headers = {}
+        if auth_token:
+            headers["Authorization"] = f"Bearer {auth_token}"
+        
+        response = requests.put(f"{API_URL}/transactions/{target_transaction_id}", 
+                              json=minimal_update_data, 
+                              headers=headers,
+                              timeout=10)
+        
+        print(f"Minimal Update Response Status: {response.status_code}")
+        print(f"Minimal Update Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            print_result(True, "Minimal update successful", 
+                       "Update works with basic required fields")
+            
+            # Now try adding the problematic fields one by one
+            print("\n🎯 TEST 4: ADD PROBLEMATIC FIELDS ONE BY ONE")
+            
+            problematic_fields = {
+                "tripType": "ida-volta",
+                "departureDate": "2025-12-29", 
+                "returnDate": "2026-01-19",
+                "passengers": [],
+                "supplier": "",
+                "airline": "",
+                "travelNotes": "",
+                "emissionType": "E-ticket",
+                "supplierPhone": "",
+                "reservationNumber": "",
+                "productType": "",
+                "clientReservationCode": "",
+                "departureCity": "",
+                "arrivalCity": ""
+            }
+            
+            working_data = minimal_update_data.copy()
+            
+            for field_name, field_value in problematic_fields.items():
+                test_data = working_data.copy()
+                test_data[field_name] = field_value
+                
+                try:
+                    response = requests.put(f"{API_URL}/transactions/{target_transaction_id}", 
+                                          json=test_data, 
+                                          headers=headers,
+                                          timeout=10)
+                    
+                    if response.status_code == 200:
+                        print_result(True, f"Field test - {field_name}", 
+                                   f"Adding {field_name}={field_value} works fine")
+                        working_data[field_name] = field_value
+                    else:
+                        print_result(False, f"Field test - {field_name} CAUSES ERROR", 
+                                   f"Adding {field_name}={field_value} causes HTTP {response.status_code}: {response.text}")
+                        break
+                        
+                except Exception as e:
+                    print_result(False, f"Field test - {field_name} exception", str(e))
+                    break
+                    
+        else:
+            print_result(False, f"Minimal update failed - HTTP {response.status_code}", 
+                       f"Even basic update fails: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Minimal update test failed", str(e))
+
 def test_critical_return_date_investigation():
     """INVESTIGAÇÃO CRÍTICA - Backend não está salvando returnDate - REVIEW REQUEST"""
     print_test_header("INVESTIGAÇÃO CRÍTICA - Backend não está salvando returnDate")
