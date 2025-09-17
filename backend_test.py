@@ -10721,13 +10721,13 @@ def test_review_request_sales_analysis_endpoints():
                 print_result(False, f"Cleanup - Delete transaction {transaction_id}", str(e))
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - SUPPLIER FIELDS INVESTIGATION RT-2025-5989")
+    print("🚀 Starting Backend API Test Suite - CRITICAL RETURNDATE INVESTIGATION")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the specific review request test for supplier fields investigation
-    test_supplier_fields_investigation_rt_2025_5989()
+    # Run the critical returnDate investigation first (highest priority)
+    test_critical_return_date_investigation()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Complete - SUPPLIER FIELDS INVESTIGATION COMPLETED")
+    print("🏁 Backend API Test Suite Complete - CRITICAL RETURNDATE INVESTIGATION COMPLETED")
     print("="*80)
