@@ -103,6 +103,18 @@
 user_problem_statement: "Implementar o módulo de Controle Interno com 5 seções independentes: 1. Investimento de Sócios, 2. Pagamentos de Clientes Parcelados (com campo 'Número de registro gerado na venda'), 3. Controle de Cliente com Controle de Milhas, 4. Contas com Sócios (com campo 'Data de retirada'), 5. Links de Consolidadoras/Operadores/Serviços. Cada seção deve ter funcionalidade 'Adicionar mais 1' e integração no sidebar. Sistema deve ser independente do resto da aplicação, apenas para controle interno."
 
 backend:
+  - task: "Critical returnDate Investigation"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 INVESTIGAÇÃO CRÍTICA RETURNDATE CONCLUÍDA COM SUCESSO - BACKEND FUNCIONA CORRETAMENTE: Utilizando credenciais rodrigo@risetravel.com.br / Emily2030* conforme solicitado na review request. ✅ BUSCA POR TRANSAÇÕES IDA-VOLTA: GET /api/transactions executado com sucesso, recuperou 89 transações do banco de dados. Encontrada 1 transação com tripType='ida-volta' existente. ✅ TRANSAÇÃO ENCONTRADA: ID: 68cac7a5258b054ae3029736, Descrição: 'Teste returnDate - Ida e Volta', tripType: 'ida-volta', departureDate: '2025-09-20', returnDate: '2025-09-25'. ✅ RETURNDATE PREENCHIDO: Campo returnDate está corretamente preenchido com valor '2025-09-25' na transação existente. ✅ TESTE DE UPDATE: Criada transação de teste para validar funcionalidade de atualização. PUT /api/transactions/{id} executado com sucesso (HTTP 200). ✅ DADOS DE UPDATE SALVOS: tripType='ida-volta', departureDate='2025-09-20', returnDate='2025-09-25' todos salvos corretamente na resposta da API. ✅ PERSISTÊNCIA VERIFICADA: Transação encontrada na lista de transações com todos os dados persistidos corretamente no banco MongoDB. ✅ CONCLUSÃO DEFINITIVA: Backend ESTÁ salvando returnDate corretamente. O campo returnDate persiste adequadamente no processo de atualização. Não há bug no backend - a funcionalidade está operacional."
+
   - task: "Supplier Fields Investigation RT-2025-5989"
     implemented: true
     working: true
