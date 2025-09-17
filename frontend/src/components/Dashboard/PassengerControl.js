@@ -746,7 +746,8 @@ const PassengerControlDirect = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reservations.map((reservation) => {
             // Determinar se precisa criar cards separados para IDA e VOLTA
-            const hasReturnDate = reservation.returnDate && reservation.tripType === 'ida-volta';
+            // CORREÇÃO: Aceitar qualquer transação com returnDate preenchido
+            const hasReturnDate = reservation.returnDate && reservation.returnDate.trim() !== '';
             
             if (hasReturnDate) {
               // Criar dois cards: um para IDA e um para VOLTA
@@ -1049,7 +1050,8 @@ const PassengerControlDirect = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reservations.map((reservation) => {
             // Determinar se precisa criar cards separados para IDA e VOLTA
-            const hasReturnDate = reservation.returnDate && reservation.tripType === 'ida-volta';
+            // CORREÇÃO: Aceitar qualquer transação com returnDate preenchido
+            const hasReturnDate = reservation.returnDate && reservation.returnDate.trim() !== '';
             
             if (hasReturnDate) {
               // Criar dois cards: um para IDA e um para VOLTA
