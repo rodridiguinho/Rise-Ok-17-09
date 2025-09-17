@@ -93,6 +93,24 @@ const PassengerControlDirect = () => {
   ];
 
   // Carregar reservas das transações de entrada
+  // Função para auto-popular passageiros baseado no cliente
+  const autoPopulatePassenger = (reservation) => {
+    if (!reservation.passengers || reservation.passengers.length === 0) {
+      return [{
+        name: reservation.client || 'Cliente não informado',
+        document: '',
+        birthDate: '',
+        type: 'Adulto',
+        nationality: 'Brasileira',
+        passportNumber: '',
+        passportExpiry: '',
+        specialNeeds: '',
+        status: 'Confirmado'
+      }];
+    }
+    return reservation.passengers;
+  };
+
   useEffect(() => {
     loadReservations();
   }, []);
