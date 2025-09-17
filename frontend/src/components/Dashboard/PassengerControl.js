@@ -265,11 +265,6 @@ const PassengerControlDirect = () => {
 
     try {
       const updatedData = {
-        // CORREÇÃO: Incluir campos obrigatórios do backend
-        type: selectedReservation.type,
-        description: selectedReservation.description,
-        amount: selectedReservation.amount,
-        // Campos existentes
         passengers: selectedReservation.passengers,
         supplier: selectedSupplier,
         airline: editableAirline,
@@ -298,82 +293,16 @@ const PassengerControlDirect = () => {
         connectionDuration: connectionDuration
       };
 
-      // DEBUG: Console log para verificar dados sendo enviados
-      console.log('🔍 DEBUG - Dados sendo enviados para salvar:', {
-        id: selectedReservation.id,
-        tripType: tripType,
-        departureDate: departureDate,
-        returnDate: returnDate,
-        updatedData: updatedData
-      });
-
-      console.log('📤 DEBUG - Chamando API updateTransaction...');
-      
-      try {
-        const apiResponse = await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
-        console.log('✅ DEBUG - API chamada concluída com sucesso. Resposta:', apiResponse);
-      } catch (apiError) {
-        console.error('❌ DEBUG - ERRO NA API:', apiError);
-        console.error('❌ DEBUG - ERRO DETALHES COMPLETO:', {
-          message: apiError.message,
-          status: apiError.response?.status,
-          statusText: apiError.response?.statusText,
-          responseData: apiError.response?.data,
-          fullResponse: apiError.response
-        });
-        
-        // Expandir detalhes específicos do erro 422
-        if (apiError.response?.status === 422) {
-          console.error('🚨 DEBUG - ERRO 422 VALIDAÇÃO:', {
-            detail: apiError.response?.data?.detail,
-            errors: apiError.response?.data?.errors,
-            fullErrorData: apiError.response?.data
-          });
-          
-          // FORÇAR exibição dos erros usando JSON.stringify
-          console.error('🔍 DEBUG - RAW ERROR DATA:', JSON.stringify(apiError.response?.data, null, 2));
-          
-          // Log cada erro individualmente para melhor visibilidade
-          if (apiError.response?.data?.detail && Array.isArray(apiError.response.data.detail)) {
-            console.error('📋 DEBUG - ERROS DE VALIDAÇÃO INDIVIDUAIS:');
-            apiError.response.data.detail.forEach((error, index) => {
-              console.error(`   ${index + 1}. ERRO:`, error);
-              console.error(`   ${index + 1}. JSON:`, JSON.stringify(error, null, 2));
-            });
-          } else {
-            console.error('❓ DEBUG - DETAIL não é array ou não existe:', typeof apiError.response?.data?.detail);
-          }
-        }
-        
-        toast({
-          variant: "destructive",
-          title: "Erro ao salvar",
-          description: `Erro na API: ${apiError.message} (Status: ${apiError.response?.status})`,
-        });
-        return; // Para por aqui se der erro
-      }
-
-      console.log('✅ DEBUG - API chamada concluída com sucesso');
+      await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
 
       // Atualizar a lista local
-      setReservations(prev => {
-        const updated = prev.map(res => 
+      setReservations(prev => 
+        prev.map(res => 
           res.id === selectedReservation.id 
             ? { ...res, ...updatedData }
             : res
-        );
-        
-        console.log('🔄 DEBUG - Lista local atualizada:', {
-          transactionId: selectedReservation.id,
-          updatedReservation: updated.find(r => r.id === selectedReservation.id)
-        });
-        
-        return updated;
-      });
-
-      console.log('📝 DEBUG - Recarregando lista do servidor...');
-      // Recarregar do servidor para garantir consistência
-      await loadReservations();
+        )
+      );
 
       toast({
         title: "Alterações Salvas",
