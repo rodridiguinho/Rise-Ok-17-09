@@ -768,116 +768,143 @@ const PassengerControlDirect = () => {
 
   // Função para renderizar um card de reserva
   function renderReservationCard(reservation, cardType, cardKey) {
-            const travelStatus = getTravelStatus(reservation);
-            const reminderStatus = getReminderStatus(travelStatus);
+    const travelStatus = getTravelStatus(reservation);
+    const reminderStatus = getReminderStatus(travelStatus);
+    
+    // Definir dados específicos para IDA ou VOLTA
+    const isReturnCard = cardType === 'volta';
+    const cardDate = isReturnCard ? reservation.returnDate : reservation.departureDate;
+    const cardTitle = isReturnCard ? '🔄 VOLTA' : '✈️ IDA';
+    const cardBorderColor = isReturnCard ? 'border-l-4 border-orange-500' : 'border-l-4 border-blue-500';
+    const cardBgColor = isReturnCard ? 'bg-orange-50' : 'bg-blue-50';
             
-            return (
-              <div key={reservation.id} data-reservation-id={reservation.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      🔗 {reservation.internalCode}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      Cliente: {reservation.client || reservation.clientReservationCode || 'N/A'}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${reminderStatus.bgColor} ${reminderStatus.textColor} block mb-1`}>
-                      {reminderStatus.text}
-                    </span>
-                    {/* Status da viagem */}
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      travelStatus.phase === 'completed' ? 'bg-gray-100 text-gray-800' :
-                      travelStatus.phase === 'return' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {travelStatus.phase === 'completed' ? '✅ Completa' :
-                       travelStatus.phase === 'return' ? '🔄 Aguardando volta' :
-                       '📅 Programada'}
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Main Passenger - Prominently displayed */}
-                <div className="bg-indigo-50 p-3 rounded-lg mb-4">
-                  <div className="flex items-center">
-                    <User className="h-5 w-5 mr-2 text-indigo-600" />
-                    <div>
-                      <p className="text-xs text-indigo-600 font-medium">PASSAGEIRO PRINCIPAL</p>
-                      <p className="font-semibold text-indigo-900">
-                        {reservation.client || reservation.passengers[0]?.name || 'Nome não informado'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+    return (
+      <div key={cardKey} data-reservation-id={reservation.id} className={`bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6 ${cardBorderColor}`}>
+        {/* Header com identificação IDA/VOLTA */}
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <div className="flex items-center space-x-2 mb-1">
+              <h3 className="text-lg font-semibold">
+                🔗 {reservation.internalCode}
+              </h3>
+              <span className={`px-2 py-1 rounded text-xs font-bold ${isReturnCard ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}`}>
+                {cardTitle}
+              </span>
+            </div>
+            <p className="text-gray-600 text-sm">
+              Cliente: {reservation.client || reservation.clientReservationCode || 'N/A'}
+            </p>
+          </div>
+          <div className="text-right">
+            <span className={`px-2 py-1 rounded text-xs font-medium ${reminderStatus.bgColor} ${reminderStatus.textColor} block mb-1`}>
+              {reminderStatus.text}
+            </span>
+            {/* Status da viagem */}
+            <span className={`px-2 py-1 rounded text-xs font-medium ${
+              travelStatus.phase === 'completed' ? 'bg-gray-100 text-gray-800' :
+              travelStatus.phase === 'return' ? 'bg-blue-100 text-blue-800' :
+              'bg-green-100 text-green-800'
+            }`}>
+              {travelStatus.phase === 'completed' ? '✅ Completa' :
+               travelStatus.phase === 'return' ? '🔄 Aguardando volta' :
+               '📅 Programada'}
+            </span>
+          </div>
+        </div>
+        
+        {/* Main Passenger - Prominently displayed */}
+        <div className={`${cardBgColor} p-3 rounded-lg mb-4`}>
+          <div className="flex items-center">
+            <User className="h-5 w-5 mr-2 text-indigo-600" />
+            <div>
+              <p className="text-xs text-indigo-600 font-medium">PASSAGEIRO PRINCIPAL</p>
+              <p className="font-semibold text-indigo-900">
+                {reservation.client || reservation.passengers[0]?.name || 'Nome não informado'}
+              </p>
+            </div>
+          </div>
+        </div>
 
-                {/* Flight Info */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm">
-                    <Plane className="h-4 w-4 mr-2 text-blue-600" />
-                    <span className="font-medium">{reservation.airline || 'Companhia não informada'}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-sm">
-                    <MapPin className="h-4 w-4 mr-2 text-green-600" />
-                    <span>{reservation.departureCity} → {reservation.arrivalCity}</span>
-                  </div>
-                  
-                  {/* Data inteligente baseada no status da viagem */}
-                  {travelStatus.displayDate && (
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm">
-                        <Calendar className="h-4 w-4 mr-2 text-purple-600" />
-                        <span className="font-medium">
-                          {travelStatus.displayLabel}: {new Date(travelStatus.displayDate).toLocaleDateString('pt-BR')}
-                        </span>
-                      </div>
-                      
-                      {/* Mostrar data adicional se houver */}
-                      {travelStatus.nextDate && (
-                        <div className="flex items-center text-xs text-gray-600 ml-6">
-                          <span>
-                            Próxima: {travelStatus.nextLabel} em {new Date(travelStatus.nextDate).toLocaleDateString('pt-BR')}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {/* Mostrar data completada se houver */}
-                      {travelStatus.completedDate && (
-                        <div className="flex items-center text-xs text-gray-600 ml-6">
-                          <span>
-                            ✅ {travelStatus.completedLabel} em {new Date(travelStatus.completedDate).toLocaleDateString('pt-BR')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+        {/* Flight Info */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center text-sm">
+            <Plane className="h-4 w-4 mr-2 text-blue-600" />
+            <span className="font-medium">{reservation.airline || 'Companhia não informada'}</span>
+          </div>
+          
+          <div className="flex items-center text-sm">
+            <MapPin className="h-4 w-4 mr-2 text-green-600" />
+            <span>
+              {isReturnCard ? 
+                `${reservation.arrivalCity} → ${reservation.departureCity}` : 
+                `${reservation.departureCity} → ${reservation.arrivalCity}`
+              }
+            </span>
+          </div>
+          
+          {/* Data específica do card */}
+          {cardDate && (
+            <div className="flex items-center text-sm">
+              <Calendar className="h-4 w-4 mr-2 text-purple-600" />
+              <span className="font-medium">
+                {new Date(cardDate).toLocaleDateString('pt-BR')}
+              </span>
+            </div>
+          )}
+          
+          {/* Horários de voo */}
+          {isReturnCard ? (
+            // Horários da volta
+            (reservation.returnDepartureTime || reservation.returnArrivalTime) && (
+              <div className="flex items-center text-xs text-gray-600">
+                <Clock className="h-3 w-3 mr-1" />
+                <span>
+                  {reservation.returnDepartureTime && `Saída: ${reservation.returnDepartureTime}`}
+                  {reservation.returnDepartureTime && reservation.returnArrivalTime && ' • '}
+                  {reservation.returnArrivalTime && `Chegada: ${reservation.returnArrivalTime}`}
+                </span>
+              </div>
+            )
+          ) : (
+            // Horários da ida
+            (reservation.outboundDepartureTime || reservation.outboundArrivalTime) && (
+              <div className="flex items-center text-xs text-gray-600">
+                <Clock className="h-3 w-3 mr-1" />
+                <span>
+                  {reservation.outboundDepartureTime && `Saída: ${reservation.outboundDepartureTime}`}
+                  {reservation.outboundDepartureTime && reservation.outboundArrivalTime && ' • '}
+                  {reservation.outboundArrivalTime && `Chegada: ${reservation.outboundArrivalTime}`}
+                </span>
+              </div>
+            )
+          )}
+        </div>
 
-                {/* Passengers Count */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm">
-                    <Users className="h-4 w-4 mr-2 text-indigo-600" />
-                    <span>{reservation.passengers.length} Passageiro(s)</span>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <Button
-                      onClick={() => deleteReservation(reservation.id)}
-                      variant="outline"
-                      className="text-sm px-3 py-1 text-red-600 border-red-300 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Excluir
-                    </Button>
-                    
-                    <Button
-                      onClick={() => {
-                        setSelectedReservation(reservation);
-                        setEditableAirline(reservation.airline || '');
-                        setReservationNumber(reservation.reservationNumber || '');
+        {/* Passengers Count */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm">
+            <Users className="h-4 w-4 mr-2 text-indigo-600" />
+            <span>{reservation.passengers.length} Passageiro(s)</span>
+          </div>
+          
+          <div className="flex space-x-2">
+            {/* Mostrar botão excluir apenas no card IDA */}
+            {!isReturnCard && (
+              <Button
+                onClick={() => deleteReservation(reservation.id)}
+                variant="outline"
+                className="text-sm px-3 py-1 text-red-600 border-red-300 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Excluir
+              </Button>
+            )}
+            
+            <Button
+              onClick={() => {
+                setSelectedReservation(reservation);
+                setEditableAirline(reservation.airline || '');
+                setReservationNumber(reservation.reservationNumber || '');
                         setReservationNotes(reservation.travelNotes || '');
                         
                         // Inicializar novos campos de detalhes da viagem
