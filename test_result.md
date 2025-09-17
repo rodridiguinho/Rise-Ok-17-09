@@ -103,6 +103,18 @@
 user_problem_statement: "PROBLEMAS CRÍTICOS RESOLVIDOS: 1. Correção do salvamento no Controle de Passageiros (campo obrigatórios faltando causavam erro 422), 2. Implementação de cards IDA/VOLTA separados baseados nas datas das transações, 3. Adição de Cascavel e outras cidades brasileiras nos dados de aeroportos, 4. Sistema automático: entrada com só data ida = card IDA, entrada com ida+volta = 2 cards (IDA + VOLTA), 5. Cada card mantém funcionalidades completas de horários, escalas e passageiros."
 
 backend:
+  - task: "IDA/VOLTA Cards Investigation - RT-2025-4732"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 INVESTIGAÇÃO ESPECÍFICA CARDS IDA/VOLTA CONCLUÍDA COM SUCESSO - PROBLEMA IDENTIFICADO: Utilizando credenciais rodrigo@risetravel.com.br / Emily2030* conforme solicitado na review request. ✅ BUSCA DE TRANSAÇÕES EXISTENTES: GET /api/transactions executado com sucesso, recuperou 84 transações do banco de dados. Encontradas 10 transações com returnDate preenchido e 2 transações com tripType='ida-volta'. ✅ TRANSAÇÃO RT-2025-4732 LOCALIZADA: Encontrada transação ID: 68cb0bdd63cb72db5d5727a7, Cliente: 'Airton', Descrição: 'Teste rodrigo', departureDate: '2025-10-25', returnDate: '2025-10-30', tripType: 'Lazer'. ✅ PROBLEMA IDENTIFICADO: A transação RT-2025-4732 TEM returnDate preenchido ('2025-10-30') mas tripType='Lazer' (deveria ser 'ida-volta' para gerar cards IDA/VOLTA). ✅ TESTE DE CRIAÇÃO IDA-VOLTA: Criada transação teste com tripType='ida-volta', departureDate='2025-02-15', returnDate='2025-02-25' - todos os campos salvos corretamente no MongoDB. ✅ PERSISTÊNCIA VERIFICADA: Campos returnDate e tripType persistem corretamente no banco de dados quando enviados pelo frontend. ✅ CONCLUSÃO DEFINITIVA: Backend está funcionando corretamente. O problema é que as transações existentes não têm tripType='ida-volta' definido corretamente. Para gerar cards IDA/VOLTA, as transações precisam ter AMBOS: returnDate preenchido E tripType='ida-volta'. A transação RT-2025-4732 tem returnDate mas tripType='Lazer', por isso só gera card IDA. ✅ SOLUÇÃO: O frontend precisa definir tripType='ida-volta' quando o usuário preencher returnDate para viagens de ida e volta."
+
   - task: "Critical returnDate Investigation"
     implemented: true
     working: true
