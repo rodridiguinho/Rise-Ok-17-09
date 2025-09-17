@@ -750,6 +750,87 @@ const PassengerControlDirect = () => {
           )}
         </div>
 
+        {/* NOVA SEÇÃO: Lista Completa de Passageiros */}
+        {reservation.passengers && reservation.passengers.length > 0 && (
+          <div className="bg-slate-50 p-3 rounded-lg mb-4">
+            <h4 className="text-xs font-bold text-slate-700 mb-2 flex items-center">
+              <Users className="h-3 w-3 mr-1" />
+              👥 TODOS OS PASSAGEIROS ({reservation.passengers.length}):
+            </h4>
+            <div className="space-y-2">
+              {reservation.passengers.map((passenger, index) => (
+                <div key={index} className="bg-white p-2 rounded text-xs border-l-2 border-indigo-300">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-semibold text-indigo-900">
+                        {index === 0 && '👑 '}{passenger.name || 'Nome não informado'}
+                      </p>
+                      <div className="text-slate-600 mt-1 space-y-1">
+                        {passenger.document && (
+                          <p className="flex items-center">
+                            <span className="w-12 text-slate-500">Doc:</span>
+                            <span>{passenger.document}</span>
+                          </p>
+                        )}
+                        {passenger.birthDate && (
+                          <p className="flex items-center">
+                            <span className="w-12 text-slate-500">Nasc:</span>
+                            <span>{new Date(passenger.birthDate).toLocaleDateString('pt-BR')}</span>
+                          </p>
+                        )}
+                        {passenger.type && (
+                          <p className="flex items-center">
+                            <span className="w-12 text-slate-500">Tipo:</span>
+                            <span className="px-1 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
+                              {passenger.type}
+                            </span>
+                          </p>
+                        )}
+                        {passenger.passportNumber && (
+                          <p className="flex items-center">
+                            <span className="w-12 text-slate-500">Pass:</span>
+                            <span>{passenger.passportNumber}</span>
+                            {passenger.passportExpiry && (
+                              <span className="text-red-600 ml-1">
+                                (exp: {new Date(passenger.passportExpiry).toLocaleDateString('pt-BR')})
+                              </span>
+                            )}
+                          </p>
+                        )}
+                        {passenger.status && (
+                          <p className="flex items-center">
+                            <span className="w-12 text-slate-500">Status:</span>
+                            <span className={`px-1 py-0.5 rounded text-xs ${
+                              passenger.status === 'Confirmado' ? 'bg-green-100 text-green-800' :
+                              passenger.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {passenger.status}
+                            </span>
+                          </p>
+                        )}
+                        {passenger.specialNeeds && (
+                          <p className="flex items-start">
+                            <span className="w-12 text-slate-500 mt-0.5">Obs:</span>
+                            <span className="text-orange-700 font-medium">{passenger.specialNeeds}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Badge para passageiro principal */}
+                    {index === 0 && (
+                      <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs font-bold ml-2">
+                        PRINCIPAL
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Passengers Count */}
         <div className="flex items-center justify-between">
           <div className="flex items-center text-sm">
