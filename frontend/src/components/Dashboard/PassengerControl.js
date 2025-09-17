@@ -938,6 +938,663 @@ const PassengerControlDirect = () => {
           }).flat()}
         </div>
       )}
+
+      {/* Empty State */}
+      {!loading && reservations.length === 0 && (
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <Plane className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Nenhuma reserva encontrada
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Crie transações de entrada com dados de viagem para vê-las aqui
+          </p>
+        </div>
+      )}
+
+      {/* NOVO MODAL COMPLETO - Direct Implementation */}
+      {selectedReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <UserCheck className="mr-2 h-5 w-5" />
+                🎯 Gerenciar Reserva: {selectedReservation.internalCode}
+              </h2>
+              <button 
+                onClick={() => setSelectedReservation(null)}
+                className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              {selectedReservation.client} • {selectedReservation.departureCity} → {selectedReservation.arrivalCity}
+            </p>
+
+            <div className="space-y-6">
+              {/* SEÇÃO FORNECEDOR - CAMPOS MANUAIS */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-4">
+                  <Building className="mr-2 h-5 w-5 text-blue-600" />
+                  📋 Informações do Fornecedor
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Fornecedor */}
+                  <div className="bg-white p-3 rounded border-l-4 border-blue-500">
+                    <Label className="text-sm font-medium text-blue-700 mb-2 block">
+                      🏢 Fornecedor:
+                    </Label>
+                    <Input
+                      value={selectedSupplier}
+                      onChange={(e) => setSelectedSupplier(e.target.value)}
+                      placeholder="Digite o nome do fornecedor"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Tipo de Emissão */}
+                  <div className="bg-white p-3 rounded border-l-4 border-purple-500">
+                    <Label className="text-sm font-medium text-purple-700 mb-2 block">
+                      📄 Tipo de Emissão:
+                    </Label>
+                    <Input
+                      value={emissionType}
+                      onChange={(e) => setEmissionType(e.target.value)}
+                      placeholder="E-ticket, Bilhete físico, etc."
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Telefone do Fornecedor */}
+                  <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                    <Label className="text-sm font-medium text-green-700 mb-2 block">
+                      📞 Telefone Fornecedor:
+                    </Label>
+                    <Input
+                      value={supplierPhone}
+                      onChange={(e) => setSupplierPhone(e.target.value)}
+                      placeholder="(11) 99999-9999"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SEÇÃO VIAGEM - CAMPOS DE VIAGEM */}
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-4">
+                  <Plane className="mr-2 h-5 w-5 text-green-600" />
+                  ✈️ Detalhes da Viagem
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {/* Companhia Aérea */}
+                  <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                    <Label className="text-sm font-medium text-green-700 mb-2 block">
+                      ✈️ Companhia Aérea:
+                    </Label>
+                    <Input
+                      value={editableAirline}
+                      onChange={(e) => setEditableAirline(e.target.value)}
+                      placeholder="Nome da companhia aérea"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Número da Reserva */}
+                  <div className="bg-white p-3 rounded border-l-4 border-orange-500">
+                    <Label className="text-sm font-medium text-orange-700 mb-2 block">
+                      🎫 Número da Reserva:
+                    </Label>
+                    <Input
+                      value={reservationNumber}
+                      onChange={(e) => setReservationNumber(e.target.value)}
+                      placeholder="Código de reserva"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Tipo de Produto */}
+                  <div className="bg-white p-3 rounded border-l-4 border-indigo-500">
+                    <Label className="text-sm font-medium text-indigo-700 mb-2 block">
+                      📦 Tipo de Produto:
+                    </Label>
+                    <Input
+                      value={productType}
+                      onChange={(e) => setProductType(e.target.value)}
+                      placeholder="Passagem, Hotel, Pacote, etc."
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Código de Reserva do Cliente */}
+                  <div className="bg-white p-3 rounded border-l-4 border-pink-500">
+                    <Label className="text-sm font-medium text-pink-700 mb-2 block">
+                      👤 Código Reserva Cliente:
+                    </Label>
+                    <Input
+                      value={clientReservationCode}
+                      onChange={(e) => setClientReservationCode(e.target.value)}
+                      placeholder="Código fornecido ao cliente"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Tipo de Viagem */}
+                  <div className="bg-white p-3 rounded border-l-4 border-cyan-500">
+                    <Label className="text-sm font-medium text-cyan-700 mb-2 block">
+                      🗺️ Tipo de Viagem:
+                    </Label>
+                    <select
+                      value={tripType}
+                      onChange={(e) => setTripType(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                    >
+                      <option value="ida">Só Ida</option>
+                      <option value="ida-volta">Ida e Volta</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Cidade de Origem */}
+                  <div className="bg-white p-3 rounded border-l-4 border-blue-500">
+                    <Label className="text-sm font-medium text-blue-700 mb-2 block">
+                      🏙️ Cidade de Origem:
+                    </Label>
+                    <Input
+                      value={departureCity}
+                      onChange={(e) => setDepartureCity(e.target.value)}
+                      placeholder="Cidade de partida"
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Cidade de Destino */}
+                  <div className="bg-white p-3 rounded border-l-4 border-red-500">
+                    <Label className="text-sm font-medium text-red-700 mb-2 block">
+                      🏙️ Cidade de Destino:
+                    </Label>
+                    <Input
+                      value={arrivalCity}
+                      onChange={(e) => setArrivalCity(e.target.value)}
+                      placeholder="Cidade de chegada"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Data de Ida */}
+                  <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                    <Label className="text-sm font-medium text-green-700 mb-2 block">
+                      📅 Data de Ida:
+                    </Label>
+                    <Input
+                      type="date"
+                      value={departureDate}
+                      onChange={(e) => setDepartureDate(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  {/* Data de Volta - Apenas se ida-volta */}
+                  {tripType === 'ida-volta' && (
+                    <div className="bg-white p-3 rounded border-l-4 border-orange-500">
+                      <Label className="text-sm font-medium text-orange-700 mb-2 block">
+                        📅 Data de Volta:
+                      </Label>
+                      <Input
+                        type="date"
+                        value={returnDate}
+                        onChange={(e) => setReturnDate(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* SEÇÃO HORÁRIOS - CAMPOS DE HORÁRIOS DE VOO */}
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-4">
+                  <Clock className="mr-2 h-5 w-5 text-yellow-600" />
+                  🕐 Horários de Voo
+                </h3>
+                
+                {/* Horários da Ida */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-md text-blue-700 mb-3">✈️ Voo de Ida</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-3 rounded border-l-4 border-blue-500">
+                      <Label className="text-sm font-medium text-blue-700 mb-2 block">
+                        🛫 Horário de Saída:
+                      </Label>
+                      <Input
+                        type="time"
+                        value={outboundDepartureTime}
+                        onChange={(e) => setOutboundDepartureTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-3 rounded border-l-4 border-green-500">
+                      <Label className="text-sm font-medium text-green-700 mb-2 block">
+                        🛬 Horário de Chegada:
+                      </Label>
+                      <Input
+                        type="time"
+                        value={outboundArrivalTime}
+                        onChange={(e) => setOutboundArrivalTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-3 rounded border-l-4 border-purple-500">
+                      <Label className="text-sm font-medium text-purple-700 mb-2 block">
+                        ⏱️ Duração do Voo:
+                      </Label>
+                      <Input
+                        value={outboundFlightDuration}
+                        onChange={(e) => setOutboundFlightDuration(e.target.value)}
+                        placeholder="Ex: 2h 30min"
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Horários da Volta - Apenas se ida-volta */}
+                {tripType === 'ida-volta' && (
+                  <div>
+                    <h4 className="font-medium text-md text-orange-700 mb-3">🔄 Voo de Volta</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-white p-3 rounded border-l-4 border-orange-500">
+                        <Label className="text-sm font-medium text-orange-700 mb-2 block">
+                          🛫 Horário de Saída:
+                        </Label>
+                        <Input
+                          type="time"
+                          value={returnDepartureTime}
+                          onChange={(e) => setReturnDepartureTime(e.target.value)}
+                          className="text-sm"
+                        />
+                      </div>
+                      
+                      <div className="bg-white p-3 rounded border-l-4 border-red-500">
+                        <Label className="text-sm font-medium text-red-700 mb-2 block">
+                          🛬 Horário de Chegada:
+                        </Label>
+                        <Input
+                          type="time"
+                          value={returnArrivalTime}
+                          onChange={(e) => setReturnArrivalTime(e.target.value)}
+                          className="text-sm"
+                        />
+                      </div>
+                      
+                      <div className="bg-white p-3 rounded border-l-4 border-indigo-500">
+                        <Label className="text-sm font-medium text-indigo-700 mb-2 block">
+                          ⏱️ Duração do Voo:
+                        </Label>
+                        <Input
+                          value={returnFlightDuration}
+                          onChange={(e) => setReturnFlightDuration(e.target.value)}
+                          placeholder="Ex: 2h 15min"
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SEÇÃO ESCALAS */}
+              <div className="bg-red-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-4">
+                  <MapPin className="mr-2 h-5 w-5 text-red-600" />
+                  🛑 Escalas e Conexões
+                </h3>
+                
+                {/* Checkbox para ativar escalas */}
+                <div className="mb-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={hasStopover}
+                      onChange={(e) => setHasStopover(e.target.checked)}
+                      className="rounded"
+                    />
+                    <span className="text-sm font-medium text-red-700">
+                      ✈️ Esta viagem possui escalas
+                    </span>
+                  </label>
+                </div>
+                
+                {/* Campos de escala - apenas se ativado */}
+                {hasStopover && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white p-3 rounded border-l-4 border-red-500">
+                      <Label className="text-sm font-medium text-red-700 mb-2 block">
+                        🏙️ Cidade da Escala:
+                      </Label>
+                      <Input
+                        value={stopoverCity}
+                        onChange={(e) => setStopoverCity(e.target.value)}
+                        placeholder="Ex: Paris"
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-3 rounded border-l-4 border-yellow-500">
+                      <Label className="text-sm font-medium text-yellow-700 mb-2 block">
+                        🛬 Chegada na Escala:
+                      </Label>
+                      <Input
+                        type="time"
+                        value={stopoverArrivalTime}
+                        onChange={(e) => setStopoverArrivalTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-3 rounded border-l-4 border-blue-500">
+                      <Label className="text-sm font-medium text-blue-700 mb-2 block">
+                        🛫 Saída da Escala:
+                      </Label>
+                      <Input
+                        type="time"
+                        value={stopoverDepartureTime}
+                        onChange={(e) => setStopoverDepartureTime(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div className="bg-white p-3 rounded border-l-4 border-purple-500">
+                      <Label className="text-sm font-medium text-purple-700 mb-2 block">
+                        ⏱️ Tempo de Conexão:
+                      </Label>
+                      <Input
+                        value={connectionDuration}
+                        onChange={(e) => setConnectionDuration(e.target.value)}
+                        placeholder="Ex: 1h 30min"
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SEÇÃO PASSAGEIROS */}
+              <div className="bg-indigo-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-4">
+                  <Users className="mr-2 h-5 w-5 text-indigo-600" />
+                  👥 Lista de Passageiros ({selectedReservation.passengers.length})
+                </h3>
+                
+                {/* Lista de passageiros existentes */}
+                <div className="space-y-3 mb-4">
+                  {selectedReservation.passengers.map((passenger, index) => (
+                    <div key={index} className="bg-white p-4 rounded-lg border border-indigo-200">
+                      <div className="flex justify-between items-start">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+                          <div>
+                            <Label className="text-xs font-medium text-indigo-700">Nome Completo:</Label>
+                            <p className="text-sm font-semibold">{passenger.name || 'Nome não informado'}</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-indigo-700">Documento:</Label>
+                            <p className="text-sm">{passenger.document || 'Não informado'}</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-indigo-700">Data de Nascimento:</Label>
+                            <p className="text-sm">{passenger.birthDate || 'Não informado'}</p>
+                          </div>
+                        </div>
+                        
+                        {/* Botão eliminar passageiro - apenas se não for o principal */}
+                        {index > 0 && (
+                          <Button
+                            onClick={() => removePassenger(index)}
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 border-red-300 hover:bg-red-50 ml-4"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Botão adicionar passageiro */}
+                <Button
+                  onClick={() => setIsAddPassengerOpen(true)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Novo Passageiro
+                </Button>
+              </div>
+
+              {/* SEÇÃO OBSERVAÇÕES */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-medium text-lg flex items-center mb-4">
+                  <FileText className="mr-2 h-5 w-5 text-gray-600" />
+                  📝 Observações da Viagem
+                </h3>
+                
+                <div className="bg-white p-3 rounded border-l-4 border-gray-500">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    💬 Notas Adicionais:
+                  </Label>
+                  <textarea
+                    value={reservationNotes}
+                    onChange={(e) => setReservationNotes(e.target.value)}
+                    placeholder="Observações importantes sobre a viagem, instruções especiais, etc."
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    rows="4"
+                  />
+                </div>
+              </div>
+
+              {/* BOTÕES DE AÇÃO */}
+              <div className="flex justify-end space-x-4 pt-6 border-t">
+                <Button
+                  onClick={() => setSelectedReservation(null)}
+                  variant="outline"
+                  className="px-6 py-2"
+                >
+                  Cancelar
+                </Button>
+                
+                <Button
+                  onClick={saveReservationChanges}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  💾 Salvar Alterações
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ADICIONAR PASSAGEIRO */}
+      {isAddPassengerOpen && selectedReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <User className="mr-2 h-5 w-5" />
+                👤 Adicionar Novo Passageiro
+              </h2>
+              <button 
+                onClick={() => setIsAddPassengerOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Nome Completo */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  👤 Nome Completo:
+                </Label>
+                <Input
+                  value={newPassenger.name}
+                  onChange={(e) => setNewPassenger({...newPassenger, name: e.target.value})}
+                  placeholder="Nome completo do passageiro"
+                  className="w-full"
+                />
+              </div>
+              
+              {/* Documento e Data de Nascimento */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    📄 CPF/RG:
+                  </Label>
+                  <Input
+                    value={newPassenger.document}
+                    onChange={(e) => setNewPassenger({...newPassenger, document: e.target.value})}
+                    placeholder="000.000.000-00"
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    📅 Data de Nascimento:
+                  </Label>
+                  <Input
+                    type="date"
+                    value={newPassenger.birthDate}
+                    onChange={(e) => setNewPassenger({...newPassenger, birthDate: e.target.value})}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              
+              {/* Tipo e Nacionalidade */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    👨‍👩‍👧‍👦 Tipo de Passageiro:
+                  </Label>
+                  <select
+                    value={newPassenger.type}
+                    onChange={(e) => setNewPassenger({...newPassenger, type: e.target.value})}
+                    className="w-full border border-gray-300 rounded px-3 py-2"
+                  >
+                    <option value="Adulto">Adulto</option>
+                    <option value="Criança">Criança</option>
+                    <option value="Bebê">Bebê</option>
+                    <option value="Idoso">Idoso</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    🌍 Nacionalidade:
+                  </Label>
+                  <Input
+                    value={newPassenger.nationality}
+                    onChange={(e) => setNewPassenger({...newPassenger, nationality: e.target.value})}
+                    placeholder="Brasileira"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              
+              {/* Dados do Passaporte */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    📘 Número do Passaporte:
+                  </Label>
+                  <Input
+                    value={newPassenger.passportNumber}
+                    onChange={(e) => setNewPassenger({...newPassenger, passportNumber: e.target.value})}
+                    placeholder="BR123456789"
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    📅 Data de Vencimento:
+                  </Label>
+                  <Input
+                    type="date"
+                    value={newPassenger.passportExpiry}
+                    onChange={(e) => setNewPassenger({...newPassenger, passportExpiry: e.target.value})}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              
+              {/* Informações Especiais */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  💬 Informações Especiais:
+                </Label>
+                <textarea
+                  value={newPassenger.specialNeeds}
+                  onChange={(e) => setNewPassenger({...newPassenger, specialNeeds: e.target.value})}
+                  placeholder="Necessidades especiais, restrições alimentares, etc."
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  rows="3"
+                />
+              </div>
+              
+              {/* Status */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  ✅ Status:
+                </Label>
+                <select
+                  value={newPassenger.status}
+                  onChange={(e) => setNewPassenger({...newPassenger, status: e.target.value})}
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                >
+                  <option value="Confirmado">Confirmado</option>
+                  <option value="Pendente">Pendente</option>
+                  <option value="Cancelado">Cancelado</option>
+                </select>
+              </div>
+              
+              {/* Botões */}
+              <div className="flex justify-end space-x-4 pt-6 border-t">
+                <Button
+                  onClick={() => setIsAddPassengerOpen(false)}
+                  variant="outline"
+                  className="px-6 py-2"
+                >
+                  Cancelar
+                </Button>
+                
+                <Button
+                  onClick={addPassenger}
+                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  👤 Adicionar Passageiro
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+};
 
+export default PassengerControlDirect;
