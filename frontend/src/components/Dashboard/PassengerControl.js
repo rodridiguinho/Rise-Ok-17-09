@@ -265,6 +265,11 @@ const PassengerControlDirect = () => {
 
     try {
       const updatedData = {
+        // CORREÇÃO: Incluir campos obrigatórios do backend
+        type: selectedReservation.type,
+        description: selectedReservation.description,
+        amount: selectedReservation.amount,
+        // Campos existentes
         passengers: selectedReservation.passengers,
         supplier: selectedSupplier,
         airline: editableAirline,
