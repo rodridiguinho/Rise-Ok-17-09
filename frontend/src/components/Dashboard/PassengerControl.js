@@ -1599,11 +1599,11 @@ const PassengerControlDirect = () => {
                       <Label className="text-sm font-medium text-red-700 mb-2 block">
                         🏙️ Cidade da Escala:
                       </Label>
-                      <Input
+                      <CityInput
                         value={stopoverCity}
-                        onChange={(e) => setStopoverCity(e.target.value)}
-                        placeholder="Ex: Paris"
-                        className="text-sm"
+                        onChange={setStopoverCity}
+                        placeholder="Digite para buscar cidade da escala..."
+                        airportCities={airportCities}
                       />
                     </div>
                     
