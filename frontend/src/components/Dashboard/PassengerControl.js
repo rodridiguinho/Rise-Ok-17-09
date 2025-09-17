@@ -149,13 +149,44 @@ const PassengerControlDirect = () => {
     if (!departureCity || !arrivalCity || !departureTime || !arrivalTime) return '';
     
     try {
-      const depCityClean = departureCity.split(' (')[0];
-      const arrCityClean = arrivalCity.split(' (')[0];
+      // Limpar nomes das cidades (remover códigos de aeroporto)
+      const depCityClean = departureCity.split(' (')[0].trim();
+      const arrCityClean = arrivalCity.split(' (')[0].trim();
       
-      const depTimezone = timezoneDB[depCityClean];
-      const arrTimezone = timezoneDB[arrCityClean];
+      // CORREÇÃO: Busca mais inteligente no timezoneDB
+      const findCityTimezone = (cityName) => {
+        // Busca exata primeiro
+        if (timezoneDB[cityName]) return timezoneDB[cityName];
+        
+        // Busca case-insensitive
+        const cityKey = Object.keys(timezoneDB).find(key => 
+          key.toLowerCase() === cityName.toLowerCase()
+        );
+        if (cityKey) return timezoneDB[cityKey];
+        
+        // Busca parcial (contém)
+        const partialKey = Object.keys(timezoneDB).find(key => 
+          key.toLowerCase().includes(cityName.toLowerCase()) ||
+          cityName.toLowerCase().includes(key.toLowerCase())
+        );
+        if (partialKey) return timezoneDB[partialKey];
+        
+        return null;
+      };
       
-      if (!depTimezone || !arrTimezone) return 'Cidades não encontradas';
+      const depTimezone = findCityTimezone(depCityClean);
+      const arrTimezone = findCityTimezone(arrCityClean);
+      
+      if (!depTimezone || !arrTimezone) {
+        console.log('Debug - Cidades não encontradas:', { 
+          depCityClean, 
+          arrCityClean, 
+          depTimezone, 
+          arrTimezone,
+          availableCities: Object.keys(timezoneDB).slice(0, 10)
+        });
+        return `Cidades não encontradas: ${depCityClean} / ${arrCityClean}`;
+      }
       
       // Converter horários para minutos
       const [depHour, depMin] = departureTime.split(':').map(Number);
