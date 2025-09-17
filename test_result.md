@@ -1040,6 +1040,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "IDA/VOLTA Cards Investigation - RT-2025-4732 - COMPLETED ✅"
     - "Critical Passenger Control Deletion Button Fix - COMPLETED ✅"
     - "Internal Code Display in Automatic Outputs Testing - COMPLETED ✅"
     - "Critical Transaction Types Bug Fix - entrada_vendas to saida_vendas - COMPLETED ✅"
@@ -1061,7 +1062,7 @@ test_plan:
     - "Analytics Error Investigation and Fix - COMPLETED ✅"
   stuck_tasks: []
   test_all: false
-  test_priority: "critical_passenger_control_deletion_completed"
+  test_priority: "ida_volta_investigation_completed"
 
 agent_communication:
     - agent: "testing"
