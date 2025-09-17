@@ -253,7 +253,16 @@ const PassengerControlDirect = () => {
     if (!selectedReservation) return;
 
     try {
+      // CORREÇÃO: Incluir campos obrigatórios para evitar erro 422
       const updatedData = {
+        // Campos obrigatórios do backend
+        type: selectedReservation.type || 'entrada',
+        category: selectedReservation.category || 'Passagem Aérea',
+        description: selectedReservation.description || selectedReservation.client || 'Reserva',
+        amount: selectedReservation.amount || 1000,
+        paymentMethod: selectedReservation.paymentMethod || 'PIX',
+        
+        // Campos existentes
         passengers: selectedReservation.passengers,
         supplier: selectedSupplier,
         airline: editableAirline,
@@ -261,6 +270,7 @@ const PassengerControlDirect = () => {
         emissionType: emissionType,
         supplierPhone: supplierPhone,
         reservationNumber: reservationNumber,
+        
         // Novos campos de detalhes da viagem
         productType: productType,
         clientReservationCode: clientReservationCode,
