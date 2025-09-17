@@ -589,6 +589,7 @@ const PassengerControlDirect = () => {
   };
 
   const deleteReservation = async (reservationId) => {
+    // eslint-disable-next-line no-undef
     const confirmCode = prompt('⚠️ ATENÇÃO: Para confirmar a remoção desta reserva APENAS do Controle de Passageiros (sem afetar a venda), digite o código: 135200');
     
     if (confirmCode !== '135200') {
