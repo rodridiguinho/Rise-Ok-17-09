@@ -302,7 +302,26 @@ const PassengerControlDirect = () => {
         updatedData: updatedData
       });
 
-      await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
+      console.log('📤 DEBUG - Chamando API updateTransaction...');
+      
+      try {
+        const apiResponse = await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
+        console.log('✅ DEBUG - API chamada concluída com sucesso. Resposta:', apiResponse);
+      } catch (apiError) {
+        console.error('❌ DEBUG - ERRO NA API:', apiError);
+        console.error('❌ DEBUG - ERRO DETALHES:', {
+          message: apiError.message,
+          response: apiError.response?.data,
+          status: apiError.response?.status
+        });
+        
+        toast({
+          variant: "destructive",
+          title: "Erro ao salvar",
+          description: `Erro na API: ${apiError.message}`,
+        });
+        return; // Para por aqui se der erro
+      }
 
       console.log('✅ DEBUG - API chamada concluída com sucesso');
 
