@@ -2064,6 +2064,249 @@ def test_critical_return_date_investigation():
     except Exception as e:
         print_result(False, "Database persistence verification failed", str(e))
 
+def test_ida_volta_cards_investigation():
+    """🎯 INVESTIGAÇÃO ESPECÍFICA - CARDS IDA/VOLTA NÃO SENDO GERADOS - REVIEW REQUEST"""
+    print_test_header("🎯 INVESTIGAÇÃO ESPECÍFICA - CARDS IDA/VOLTA NÃO SENDO GERADOS")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "🎯 INVESTIGAÇÃO IDA/VOLTA - Authentication", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"🎯 INVESTIGAÇÃO IDA/VOLTA - Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "🎯 INVESTIGAÇÃO IDA/VOLTA - Authentication failed", str(e))
+        return
+    
+    # Test 2: Buscar todas as transações existentes
+    print("\n🎯 PASSO 1: VERIFICAR TRANSAÇÕES EXISTENTES")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            total_transactions = len(transactions)
+            print_result(True, "Busca de transações existentes", 
+                       f"Encontradas {total_transactions} transações no banco de dados")
+            
+            # Analisar transações com returnDate preenchido
+            transactions_with_return_date = []
+            transactions_ida_volta = []
+            
+            for transaction in transactions:
+                if transaction.get("returnDate"):
+                    transactions_with_return_date.append(transaction)
+                    print(f"   📅 Transação com returnDate: ID={transaction.get('id')}, Descrição='{transaction.get('description')}', returnDate='{transaction.get('returnDate')}', tripType='{transaction.get('tripType')}'")
+                
+                if transaction.get("tripType") == "ida-volta":
+                    transactions_ida_volta.append(transaction)
+                    print(f"   ✈️ Transação ida-volta: ID={transaction.get('id')}, Descrição='{transaction.get('description')}', departureDate='{transaction.get('departureDate')}', returnDate='{transaction.get('returnDate')}'")
+            
+            print_result(True, "Análise de transações com returnDate", 
+                       f"Encontradas {len(transactions_with_return_date)} transações com returnDate preenchido")
+            print_result(True, "Análise de transações ida-volta", 
+                       f"Encontradas {len(transactions_ida_volta)} transações com tripType='ida-volta'")
+            
+            # Verificar transação específica RT-2025-4732
+            rt_transaction = None
+            for transaction in transactions:
+                if (transaction.get("internalReservationCode") == "RT-2025-4732" or 
+                    transaction.get("clientReservationCode") == "RT-2025-4732" or
+                    "RT-2025-4732" in str(transaction.get("description", ""))):
+                    rt_transaction = transaction
+                    break
+            
+            if rt_transaction:
+                print_result(True, "Transação RT-2025-4732 encontrada", 
+                           f"ID: {rt_transaction.get('id')}, Cliente: {rt_transaction.get('client')}, returnDate: {rt_transaction.get('returnDate')}, tripType: {rt_transaction.get('tripType')}")
+                print(f"   📋 Detalhes RT-2025-4732: departureDate='{rt_transaction.get('departureDate')}', returnDate='{rt_transaction.get('returnDate')}', tripType='{rt_transaction.get('tripType')}'")
+            else:
+                print_result(False, "Transação RT-2025-4732 não encontrada", 
+                           "Não foi possível localizar a transação RT-2025-4732 mencionada no screenshot")
+                
+        else:
+            print_result(False, f"Busca de transações falhou - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Busca de transações existentes falhou", str(e))
+        return
+    
+    # Test 3: Criar transação teste IDA-VOLTA
+    print("\n🎯 PASSO 2: CRIAR TRANSAÇÃO TESTE IDA-VOLTA")
+    try:
+        test_ida_volta_transaction = {
+            "type": "entrada_vendas",
+            "category": "Passagem Aérea",
+            "description": "TESTE IDA-VOLTA - Investigação Cards",
+            "amount": 2500.00,
+            "paymentMethod": "PIX",
+            "client": "Airton - Cliente Teste",
+            "departureDate": "2025-02-15",
+            "returnDate": "2025-02-25",  # IMPORTANTE: returnDate preenchido
+            "tripType": "ida-volta",  # IMPORTANTE: tripType explicitamente ida-volta
+            "departureCity": "São Paulo",
+            "arrivalCity": "Lisboa",
+            "clientReservationCode": "RT-2025-TEST-IDA-VOLTA",
+            "internalReservationCode": "RT-2025-TEST-IDA-VOLTA",
+            "transactionDate": "2025-01-20"
+        }
+        
+        response = requests.post(f"{API_URL}/transactions", json=test_ida_volta_transaction, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if "id" in data:
+                test_transaction_id = data["id"]
+                print_result(True, "Criação de transação teste IDA-VOLTA", 
+                           f"Transação criada com sucesso - ID: {test_transaction_id}")
+                
+                # Verificar se os campos foram salvos corretamente
+                saved_departure_date = data.get("departureDate")
+                saved_return_date = data.get("returnDate")
+                saved_trip_type = data.get("tripType")
+                
+                print_result(True, "Verificação de campos salvos", 
+                           f"departureDate: '{saved_departure_date}', returnDate: '{saved_return_date}', tripType: '{saved_trip_type}'")
+                
+                if saved_return_date == "2025-02-25":
+                    print_result(True, "✅ Campo returnDate persistido corretamente", 
+                               f"returnDate salvo: '{saved_return_date}'")
+                else:
+                    print_result(False, "❌ Campo returnDate NÃO persistido corretamente", 
+                               f"Esperado: '2025-02-25', Obtido: '{saved_return_date}'")
+                
+                if saved_trip_type == "ida-volta":
+                    print_result(True, "✅ Campo tripType persistido corretamente", 
+                               f"tripType salvo: '{saved_trip_type}'")
+                else:
+                    print_result(False, "❌ Campo tripType NÃO persistido corretamente", 
+                               f"Esperado: 'ida-volta', Obtido: '{saved_trip_type}'")
+                
+            else:
+                print_result(False, "Criação de transação teste IDA-VOLTA falhou", 
+                           f"Resposta não contém ID: {data}")
+        else:
+            print_result(False, f"Criação de transação teste IDA-VOLTA falhou - HTTP {response.status_code}", 
+                       response.text)
+    except Exception as e:
+        print_result(False, "Criação de transação teste IDA-VOLTA falhou", str(e))
+    
+    # Test 4: Verificar persistência no MongoDB
+    print("\n🎯 PASSO 3: ANÁLISE DOS CAMPOS NO MONGODB")
+    try:
+        # Buscar novamente todas as transações para verificar persistência
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            
+            # Encontrar nossa transação teste
+            test_transaction = None
+            for transaction in transactions:
+                if transaction.get("internalReservationCode") == "RT-2025-TEST-IDA-VOLTA":
+                    test_transaction = transaction
+                    break
+            
+            if test_transaction:
+                print_result(True, "Transação teste encontrada no banco", 
+                           f"ID: {test_transaction.get('id')}")
+                
+                # Verificar estrutura exata dos dados salvos
+                print("\n📊 ESTRUTURA EXATA DOS DADOS SALVOS:")
+                important_fields = ["departureDate", "returnDate", "tripType", "client", "description"]
+                for field in important_fields:
+                    value = test_transaction.get(field)
+                    print(f"   {field}: '{value}' (tipo: {type(value).__name__})")
+                
+                # Verificar se returnDate e tripType estão sendo persistidos
+                mongodb_return_date = test_transaction.get("returnDate")
+                mongodb_trip_type = test_transaction.get("tripType")
+                
+                if mongodb_return_date and mongodb_return_date == "2025-02-25":
+                    print_result(True, "✅ MongoDB - returnDate persistido", 
+                               f"returnDate no MongoDB: '{mongodb_return_date}'")
+                else:
+                    print_result(False, "❌ MongoDB - returnDate NÃO persistido", 
+                               f"returnDate no MongoDB: '{mongodb_return_date}'")
+                
+                if mongodb_trip_type and mongodb_trip_type == "ida-volta":
+                    print_result(True, "✅ MongoDB - tripType persistido", 
+                               f"tripType no MongoDB: '{mongodb_trip_type}'")
+                else:
+                    print_result(False, "❌ MongoDB - tripType NÃO persistido", 
+                               f"tripType no MongoDB: '{mongodb_trip_type}'")
+                
+            else:
+                print_result(False, "Transação teste não encontrada no banco", 
+                           "A transação teste não foi encontrada na busca posterior")
+        else:
+            print_result(False, f"Verificação de persistência falhou - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "Análise de persistência no MongoDB falhou", str(e))
+    
+    # Test 5: Investigação específica da transação RT-2025-4732
+    print("\n🎯 PASSO 4: INVESTIGAÇÃO ESPECÍFICA RT-2025-4732")
+    if rt_transaction:
+        print(f"📋 ANÁLISE DETALHADA DA TRANSAÇÃO RT-2025-4732:")
+        print(f"   ID: {rt_transaction.get('id')}")
+        print(f"   Descrição: '{rt_transaction.get('description')}'")
+        print(f"   Cliente: '{rt_transaction.get('client')}'")
+        print(f"   departureDate: '{rt_transaction.get('departureDate')}'")
+        print(f"   returnDate: '{rt_transaction.get('returnDate')}'")
+        print(f"   tripType: '{rt_transaction.get('tripType')}'")
+        print(f"   Valor: R$ {rt_transaction.get('amount')}")
+        print(f"   Tipo: {rt_transaction.get('type')}")
+        
+        # Verificar se tem os campos necessários para gerar cards IDA/VOLTA
+        has_return_date = bool(rt_transaction.get("returnDate"))
+        has_ida_volta_type = rt_transaction.get("tripType") == "ida-volta"
+        
+        if has_return_date and has_ida_volta_type:
+            print_result(True, "RT-2025-4732 - Deveria gerar cards IDA/VOLTA", 
+                       f"Tem returnDate ('{rt_transaction.get('returnDate')}') E tripType='ida-volta'")
+        elif has_return_date:
+            print_result(False, "RT-2025-4732 - Problema no tripType", 
+                       f"Tem returnDate mas tripType='{rt_transaction.get('tripType')}' (deveria ser 'ida-volta')")
+        elif has_ida_volta_type:
+            print_result(False, "RT-2025-4732 - Problema no returnDate", 
+                       f"Tem tripType='ida-volta' mas returnDate='{rt_transaction.get('returnDate')}' (vazio)")
+        else:
+            print_result(False, "RT-2025-4732 - Faltam ambos os campos", 
+                       f"returnDate='{rt_transaction.get('returnDate')}' E tripType='{rt_transaction.get('tripType')}'")
+    
+    # Test 6: Resumo da investigação
+    print("\n🎯 RESUMO DA INVESTIGAÇÃO IDA/VOLTA")
+    print("="*80)
+    print("📊 RESULTADOS DA INVESTIGAÇÃO:")
+    print(f"   • Total de transações no banco: {total_transactions}")
+    print(f"   • Transações com returnDate: {len(transactions_with_return_date)}")
+    print(f"   • Transações com tripType='ida-volta': {len(transactions_ida_volta)}")
+    print(f"   • Transação RT-2025-4732 encontrada: {'Sim' if rt_transaction else 'Não'}")
+    print(f"   • Transação teste IDA-VOLTA criada: {'Sim' if 'test_transaction_id' in locals() else 'Não'}")
+    
+    if len(transactions_ida_volta) == 0:
+        print_result(False, "🚨 PROBLEMA IDENTIFICADO", 
+                   "NENHUMA transação com tripType='ida-volta' encontrada no banco!")
+        print("   💡 POSSÍVEL CAUSA: Frontend não está enviando tripType='ida-volta' corretamente")
+    elif len(transactions_with_return_date) == 0:
+        print_result(False, "🚨 PROBLEMA IDENTIFICADO", 
+                   "NENHUMA transação com returnDate encontrada no banco!")
+        print("   💡 POSSÍVEL CAUSA: Frontend não está enviando returnDate corretamente")
+    else:
+        print_result(True, "✅ DADOS ENCONTRADOS", 
+                   f"Existem {len(transactions_ida_volta)} transações ida-volta e {len(transactions_with_return_date)} com returnDate")
+        print("   💡 INVESTIGAÇÃO: O problema pode estar na lógica do frontend para gerar os cards")
 def test_supplier_fields_investigation_rt_2025_5989():
     """INVESTIGAÇÃO dos campos de fornecedor na transação RT-2025-5989 - REVIEW REQUEST"""
     print_test_header("INVESTIGAÇÃO DOS CAMPOS DE FORNECEDOR NA TRANSAÇÃO RT-2025-5989")
