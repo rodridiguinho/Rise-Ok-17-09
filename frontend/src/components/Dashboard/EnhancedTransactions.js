@@ -2828,9 +2828,9 @@ const EnhancedTransactions = () => {
                         <span>{transaction.departureCity} → {transaction.arrivalCity}</span>
                       )}
                       {transaction.saleValue && <span>Venda: {formatCurrency(transaction.saleValue)}</span>}
-                      {transaction.supplierValue && <span>Fornecedor: {formatCurrency(transaction.supplierValue)}</span>}
+                      {transaction.supplierValue && <span className="text-orange-600">💰 Fornecedor: {formatCurrency(transaction.supplierValue)}</span>}
                       {transaction.commissionValue && (
-                        <span>Comissão: {formatCurrency(transaction.commissionValue)} ({transaction.commissionPercentage?.toFixed(2)}%)</span>
+                        <span className="text-green-600">💳 Comissão: {formatCurrency(transaction.commissionValue)} ({transaction.commissionPercentage?.toFixed(2) || ((parseFloat(transaction.commissionValue) / parseFloat(transaction.saleValue || transaction.amount)) * 100).toFixed(2)}%)</span>
                       )}
                       {transaction.supplierUsedMiles && transaction.supplierMilesQuantity && (
                         <span className="text-blue-600 font-medium">
