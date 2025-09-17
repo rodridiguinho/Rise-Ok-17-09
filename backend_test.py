@@ -11486,13 +11486,13 @@ def test_review_request_sales_analysis_endpoints():
                 print_result(False, f"Cleanup - Delete transaction {transaction_id}", str(e))
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - CRITICAL RETURNDATE INVESTIGATION")
+    print("🚀 Starting Backend API Test Suite - INVESTIGAÇÃO ESPECÍFICA CARDS IDA/VOLTA")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the critical returnDate investigation first (highest priority)
-    test_critical_return_date_investigation()
+    # Run the IDA/VOLTA cards investigation (highest priority)
+    test_ida_volta_cards_investigation()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Complete - CRITICAL RETURNDATE INVESTIGATION COMPLETED")
+    print("🏁 Backend API Test Suite Complete - INVESTIGAÇÃO IDA/VOLTA CONCLUÍDA")
     print("="*80)
