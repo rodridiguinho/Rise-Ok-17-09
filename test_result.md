@@ -103,6 +103,18 @@
 user_problem_statement: "Implementar o módulo de Controle Interno com 5 seções independentes: 1. Investimento de Sócios, 2. Pagamentos de Clientes Parcelados (com campo 'Número de registro gerado na venda'), 3. Controle de Cliente com Controle de Milhas, 4. Contas com Sócios (com campo 'Data de retirada'), 5. Links de Consolidadoras/Operadores/Serviços. Cada seção deve ter funcionalidade 'Adicionar mais 1' e integração no sidebar. Sistema deve ser independente do resto da aplicação, apenas para controle interno."
 
 backend:
+  - task: "Supplier Fields Investigation RT-2025-5989"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 INVESTIGAÇÃO DOS CAMPOS DE FORNECEDOR NA TRANSAÇÃO RT-2025-5989 - INVESTIGAÇÃO COMPLETA: Utilizando credenciais rodrigo@risetravel.com.br / Emily2030* conforme solicitado na review request. ✅ TRANSAÇÃO RT-2025-5989 LOCALIZADA: Encontrada transação com ID: 68cabfbd44f226ebb2e775ad, Descrição: 'teste22', Código Interno: 'RT-2025-5989', Código Cliente: 'rr2233', Valor Total: R$ 15.000,00. ✅ ANÁLISE DOS CAMPOS DE FORNECEDOR: Campo 'supplierValue' NÃO está preenchido (null/vazio). Campo 'supplier' (nome) NÃO está preenchido (vazio). Campo 'suppliers' (array) ESTÁ PREENCHIDO com 1 fornecedor. ✅ ESTRUTURA DO ARRAY SUPPLIERS: suppliers[0] = {name: 'Franciele', value: 10000, paymentStatus: 'Pago'}. ✅ CONCLUSÃO DEFINITIVA: O valor do fornecedor que o usuário preencheu está localizado no array 'suppliers' no campo 'value' = R$ 10.000,00. O sistema utiliza o array 'suppliers' para armazenar múltiplos fornecedores com seus respectivos valores, não o campo individual 'supplierValue'. ✅ CAMPOS RELACIONADOS ENCONTRADOS: supplierPaymentStatus: 'Pendente', supplierUsedMiles: false. ✅ OBJETIVO DA INVESTIGAÇÃO ALCANÇADO: Identificado onde está o valor do fornecedor preenchido pelo usuário - no array suppliers[].value, não no campo supplierValue direto."
+
   - task: "Internal Code Display in Automatic Outputs Testing"
     implemented: true
     working: true
