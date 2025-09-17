@@ -1248,6 +1248,301 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_critical_return_date_investigation():
+    """INVESTIGAÇÃO CRÍTICA - Backend não está salvando returnDate - REVIEW REQUEST"""
+    print_test_header("INVESTIGAÇÃO CRÍTICA - Backend não está salvando returnDate")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "🔐 Authentication for returnDate investigation", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for returnDate investigation failed", str(e))
+        return
+    
+    # Test 2: Search for existing round-trip transaction (tripType="ida-volta")
+    print("\n🎯 TEST 1: BUSCAR TRANSAÇÃO IDA E VOLTA EXISTENTE")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "GET /api/transactions - Success", 
+                       f"Retrieved {len(transactions)} transactions from database")
+            
+            # Search for round-trip transactions
+            round_trip_transactions = []
+            for transaction in transactions:
+                if transaction.get("tripType") == "ida-volta":
+                    round_trip_transactions.append(transaction)
+            
+            if round_trip_transactions:
+                print_result(True, "Round-trip transactions found", 
+                           f"Found {len(round_trip_transactions)} transactions with tripType='ida-volta'")
+                
+                # Analyze returnDate field in existing round-trip transactions
+                transactions_with_return_date = []
+                transactions_without_return_date = []
+                
+                for transaction in round_trip_transactions:
+                    transaction_id = transaction.get("id", "Unknown")
+                    return_date = transaction.get("returnDate")
+                    departure_date = transaction.get("departureDate")
+                    
+                    print(f"   📋 Transaction ID: {transaction_id}")
+                    print(f"      - Description: {transaction.get('description', 'No description')}")
+                    print(f"      - tripType: {transaction.get('tripType')}")
+                    print(f"      - departureDate: {departure_date}")
+                    print(f"      - returnDate: {return_date}")
+                    
+                    if return_date:
+                        transactions_with_return_date.append(transaction)
+                        print_result(True, f"Transaction {transaction_id} - returnDate populated", 
+                                   f"returnDate: {return_date}")
+                    else:
+                        transactions_without_return_date.append(transaction)
+                        print_result(False, f"Transaction {transaction_id} - returnDate MISSING", 
+                                   f"tripType='ida-volta' but returnDate is empty/null")
+                
+                # Summary of existing data
+                if transactions_with_return_date:
+                    print_result(True, "Existing data analysis - returnDate populated", 
+                               f"{len(transactions_with_return_date)} round-trip transactions have returnDate populated")
+                
+                if transactions_without_return_date:
+                    print_result(False, "🚨 CRITICAL ISSUE IDENTIFIED - returnDate missing", 
+                               f"{len(transactions_without_return_date)} round-trip transactions are MISSING returnDate")
+                    
+                    # Store one transaction for update testing
+                    global test_transaction_for_update
+                    test_transaction_for_update = transactions_without_return_date[0]
+                
+            else:
+                print_result(False, "No round-trip transactions found", 
+                           "No transactions with tripType='ida-volta' found in database")
+                
+                # Create a test transaction for update testing
+                print("\n🎯 CREATING TEST TRANSACTION FOR UPDATE TESTING")
+                test_transaction_data = {
+                    "type": "entrada",
+                    "category": "Passagem Aérea",
+                    "description": "Teste returnDate - Ida e Volta",
+                    "amount": 2500.00,
+                    "paymentMethod": "PIX",
+                    "tripType": "ida-volta",
+                    "departureDate": "2025-09-20",
+                    "returnDate": "2025-09-25",
+                    "client": "Cliente Teste ReturnDate",
+                    "transactionDate": "2025-01-15"
+                }
+                
+                create_response = requests.post(f"{API_URL}/transactions", json=test_transaction_data, timeout=10)
+                if create_response.status_code == 200:
+                    created_data = create_response.json()
+                    test_transaction_for_update = created_data
+                    print_result(True, "Test transaction created for update testing", 
+                               f"ID: {created_data.get('id')}")
+                else:
+                    print_result(False, f"Failed to create test transaction - HTTP {create_response.status_code}", 
+                               create_response.text)
+                    return
+        else:
+            print_result(False, f"GET /api/transactions failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Transaction search failed", str(e))
+        return
+    
+    # Test 3: Test UPDATE of a transaction with returnDate
+    print("\n🎯 TEST 2: TESTAR UPDATE DE TRANSAÇÃO COM RETURNDATE")
+    try:
+        if 'test_transaction_for_update' not in globals():
+            print_result(False, "No transaction available for update testing", 
+                       "Cannot proceed with update test")
+            return
+        
+        transaction_to_update = test_transaction_for_update
+        transaction_id = transaction_to_update.get("id")
+        
+        if not transaction_id:
+            print_result(False, "Transaction ID not found", "Cannot update transaction without ID")
+            return
+        
+        print(f"📝 Updating transaction ID: {transaction_id}")
+        
+        # Prepare update data with exact data from review request
+        update_data = {
+            "type": transaction_to_update.get("type", "entrada"),
+            "category": transaction_to_update.get("category", "Passagem Aérea"),
+            "description": transaction_to_update.get("description", "Updated transaction"),
+            "amount": transaction_to_update.get("amount", 2500.00),
+            "paymentMethod": transaction_to_update.get("paymentMethod", "PIX"),
+            "tripType": "ida-volta",  # Ensure round-trip
+            "departureDate": "2025-09-20",  # Exact data from review request
+            "returnDate": "2025-09-25",     # Exact data from review request
+            "client": transaction_to_update.get("client", "Cliente Teste"),
+            "transactionDate": transaction_to_update.get("transactionDate", "2025-01-15")
+        }
+        
+        print(f"📤 Sending PUT request with data:")
+        print(f"   - tripType: {update_data['tripType']}")
+        print(f"   - departureDate: {update_data['departureDate']}")
+        print(f"   - returnDate: {update_data['returnDate']}")
+        
+        # Add authentication header
+        headers = {}
+        if auth_token:
+            headers["Authorization"] = f"Bearer {auth_token}"
+        
+        response = requests.put(f"{API_URL}/transactions/{transaction_id}", 
+                              json=update_data, headers=headers, timeout=10)
+        
+        print(f"📥 PUT Response Status: {response.status_code}")
+        print(f"📥 PUT Response Text: {response.text[:500]}...")
+        
+        if response.status_code == 200:
+            updated_data = response.json()
+            print_result(True, "PUT /api/transactions/{id} - Update successful", 
+                       f"Transaction {transaction_id} updated successfully")
+            
+            # Verify returnDate was saved in the response
+            response_return_date = updated_data.get("returnDate")
+            response_departure_date = updated_data.get("departureDate")
+            response_trip_type = updated_data.get("tripType")
+            
+            print(f"📋 Response data:")
+            print(f"   - tripType: {response_trip_type}")
+            print(f"   - departureDate: {response_departure_date}")
+            print(f"   - returnDate: {response_return_date}")
+            
+            if response_return_date == "2025-09-25":
+                print_result(True, "PUT Response - returnDate saved", 
+                           f"returnDate correctly saved in response: {response_return_date}")
+            else:
+                print_result(False, "🚨 PUT Response - returnDate NOT saved", 
+                           f"Expected: 2025-09-25, Got: {response_return_date}")
+            
+            if response_departure_date == "2025-09-20":
+                print_result(True, "PUT Response - departureDate saved", 
+                           f"departureDate correctly saved: {response_departure_date}")
+            else:
+                print_result(False, "PUT Response - departureDate issue", 
+                           f"Expected: 2025-09-20, Got: {response_departure_date}")
+            
+            if response_trip_type == "ida-volta":
+                print_result(True, "PUT Response - tripType saved", 
+                           f"tripType correctly saved: {response_trip_type}")
+            else:
+                print_result(False, "PUT Response - tripType issue", 
+                           f"Expected: ida-volta, Got: {response_trip_type}")
+        else:
+            print_result(False, f"PUT /api/transactions/{transaction_id} failed - HTTP {response.status_code}", 
+                       response.text)
+            return
+    except Exception as e:
+        print_result(False, "Transaction update test failed", str(e))
+        return
+    
+    # Test 4: Verify if returnDate persists in database
+    print("\n🎯 TEST 3: VERIFICAR SE RETURNDATE PERSISTE NO BANCO")
+    try:
+        # Get the transaction again to verify persistence
+        response = requests.get(f"{API_URL}/transactions/{transaction_id}", timeout=10)
+        
+        if response.status_code == 404:
+            # Try getting all transactions and find our transaction
+            print("🔍 Transaction not found by ID, searching in transaction list...")
+            response = requests.get(f"{API_URL}/transactions", timeout=10)
+            if response.status_code == 200:
+                transactions = response.json()
+                found_transaction = None
+                for t in transactions:
+                    if t.get("id") == transaction_id:
+                        found_transaction = t
+                        break
+                
+                if found_transaction:
+                    print_result(True, "Transaction found in list", f"Transaction {transaction_id} found")
+                    
+                    # Verify persistence
+                    persisted_return_date = found_transaction.get("returnDate")
+                    persisted_departure_date = found_transaction.get("departureDate")
+                    persisted_trip_type = found_transaction.get("tripType")
+                    
+                    print(f"📋 Persisted data from database:")
+                    print(f"   - tripType: {persisted_trip_type}")
+                    print(f"   - departureDate: {persisted_departure_date}")
+                    print(f"   - returnDate: {persisted_return_date}")
+                    
+                    # Critical test: Does returnDate persist?
+                    if persisted_return_date == "2025-09-25":
+                        print_result(True, "✅ CRITICAL SUCCESS - returnDate PERSISTS", 
+                                   f"returnDate correctly persisted in database: {persisted_return_date}")
+                    else:
+                        print_result(False, "🚨 CRITICAL FAILURE - returnDate NOT PERSISTING", 
+                                   f"Expected: 2025-09-25, Found in DB: {persisted_return_date}")
+                    
+                    if persisted_departure_date == "2025-09-20":
+                        print_result(True, "departureDate persistence verified", 
+                                   f"departureDate correctly persisted: {persisted_departure_date}")
+                    else:
+                        print_result(False, "departureDate persistence issue", 
+                                   f"Expected: 2025-09-20, Found in DB: {persisted_departure_date}")
+                    
+                    if persisted_trip_type == "ida-volta":
+                        print_result(True, "tripType persistence verified", 
+                                   f"tripType correctly persisted: {persisted_trip_type}")
+                    else:
+                        print_result(False, "tripType persistence issue", 
+                                   f"Expected: ida-volta, Found in DB: {persisted_trip_type}")
+                    
+                    # Final conclusion
+                    if (persisted_return_date == "2025-09-25" and 
+                        persisted_departure_date == "2025-09-20" and 
+                        persisted_trip_type == "ida-volta"):
+                        print_result(True, "🎯 INVESTIGAÇÃO CONCLUÍDA - RETURNDATE FUNCIONA CORRETAMENTE", 
+                                   "✅ Backend está salvando returnDate corretamente\n✅ Dados persistem no banco de dados\n✅ Update funciona perfeitamente")
+                    else:
+                        print_result(False, "🚨 INVESTIGAÇÃO CONCLUÍDA - PROBLEMA IDENTIFICADO", 
+                                   "❌ Backend NÃO está salvando returnDate corretamente\n❌ Dados não persistem adequadamente")
+                else:
+                    print_result(False, "Transaction not found after update", 
+                               f"Transaction {transaction_id} not found in database")
+            else:
+                print_result(False, f"Failed to retrieve transactions - HTTP {response.status_code}", 
+                           response.text)
+        elif response.status_code == 200:
+            # Direct GET by ID worked
+            persisted_data = response.json()
+            persisted_return_date = persisted_data.get("returnDate")
+            
+            if persisted_return_date == "2025-09-25":
+                print_result(True, "✅ CRITICAL SUCCESS - returnDate PERSISTS", 
+                           f"returnDate correctly persisted: {persisted_return_date}")
+            else:
+                print_result(False, "🚨 CRITICAL FAILURE - returnDate NOT PERSISTING", 
+                           f"Expected: 2025-09-25, Found: {persisted_return_date}")
+        else:
+            print_result(False, f"GET /api/transactions/{transaction_id} failed - HTTP {response.status_code}", 
+                       response.text)
+    except Exception as e:
+        print_result(False, "Database persistence verification failed", str(e))
+
 def test_supplier_fields_investigation_rt_2025_5989():
     """INVESTIGAÇÃO dos campos de fornecedor na transação RT-2025-5989 - REVIEW REQUEST"""
     print_test_header("INVESTIGAÇÃO DOS CAMPOS DE FORNECEDOR NA TRANSAÇÃO RT-2025-5989")
