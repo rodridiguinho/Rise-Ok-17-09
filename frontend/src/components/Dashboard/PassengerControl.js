@@ -315,14 +315,23 @@ const PassengerControlDirect = () => {
 
       await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
 
-      // Atualizar a lista local
+      // CORREÇÃO CRÍTICA: Atualizar a lista local MAS manter os passageiros
+      const updatedReservation = { 
+        ...selectedReservation, 
+        ...updatedData,
+        passengers: selectedReservation.passengers // MANTER passageiros existentes
+      };
+      
       setReservations(prev => 
         prev.map(res => 
           res.id === selectedReservation.id 
-            ? { ...res, ...updatedData }
+            ? updatedReservation
             : res
         )
       );
+      
+      // CORREÇÃO: Atualizar selectedReservation para mostrar dados atualizados
+      setSelectedReservation(updatedReservation);
 
       toast({
         title: "Alterações Salvas",
