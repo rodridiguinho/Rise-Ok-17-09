@@ -187,6 +187,18 @@ backend:
           agent: "testing"
           comment: "🎯 CRITICAL TRANSACTION TYPES BUG FIX - COMPLETE SUCCESS: Successfully tested the exact bug fix scenario from review request using rodrigo@risetravel.com.br / Emily2030* authentication. ✅ ENTRADA_VENDAS CREATION: Created entrada_vendas transaction with exact test data (type: 'entrada_vendas', description: 'TESTE CORREÇÃO BUG - Venda com fornecedor', amount: 1000, suppliers: [{'name': 'Fornecedor Teste', 'value': 800, 'paymentStatus': 'Pago', 'paymentDate': '2025-09-16'}], seller: 'Fernando Dos Anjos', commissionValue: 50, commissionPaymentStatus: 'Pago'). Transaction created successfully with ID: 68c9a44bda82b03813ee784a. ✅ AUTOMATIC SAÍDAS GENERATION: System correctly generated 2 automatic expense transactions (supplier payment + commission) as expected. ✅ CRITICAL BUG FIX VALIDATION: ALL generated saídas have correct type='saida_vendas' (2/2) - NOT 'saida' as before. This confirms the bug fix is working correctly. ✅ SAÍDA TYPES VERIFICATION: Found 2 generated transactions: (1) 'Pagamento a Fornecedor Teste' with type='saida_vendas', (2) 'Comissão para Fernando Dos Anjos' with type='saida_vendas'. Both have correct type. ✅ ANALYSIS ENDPOINTS VERIFICATION: Both GET /api/reports/sales-performance and GET /api/reports/complete-analysis correctly include saida_vendas transactions in their calculations. ✅ OBJECTIVE ACHIEVED: entrada_vendas → generates saida_vendas automatically (NOT 'saida'). The critical bug fix is completely functional and working as requested."
 
+  - task: "Critical 422 Error Investigation PUT /api/transactions"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎯 INVESTIGAÇÃO CRÍTICA DO ERRO 422 CONCLUÍDA COM SUCESSO - ROOT CAUSE IDENTIFICADO: Utilizando credenciais rodrigo@risetravel.com.br / Emily2030* conforme solicitado na review request. ✅ TRANSAÇÃO ALVO LOCALIZADA: Encontrada transação ID: 68c82cb493e52856876947e4, Descrição: 'Emissão Rui Portugal', Cliente: 'Rui Manuel de Souza Mendes', Valor: R$ 14.000,00. ✅ ERRO 422 REPRODUZIDO COM SUCESSO: Utilizando dados exatos da review request (tripType: 'ida-volta', departureDate: '2025-12-29', returnDate: '2026-01-19', passengers: [], supplier: '', airline: '', travelNotes: '', emissionType: 'E-ticket', supplierPhone: '', reservationNumber: '', productType: '', clientReservationCode: '', departureCity: '', arrivalCity: ''). ✅ ROOT CAUSE IDENTIFICADO: API retorna HTTP 422 com 3 campos obrigatórios faltando: (1) 'type' - Field required, (2) 'description' - Field required, (3) 'amount' - Field required. ✅ VALIDAÇÃO CONFIRMADA: Quando incluídos os campos obrigatórios (type, description, amount), a atualização funciona perfeitamente (HTTP 200). ✅ TESTE DE CAMPOS INDIVIDUAIS: Todos os campos da review request (tripType, departureDate, returnDate, passengers, supplier, airline, travelNotes, emissionType, supplierPhone, reservationNumber, productType, clientReservationCode, departureCity, arrivalCity) funcionam corretamente quando combinados com os campos obrigatórios. ✅ CONCLUSÃO DEFINITIVA: O erro 422 ocorre porque o frontend está enviando apenas campos opcionais sem incluir os campos obrigatórios 'type', 'description' e 'amount' na requisição PUT. O backend está funcionando corretamente - a validação está adequada."
+
   - task: "Analytics and Transactions Duplicates Investigation"
     implemented: true
     working: true
