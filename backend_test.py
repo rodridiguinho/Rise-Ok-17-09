@@ -1248,6 +1248,203 @@ def test_specific_transaction_creation_bug():
         print_result(False, "Specific Transaction Creation - Exception occurred", str(e))
         print("🚨 CRITICAL ERROR: Exception during specific transaction creation!")
 
+def test_supplier_fields_investigation_rt_2025_5989():
+    """INVESTIGAÇÃO dos campos de fornecedor na transação RT-2025-5989 - REVIEW REQUEST"""
+    print_test_header("INVESTIGAÇÃO DOS CAMPOS DE FORNECEDOR NA TRANSAÇÃO RT-2025-5989")
+    
+    # Test credentials from review request
+    test_email = "rodrigo@risetravel.com.br"
+    test_password = "Emily2030*"
+    
+    # Test 1: Authenticate first
+    global auth_token
+    try:
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            auth_token = data.get("access_token")
+            print_result(True, "Authentication for supplier fields investigation", 
+                       f"Successfully logged in as {test_email}")
+        else:
+            print_result(False, f"Authentication failed - HTTP {response.status_code}", response.text)
+            return
+    except Exception as e:
+        print_result(False, "Authentication for supplier fields investigation failed", str(e))
+        return
+    
+    # Test 2: GET /api/transactions - Buscar transação RT-2025-5989 específica
+    print("\n🎯 TEST 1: GET /api/transactions - BUSCAR TRANSAÇÃO RT-2025-5989")
+    try:
+        response = requests.get(f"{API_URL}/transactions", timeout=15)
+        if response.status_code == 200:
+            transactions = response.json()
+            print_result(True, "GET /api/transactions - Request successful", 
+                       f"Retrieved {len(transactions)} transactions from database")
+            
+            # Buscar transação RT-2025-5989 específica
+            target_transaction = None
+            rt_transactions = []
+            
+            for transaction in transactions:
+                # Buscar por código interno RT-2025-5989
+                internal_code = transaction.get('internalReservationCode', '')
+                client_code = transaction.get('clientReservationCode', '')
+                description = transaction.get('description', '')
+                
+                # Verificar se contém RT-2025-5989 em qualquer campo
+                if ('RT-2025-5989' in internal_code or 
+                    'RT-2025-5989' in client_code or 
+                    'RT-2025-5989' in description):
+                    target_transaction = transaction
+                    print_result(True, "Transação RT-2025-5989 ENCONTRADA", 
+                               f"ID: {transaction.get('id')}, Description: {description}")
+                    break
+                
+                # Coletar todas as transações RT para análise
+                if ('RT-' in internal_code or 'RT-' in client_code or 'RT-' in description):
+                    rt_transactions.append({
+                        'id': transaction.get('id'),
+                        'description': description,
+                        'internalReservationCode': internal_code,
+                        'clientReservationCode': client_code
+                    })
+            
+            if target_transaction:
+                print_result(True, "🎯 TRANSAÇÃO RT-2025-5989 LOCALIZADA", 
+                           f"Transação encontrada com sucesso")
+                
+                # Test 3: Analisar campos de fornecedor específicos
+                print("\n🎯 TEST 2: ANÁLISE DOS CAMPOS DE FORNECEDOR")
+                
+                # Verificar campo supplierValue
+                supplier_value = target_transaction.get('supplierValue')
+                if supplier_value is not None:
+                    print_result(True, "Campo supplierValue ENCONTRADO", 
+                               f"supplierValue: R$ {supplier_value}")
+                else:
+                    print_result(False, "Campo supplierValue NÃO ENCONTRADO", 
+                               "Campo supplierValue está vazio ou não existe")
+                
+                # Verificar campo supplier (nome do fornecedor)
+                supplier_name = target_transaction.get('supplier')
+                if supplier_name:
+                    print_result(True, "Campo supplier ENCONTRADO", 
+                               f"supplier: {supplier_name}")
+                else:
+                    print_result(False, "Campo supplier NÃO ENCONTRADO", 
+                               "Campo supplier está vazio ou não existe")
+                
+                # Verificar campo suppliers (array de fornecedores)
+                suppliers_array = target_transaction.get('suppliers', [])
+                if suppliers_array and len(suppliers_array) > 0:
+                    print_result(True, "Campo suppliers ENCONTRADO", 
+                               f"suppliers array com {len(suppliers_array)} fornecedor(es)")
+                    
+                    # Analisar cada fornecedor no array
+                    for i, supplier in enumerate(suppliers_array):
+                        supplier_info = f"Fornecedor {i+1}: "
+                        if supplier.get('name'):
+                            supplier_info += f"Nome: {supplier.get('name')}, "
+                        if supplier.get('value'):
+                            supplier_info += f"Valor: R$ {supplier.get('value')}, "
+                        if supplier.get('paymentStatus'):
+                            supplier_info += f"Status: {supplier.get('paymentStatus')}"
+                        
+                        print_result(True, f"Análise suppliers[{i}]", supplier_info)
+                else:
+                    print_result(False, "Campo suppliers NÃO ENCONTRADO", 
+                               "Array suppliers está vazio ou não existe")
+                
+                # Test 4: Análise completa da estrutura de dados
+                print("\n🎯 TEST 3: ANÁLISE COMPLETA DA ESTRUTURA DOS DADOS")
+                
+                # Identificar onde está o valor do fornecedor que o usuário preencheu
+                supplier_value_sources = []
+                
+                if supplier_value is not None:
+                    supplier_value_sources.append(f"supplierValue: R$ {supplier_value}")
+                
+                if suppliers_array:
+                    for i, supplier in enumerate(suppliers_array):
+                        if supplier.get('value'):
+                            supplier_value_sources.append(f"suppliers[{i}].value: R$ {supplier.get('value')}")
+                
+                if supplier_value_sources:
+                    print_result(True, "🎯 VALORES DE FORNECEDOR IDENTIFICADOS", 
+                               f"Fontes encontradas: {', '.join(supplier_value_sources)}")
+                else:
+                    print_result(False, "🎯 NENHUM VALOR DE FORNECEDOR ENCONTRADO", 
+                               "Não foi possível identificar valores de fornecedor preenchidos")
+                
+                # Verificar outros campos relacionados a fornecedor
+                other_supplier_fields = {
+                    'supplierPaymentDate': target_transaction.get('supplierPaymentDate'),
+                    'supplierPaymentStatus': target_transaction.get('supplierPaymentStatus'),
+                    'supplierUsedMiles': target_transaction.get('supplierUsedMiles'),
+                    'supplierMilesQuantity': target_transaction.get('supplierMilesQuantity'),
+                    'supplierMilesValue': target_transaction.get('supplierMilesValue'),
+                    'supplierMilesProgram': target_transaction.get('supplierMilesProgram'),
+                    'supplierPhone': target_transaction.get('supplierPhone'),
+                    'airportTaxes': target_transaction.get('airportTaxes')
+                }
+                
+                print_result(True, "Outros campos de fornecedor encontrados:", "")
+                for field, value in other_supplier_fields.items():
+                    if value is not None and value != "":
+                        print_result(True, f"  - {field}", f"{value}")
+                
+                # Test 5: Resumo da investigação
+                print("\n🎯 TEST 4: RESUMO DA INVESTIGAÇÃO RT-2025-5989")
+                
+                summary_info = {
+                    "ID da Transação": target_transaction.get('id'),
+                    "Descrição": target_transaction.get('description'),
+                    "Código Interno": target_transaction.get('internalReservationCode'),
+                    "Código Cliente": target_transaction.get('clientReservationCode'),
+                    "Valor Total": f"R$ {target_transaction.get('amount', 0)}",
+                    "supplierValue preenchido": "SIM" if supplier_value is not None else "NÃO",
+                    "suppliers array preenchido": "SIM" if suppliers_array else "NÃO",
+                    "supplier nome preenchido": "SIM" if supplier_name else "NÃO"
+                }
+                
+                print_result(True, "🎯 RESUMO COMPLETO DA TRANSAÇÃO RT-2025-5989:", "")
+                for key, value in summary_info.items():
+                    print_result(True, f"  {key}", f"{value}")
+                
+                # Conclusão sobre onde está o valor do fornecedor
+                if supplier_value is not None:
+                    print_result(True, "🎯 CONCLUSÃO - VALOR DO FORNECEDOR", 
+                               f"O valor do fornecedor está no campo 'supplierValue': R$ {supplier_value}")
+                elif suppliers_array and any(s.get('value') for s in suppliers_array):
+                    total_suppliers_value = sum(s.get('value', 0) for s in suppliers_array if s.get('value'))
+                    print_result(True, "🎯 CONCLUSÃO - VALOR DO FORNECEDOR", 
+                               f"O valor do fornecedor está no array 'suppliers': R$ {total_suppliers_value}")
+                else:
+                    print_result(False, "🎯 CONCLUSÃO - VALOR DO FORNECEDOR", 
+                               "Não foi possível identificar onde está o valor do fornecedor preenchido pelo usuário")
+                
+            else:
+                print_result(False, "Transação RT-2025-5989 NÃO ENCONTRADA", 
+                           "Transação específica não foi localizada na base de dados")
+                
+                # Mostrar transações RT encontradas para debug
+                if rt_transactions:
+                    print_result(True, f"Transações RT encontradas ({len(rt_transactions)})", "")
+                    for rt_trans in rt_transactions[:10]:  # Mostrar apenas as primeiras 10
+                        print_result(True, f"  - {rt_trans['id']}", 
+                                   f"Desc: {rt_trans['description'][:50]}..., Internal: {rt_trans['internalReservationCode']}, Client: {rt_trans['clientReservationCode']}")
+                else:
+                    print_result(False, "Nenhuma transação RT encontrada", 
+                               "Não foram encontradas transações com códigos RT na base de dados")
+        else:
+            print_result(False, f"GET /api/transactions failed - HTTP {response.status_code}", response.text)
+    except Exception as e:
+        print_result(False, "GET /api/transactions - Exception occurred", str(e))
+
 def test_critical_passenger_control_deletion_fix():
     """Test Critical Passenger Control Deletion Button Fix - REVIEW REQUEST"""
     print_test_header("TESTE CRÍTICO DA CORREÇÃO DO BOTÃO DE EXCLUSÃO NO CONTROLE DE PASSAGEIROS")
