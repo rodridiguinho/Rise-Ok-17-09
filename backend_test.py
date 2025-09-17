@@ -1461,84 +1461,66 @@ def test_critical_return_date_investigation():
     # Test 4: Verify if returnDate persists in database
     print("\n🎯 TEST 3: VERIFICAR SE RETURNDATE PERSISTE NO BANCO")
     try:
-        # Get the transaction again to verify persistence
-        response = requests.get(f"{API_URL}/transactions/{transaction_id}", timeout=10)
-        
-        if response.status_code == 404:
-            # Try getting all transactions and find our transaction
-            print("🔍 Transaction not found by ID, searching in transaction list...")
-            response = requests.get(f"{API_URL}/transactions", timeout=10)
-            if response.status_code == 200:
-                transactions = response.json()
-                found_transaction = None
-                for t in transactions:
-                    if t.get("id") == transaction_id:
-                        found_transaction = t
-                        break
-                
-                if found_transaction:
-                    print_result(True, "Transaction found in list", f"Transaction {transaction_id} found")
-                    
-                    # Verify persistence
-                    persisted_return_date = found_transaction.get("returnDate")
-                    persisted_departure_date = found_transaction.get("departureDate")
-                    persisted_trip_type = found_transaction.get("tripType")
-                    
-                    print(f"📋 Persisted data from database:")
-                    print(f"   - tripType: {persisted_trip_type}")
-                    print(f"   - departureDate: {persisted_departure_date}")
-                    print(f"   - returnDate: {persisted_return_date}")
-                    
-                    # Critical test: Does returnDate persist?
-                    if persisted_return_date == "2025-09-25":
-                        print_result(True, "✅ CRITICAL SUCCESS - returnDate PERSISTS", 
-                                   f"returnDate correctly persisted in database: {persisted_return_date}")
-                    else:
-                        print_result(False, "🚨 CRITICAL FAILURE - returnDate NOT PERSISTING", 
-                                   f"Expected: 2025-09-25, Found in DB: {persisted_return_date}")
-                    
-                    if persisted_departure_date == "2025-09-20":
-                        print_result(True, "departureDate persistence verified", 
-                                   f"departureDate correctly persisted: {persisted_departure_date}")
-                    else:
-                        print_result(False, "departureDate persistence issue", 
-                                   f"Expected: 2025-09-20, Found in DB: {persisted_departure_date}")
-                    
-                    if persisted_trip_type == "ida-volta":
-                        print_result(True, "tripType persistence verified", 
-                                   f"tripType correctly persisted: {persisted_trip_type}")
-                    else:
-                        print_result(False, "tripType persistence issue", 
-                                   f"Expected: ida-volta, Found in DB: {persisted_trip_type}")
-                    
-                    # Final conclusion
-                    if (persisted_return_date == "2025-09-25" and 
-                        persisted_departure_date == "2025-09-20" and 
-                        persisted_trip_type == "ida-volta"):
-                        print_result(True, "🎯 INVESTIGAÇÃO CONCLUÍDA - RETURNDATE FUNCIONA CORRETAMENTE", 
-                                   "✅ Backend está salvando returnDate corretamente\n✅ Dados persistem no banco de dados\n✅ Update funciona perfeitamente")
-                    else:
-                        print_result(False, "🚨 INVESTIGAÇÃO CONCLUÍDA - PROBLEMA IDENTIFICADO", 
-                                   "❌ Backend NÃO está salvando returnDate corretamente\n❌ Dados não persistem adequadamente")
-                else:
-                    print_result(False, "Transaction not found after update", 
-                               f"Transaction {transaction_id} not found in database")
-            else:
-                print_result(False, f"Failed to retrieve transactions - HTTP {response.status_code}", 
-                           response.text)
-        elif response.status_code == 200:
-            # Direct GET by ID worked
-            persisted_data = response.json()
-            persisted_return_date = persisted_data.get("returnDate")
+        # Get all transactions and find our transaction to verify persistence
+        print("🔍 Searching for transaction in transaction list...")
+        response = requests.get(f"{API_URL}/transactions", timeout=10)
+        if response.status_code == 200:
+            transactions = response.json()
+            found_transaction = None
+            for t in transactions:
+                if t.get("id") == transaction_id:
+                    found_transaction = t
+                    break
             
-            if persisted_return_date == "2025-09-25":
-                print_result(True, "✅ CRITICAL SUCCESS - returnDate PERSISTS", 
-                           f"returnDate correctly persisted: {persisted_return_date}")
+            if found_transaction:
+                print_result(True, "Transaction found in list", f"Transaction {transaction_id} found")
+                
+                # Verify persistence
+                persisted_return_date = found_transaction.get("returnDate")
+                persisted_departure_date = found_transaction.get("departureDate")
+                persisted_trip_type = found_transaction.get("tripType")
+                
+                print(f"📋 Persisted data from database:")
+                print(f"   - tripType: {persisted_trip_type}")
+                print(f"   - departureDate: {persisted_departure_date}")
+                print(f"   - returnDate: {persisted_return_date}")
+                
+                # Critical test: Does returnDate persist?
+                if persisted_return_date == "2025-09-25":
+                    print_result(True, "✅ CRITICAL SUCCESS - returnDate PERSISTS", 
+                               f"returnDate correctly persisted in database: {persisted_return_date}")
+                else:
+                    print_result(False, "🚨 CRITICAL FAILURE - returnDate NOT PERSISTING", 
+                               f"Expected: 2025-09-25, Found in DB: {persisted_return_date}")
+                
+                if persisted_departure_date == "2025-09-20":
+                    print_result(True, "departureDate persistence verified", 
+                               f"departureDate correctly persisted: {persisted_departure_date}")
+                else:
+                    print_result(False, "departureDate persistence issue", 
+                               f"Expected: 2025-09-20, Found in DB: {persisted_departure_date}")
+                
+                if persisted_trip_type == "ida-volta":
+                    print_result(True, "tripType persistence verified", 
+                               f"tripType correctly persisted: {persisted_trip_type}")
+                else:
+                    print_result(False, "tripType persistence issue", 
+                               f"Expected: ida-volta, Found in DB: {persisted_trip_type}")
+                
+                # Final conclusion
+                if (persisted_return_date == "2025-09-25" and 
+                    persisted_departure_date == "2025-09-20" and 
+                    persisted_trip_type == "ida-volta"):
+                    print_result(True, "🎯 INVESTIGAÇÃO CONCLUÍDA - RETURNDATE FUNCIONA CORRETAMENTE", 
+                               "✅ Backend está salvando returnDate corretamente\n✅ Dados persistem no banco de dados\n✅ Update funciona perfeitamente")
+                else:
+                    print_result(False, "🚨 INVESTIGAÇÃO CONCLUÍDA - PROBLEMA IDENTIFICADO", 
+                               "❌ Backend NÃO está salvando returnDate corretamente\n❌ Dados não persistem adequadamente")
             else:
-                print_result(False, "🚨 CRITICAL FAILURE - returnDate NOT PERSISTING", 
-                           f"Expected: 2025-09-25, Found: {persisted_return_date}")
+                print_result(False, "Transaction not found after update", 
+                           f"Transaction {transaction_id} not found in database")
         else:
-            print_result(False, f"GET /api/transactions/{transaction_id} failed - HTTP {response.status_code}", 
+            print_result(False, f"Failed to retrieve transactions - HTTP {response.status_code}", 
                        response.text)
     except Exception as e:
         print_result(False, "Database persistence verification failed", str(e))
