@@ -769,7 +769,9 @@ const PassengerControlDirect = () => {
         </div>
 
         {/* NOVA SEÇÃO: Lista Completa de Passageiros */}
-        {reservation.passengers && reservation.passengers.length > 0 && (
+        {(() => {
+          const displayPassengers = autoPopulatePassenger(reservation);
+          return displayPassengers && displayPassengers.length > 0 && (
           <div className="bg-slate-50 p-3 rounded-lg mb-4">
             <h4 className="text-xs font-bold text-slate-700 mb-2 flex items-center">
               <Users className="h-3 w-3 mr-1" />
