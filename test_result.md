@@ -100,7 +100,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implementar o módulo de Controle Interno com 5 seções independentes: 1. Investimento de Sócios, 2. Pagamentos de Clientes Parcelados (com campo 'Número de registro gerado na venda'), 3. Controle de Cliente com Controle de Milhas, 4. Contas com Sócios (com campo 'Data de retirada'), 5. Links de Consolidadoras/Operadores/Serviços. Cada seção deve ter funcionalidade 'Adicionar mais 1' e integração no sidebar. Sistema deve ser independente do resto da aplicação, apenas para controle interno."
+user_problem_statement: "PROBLEMAS CRÍTICOS RESOLVIDOS: 1. Correção do salvamento no Controle de Passageiros (campo obrigatórios faltando causavam erro 422), 2. Implementação de cards IDA/VOLTA separados baseados nas datas das transações, 3. Adição de Cascavel e outras cidades brasileiras nos dados de aeroportos, 4. Sistema automático: entrada com só data ida = card IDA, entrada com ida+volta = 2 cards (IDA + VOLTA), 5. Cada card mantém funcionalidades completas de horários, escalas e passageiros."
 
 backend:
   - task: "Critical returnDate Investigation"
