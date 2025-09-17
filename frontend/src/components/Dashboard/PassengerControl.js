@@ -139,12 +139,7 @@ const PassengerControlDirect = () => {
         reservationNumber: transaction.reservationNumber || '',
         // Novos campos de detalhes da viagem
         productType: transaction.productType || '',
-        clientReservationCode: transaction.clientReservationCode || '',
-        departureCity: transaction.departureCity || '',
-        arrivalCity: transaction.arrivalCity || '',
         tripType: transaction.tripType || 'ida-volta',
-        departureDate: transaction.departureDate || '',
-        returnDate: transaction.returnDate || '',
         outboundDepartureTime: transaction.outboundDepartureTime || '',
         outboundArrivalTime: transaction.outboundArrivalTime || '',
         outboundFlightDuration: transaction.outboundFlightDuration || '',
