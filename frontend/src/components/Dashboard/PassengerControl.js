@@ -295,14 +295,27 @@ const PassengerControlDirect = () => {
 
       await transactionsAPI.updateTransaction(selectedReservation.id, updatedData);
 
+      console.log('✅ DEBUG - API chamada concluída com sucesso');
+
       // Atualizar a lista local
-      setReservations(prev => 
-        prev.map(res => 
+      setReservations(prev => {
+        const updated = prev.map(res => 
           res.id === selectedReservation.id 
             ? { ...res, ...updatedData }
             : res
-        )
-      );
+        );
+        
+        console.log('🔄 DEBUG - Lista local atualizada:', {
+          transactionId: selectedReservation.id,
+          updatedReservation: updated.find(r => r.id === selectedReservation.id)
+        });
+        
+        return updated;
+      });
+
+      console.log('📝 DEBUG - Recarregando lista do servidor...');
+      // Recarregar do servidor para garantir consistência
+      await loadReservations();
 
       toast({
         title: "Alterações Salvas",
