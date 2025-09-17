@@ -856,7 +856,7 @@ const PassengerControlDirect = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center text-sm">
             <Users className="h-4 w-4 mr-2 text-indigo-600" />
-            <span>{reservation.passengers.length} Passageiro(s)</span>
+            <span>{autoPopulatePassenger(reservation).length} Passageiro(s)</span>
           </div>
           
           <div className="flex space-x-2">
