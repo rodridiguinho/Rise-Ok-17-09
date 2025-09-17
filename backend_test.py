@@ -1289,14 +1289,16 @@ def test_critical_rui_data_recovery():
             # Procurar por transações do Rui
             rui_transactions = []
             for transaction in all_transactions:
-                client = transaction.get('client', '').lower()
-                description = transaction.get('description', '').lower()
+                client = transaction.get('client', '') or ''
+                description = transaction.get('description', '') or ''
+                client_lower = client.lower()
+                description_lower = description.lower()
                 
                 # Buscar por "Rui" ou "Rui Manuel" no cliente
-                if 'rui' in client:
+                if 'rui' in client_lower:
                     rui_transactions.append(transaction)
                 # Buscar por "Emissão Portugal" na descrição
-                elif 'emissão portugal' in description or 'emissao portugal' in description:
+                elif 'emissão portugal' in description_lower or 'emissao portugal' in description_lower or 'rui portugal' in description_lower:
                     rui_transactions.append(transaction)
                 # Buscar por valor R$ 14.000,00
                 elif transaction.get('amount') == 14000.0 or transaction.get('amount') == 14000:
