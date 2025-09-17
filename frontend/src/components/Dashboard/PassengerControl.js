@@ -745,6 +745,29 @@ const PassengerControlDirect = () => {
       {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reservations.map((reservation) => {
+            // Determinar se precisa criar cards separados para IDA e VOLTA
+            const hasReturnDate = reservation.returnDate && reservation.tripType === 'ida-volta';
+            
+            if (hasReturnDate) {
+              // Criar dois cards: um para IDA e um para VOLTA
+              return [
+                // CARD IDA
+                renderReservationCard(reservation, 'ida', `${reservation.id}-ida`),
+                // CARD VOLTA  
+                renderReservationCard(reservation, 'volta', `${reservation.id}-volta`)
+              ];
+            } else {
+              // Criar apenas um card para IDA
+              return renderReservationCard(reservation, 'ida', reservation.id);
+            }
+          }).flat()}
+        </div>
+      )}
+    </div>
+  );
+
+  // Função para renderizar um card de reserva
+  function renderReservationCard(reservation, cardType, cardKey) {
             const travelStatus = getTravelStatus(reservation);
             const reminderStatus = getReminderStatus(travelStatus);
             
