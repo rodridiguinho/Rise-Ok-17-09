@@ -1456,6 +1456,64 @@ def test_critical_rui_data_recovery():
             print_result(False, "👤 TRANSAÇÕES COM 'RUI MANUEL'", 
                        "❌ Nenhuma transação encontrada com 'Rui Manuel'")
         
+        # BUSCA CRÍTICA: Procurar pela transação original que gerou o pagamento do Rui
+        print(f"\n🎯 BUSCA CRÍTICA: TRANSAÇÃO ORIGINAL QUE GEROU O PAGAMENTO DO RUI")
+        try:
+            # Buscar especificamente pela transação 68c82cb493e52856876947e4 que é a original
+            original_rui_transaction = None
+            for t in all_transactions:
+                if t.get('id') == '68c82cb493e52856876947e4':
+                    original_rui_transaction = t
+                    break
+            
+            if original_rui_transaction:
+                print(f"\n📋 TRANSAÇÃO ORIGINAL DO RUI ENCONTRADA:")
+                print(f"   🆔 ID: {original_rui_transaction.get('id')}")
+                print(f"   📝 Descrição: {original_rui_transaction.get('description')}")
+                print(f"   💰 Valor: R$ {original_rui_transaction.get('amount', 0):,.2f}")
+                print(f"   🏷️ Tipo: {original_rui_transaction.get('type')}")
+                print(f"   👤 Cliente: {original_rui_transaction.get('client') or 'Não informado'}")
+                print(f"   📅 Data: {original_rui_transaction.get('date')}")
+                print(f"   🔒 Oculta do Controle: {original_rui_transaction.get('hiddenFromPassengerControl', False)}")
+                
+                # Verificar todos os campos relacionados ao Rui
+                all_fields = {}
+                for key, value in original_rui_transaction.items():
+                    if value and str(value).lower() != 'none':
+                        all_fields[key] = value
+                
+                print(f"\n🔍 TODOS OS CAMPOS DA TRANSAÇÃO ORIGINAL:")
+                for key, value in all_fields.items():
+                    if key not in ['_id', 'id', 'createdAt', 'updatedAt']:
+                        print(f"   {key}: {value}")
+                
+                print_result(True, "🎯 TRANSAÇÃO ORIGINAL DO RUI LOCALIZADA", 
+                           f"✅ Encontrada a transação original que gerou o pagamento do Rui")
+            else:
+                print_result(False, "❌ TRANSAÇÃO ORIGINAL NÃO ENCONTRADA", 
+                           "❌ Não foi possível localizar a transação original 68c82cb493e52856876947e4")
+        except Exception as e:
+            print_result(False, "❌ ERRO NA BUSCA DA TRANSAÇÃO ORIGINAL", str(e))
+        
+        # BUSCA FINAL: Procurar por qualquer transação que contenha "Emissão" e valor alto
+        print(f"\n🔍 BUSCA FINAL: TRANSAÇÕES COM 'EMISSÃO' E VALORES ALTOS")
+        emissao_transactions = []
+        for t in all_transactions:
+            description = (t.get('description') or '').lower()
+            amount = t.get('amount', 0)
+            if 'emissão' in description or 'emissao' in description:
+                if amount > 10000:  # Valores acima de R$ 10.000
+                    emissao_transactions.append(t)
+        
+        if emissao_transactions:
+            print_result(True, "📋 TRANSAÇÕES DE EMISSÃO COM VALORES ALTOS", 
+                       f"✅ Encontradas {len(emissao_transactions)} transação(ões) de emissão com valores altos")
+            for transaction in emissao_transactions:
+                print(f"   🆔 ID: {transaction.get('id')}, Cliente: {transaction.get('client') or 'N/A'}, Valor: R$ {transaction.get('amount', 0):,.2f}, Descrição: {transaction.get('description')}")
+        else:
+            print_result(False, "📋 TRANSAÇÕES DE EMISSÃO COM VALORES ALTOS", 
+                       "❌ Nenhuma transação de emissão com valores altos encontrada")
+        
     except Exception as e:
         print_result(False, "❌ ERRO NA INVESTIGAÇÃO DETALHADA", str(e))
     
