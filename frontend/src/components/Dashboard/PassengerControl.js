@@ -627,18 +627,6 @@ const PassengerControlDirect = () => {
     }
   };
 
-  // CORREÇÃO: Force re-render when modal opens to show return date field
-  useEffect(() => {
-    if (selectedReservation && tripType === 'ida-volta') {
-      // Pequeno delay para garantir que o campo de volta seja renderizado
-      const timer = setTimeout(() => {
-        // Force component update by touching the tripType state
-        setTripType(prev => prev);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedReservation, tripType]);
-
   const notifications = getNotifications();
 
   return (
