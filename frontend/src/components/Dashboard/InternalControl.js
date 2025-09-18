@@ -244,6 +244,54 @@ const InternalControl = () => {
     });
   };
 
+  // NOVA FUNÇÃO: Adicionar Pagamento Mensal
+  const adicionarPagamentoMensal = () => {
+    if (!novoPagamentoMensal.tipoConta || !novoPagamentoMensal.nomeEmpresa || !novoPagamentoMensal.valor) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Por favor, preencha pelo menos o tipo de conta, empresa e valor."
+      });
+      return;
+    }
+
+    setPagamentosMensais([...pagamentosMensais, { ...novoPagamentoMensal, id: Date.now() }]);
+    setNovoPagamentoMensal({
+      tipoConta: '',
+      nomeEmpresa: '',
+      valor: '',
+      valorJuros: '',
+      dataPagamento: '',
+      contaPagamento: '',
+      statusPago: false
+    });
+
+    toast({
+      title: "Sucesso",
+      description: "Pagamento mensal adicionado com sucesso!"
+    });
+  };
+
+  // NOVA FUNÇÃO: Duplicar Pagamento para Próximo Mês
+  const duplicarPagamentoProximoMes = (pagamento) => {
+    const dataAtual = new Date(pagamento.dataPagamento);
+    const proximoMes = new Date(dataAtual.setMonth(dataAtual.getMonth() + 1));
+    
+    const novoPagamento = {
+      ...pagamento,
+      id: Date.now(),
+      dataPagamento: proximoMes.toISOString().split('T')[0],
+      statusPago: false // Resetar status para não pago
+    };
+
+    setPagamentosMensais([...pagamentosMensais, novoPagamento]);
+
+    toast({
+      title: "Sucesso",
+      description: `Pagamento duplicado para ${proximoMes.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}!`
+    });
+  };
+
   const renderInvestimentos = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
