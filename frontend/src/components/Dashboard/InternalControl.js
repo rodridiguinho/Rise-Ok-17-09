@@ -1118,71 +1118,114 @@ const InternalControl = () => {
           <CardContent>
             <div className="space-y-4">
               {pagamentosMensais.map((pagamento) => (
-                <div key={pagamento.id} className="p-4 border border-gray-200 rounded-lg">
-                  <div className="flex justify-between items-start mb-3">
+                <div key={pagamento.id} className="p-5 border border-gray-200 rounded-lg bg-gradient-to-r from-white to-gray-50">
+                  {/* Header com título e botões de ação */}
+                  <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h4 className="font-bold text-lg text-gray-800">{pagamento.tipoConta}</h4>
-                      <p className="text-sm text-gray-600">Empresa: {pagamento.nomeEmpresa}</p>
+                      <h4 className="font-bold text-xl text-gray-800 flex items-center">
+                        💼 {pagamento.tipoConta}
+                      </h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        🏢 <strong>Empresa:</strong> {pagamento.nomeEmpresa}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                         pagamento.statusPago 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-green-100 text-green-800 border border-green-300' 
+                          : 'bg-red-100 text-red-800 border border-red-300'
                       }`}>
-                        {pagamento.statusPago ? '✅ Pago' : '❌ Não Pago'}
+                        {pagamento.statusPago ? '✅ PAGO' : '❌ NÃO PAGO'}
                       </span>
+                      
                       <Button
                         onClick={() => duplicarPagamentoProximoMes(pagamento)}
                         variant="outline"
                         size="sm"
-                        className="text-xs"
+                        className="text-xs bg-blue-50 hover:bg-blue-100 border-blue-300"
                       >
-                        📅 Duplicar p/ próximo mês
+                        📅 Duplicar
+                      </Button>
+                      
+                      <Button
+                        onClick={() => excluirPagamentoMensal(pagamento.id)}
+                        variant="outline"
+                        size="sm" 
+                        className="text-xs bg-red-50 hover:bg-red-100 border-red-300 text-red-600"
+                      >
+                        🗑️ Excluir
                       </Button>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Valor:</span>
-                      <p className="font-semibold text-blue-600">
+                  {/* Seção de valores financeiros */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+                      <span className="text-blue-700 font-medium text-sm">💰 Valor Principal</span>
+                      <p className="font-bold text-lg text-blue-800">
                         R$ {parseFloat(pagamento.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                     
                     {pagamento.valorJuros && parseFloat(pagamento.valorJuros) > 0 && (
-                      <div>
-                        <span className="text-gray-500">Juros:</span>
-                        <p className="font-semibold text-red-600">
+                      <div className="bg-orange-50 p-3 rounded-lg border-l-4 border-orange-400">
+                        <span className="text-orange-700 font-medium text-sm">📈 Valor de Juros</span>
+                        <p className="font-bold text-lg text-orange-800">
                           R$ {parseFloat(pagamento.valorJuros).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </p>
                       </div>
                     )}
                     
-                    {pagamento.dataPagamento && (
-                      <div>
-                        <span className="text-gray-500">Vencimento:</span>
-                        <p className="font-medium">{new Date(pagamento.dataPagamento).toLocaleDateString('pt-BR')}</p>
-                      </div>
-                    )}
-                    
-                    {pagamento.contaPagamento && (
-                      <div>
-                        <span className="text-gray-500">Conta:</span>
-                        <p className="font-medium">{pagamento.contaPagamento}</p>
+                    {pagamento.valorJuros && parseFloat(pagamento.valorJuros) > 0 && (
+                      <div className="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-400">
+                        <span className="text-purple-700 font-medium text-sm">💎 Total Geral</span>
+                        <p className="font-bold text-lg text-purple-800">
+                          R$ {(parseFloat(pagamento.valor || 0) + parseFloat(pagamento.valorJuros || 0))
+                            .toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
                       </div>
                     )}
                   </div>
                   
+                  {/* Seção de informações adicionais */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    {pagamento.dataPagamento && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-gray-500 font-medium">📅 Data de Pagamento:</span>
+                        <span className="font-semibold text-gray-800">
+                          {new Date(pagamento.dataPagamento).toLocaleDateString('pt-BR', { 
+                            day: '2-digit', 
+                            month: 'long', 
+                            year: 'numeric' 
+                          })}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {pagamento.contaPagamento && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-gray-500 font-medium">🏦 Conta de Pagamento:</span>
+                        <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded">
+                          {pagamento.contaPagamento}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Seção de destaque para total com juros (se houver) */}
                   {pagamento.valorJuros && parseFloat(pagamento.valorJuros) > 0 && (
-                    <div className="mt-3 p-2 bg-yellow-50 rounded border-l-4 border-yellow-400">
-                      <span className="text-sm text-gray-700">
-                        <strong>Total com juros:</strong> R$ {
-                          (parseFloat(pagamento.valor || 0) + parseFloat(pagamento.valorJuros || 0))
-                            .toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-                        }
-                      </span>
+                    <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg border-l-4 border-yellow-400">
+                      <div className="flex items-center justify-between">
+                        <span className="text-yellow-800 font-bold">
+                          ⚠️ Conta com Juros - Valor Total: R$ {
+                            (parseFloat(pagamento.valor || 0) + parseFloat(pagamento.valorJuros || 0))
+                              .toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                          }
+                        </span>
+                        <span className="text-xs text-yellow-700 bg-yellow-200 px-2 py-1 rounded">
+                          Juros: {((parseFloat(pagamento.valorJuros || 0) / parseFloat(pagamento.valor || 1)) * 100).toFixed(1)}%
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
