@@ -2853,6 +2853,28 @@ const EnhancedTransactions = () => {
                       {transaction.commissionValue && (
                         <span className="text-green-600">💳 Comissão: {formatCurrency(transaction.commissionValue)} ({transaction.commissionPercentage?.toFixed(2) || ((parseFloat(transaction.commissionValue) / parseFloat(transaction.saleValue || transaction.amount)) * 100).toFixed(2)}%)</span>
                       )}
+                      {/* NOVO: Exibir Valor de Lucro */}
+                      {(() => {
+                        const saleValue = parseFloat(transaction.saleValue || transaction.amount || 0);
+                        const directSupplierValue = parseFloat(transaction.supplierValue || 0);
+                        const suppliersArrayValue = transaction.suppliers && transaction.suppliers.length > 0 ? 
+                          transaction.suppliers.reduce((total, supplier) => total + (parseFloat(supplier.value) || 0), 0) : 0;
+                        const totalSupplierValue = directSupplierValue || suppliersArrayValue;
+                        const commissionValue = parseFloat(transaction.commissionValue || 0);
+                        
+                        // Calcular lucro apenas para transações de entrada com valores válidos
+                        if ((transaction.type === 'entrada' || transaction.type === 'entrada_vendas') && saleValue > 0) {
+                          const profit = saleValue - totalSupplierValue - commissionValue;
+                          const profitPercentage = saleValue > 0 ? (profit / saleValue * 100).toFixed(2) : '0.00';
+                          
+                          return (
+                            <span className={`font-medium ${profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                              💎 Lucro: {formatCurrency(profit)} ({profitPercentage}%)
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                       {transaction.supplierUsedMiles && transaction.supplierMilesQuantity && (
                         <span className="text-blue-600 font-medium">
                           ✈️ Milhas: {parseInt(transaction.supplierMilesQuantity).toLocaleString('pt-BR')} ({transaction.supplierMilesProgram})
