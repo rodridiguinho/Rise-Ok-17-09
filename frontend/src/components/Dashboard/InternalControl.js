@@ -1196,6 +1196,8 @@ const InternalControl = () => {
         return renderContasSocios();
       case 'links':
         return renderLinksConsolidadoras();
+      case 'pagamentosMensais':
+        return renderPagamentosMensais();
       default:
         return renderInvestimentos();
     }
