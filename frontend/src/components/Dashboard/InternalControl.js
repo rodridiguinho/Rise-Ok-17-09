@@ -292,6 +292,16 @@ const InternalControl = () => {
     });
   };
 
+  // NOVA FUNÇÃO: Excluir Pagamento Mensal
+  const excluirPagamentoMensal = (id) => {
+    setPagamentosMensais(pagamentosMensais.filter(pagamento => pagamento.id !== id));
+    
+    toast({
+      title: "Sucesso",
+      description: "Conta mensal excluída com sucesso!"
+    });
+  };
+
   const renderInvestimentos = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
