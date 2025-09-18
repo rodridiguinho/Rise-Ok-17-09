@@ -90,6 +90,18 @@ const InternalControl = () => {
     informacoesAdicionais: ''
   });
 
+  // 6. Pagamentos Mensais Fixos - NOVA SEÇÃO
+  const [pagamentosMensais, setPagamentosMensais] = useState([]);
+  const [novoPagamentoMensal, setNovoPagamentoMensal] = useState({
+    tipoConta: '',
+    nomeEmpresa: '',
+    valor: '',
+    valorJuros: '',
+    dataPagamento: '',
+    contaPagamento: '',
+    statusPago: false
+  });
+
   // Funções para adicionar registros
   const adicionarInvestimento = () => {
     if (!novoInvestimento.nomeSocio || !novoInvestimento.valorInvestido) {
