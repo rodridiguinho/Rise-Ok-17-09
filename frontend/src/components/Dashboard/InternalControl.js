@@ -999,6 +999,191 @@ const InternalControl = () => {
     </div>
   );
 
+  // NOVA SEÇÃO: Render Pagamentos Mensais Fixos
+  const renderPagamentosMensais = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+          <Calendar className="mr-3 h-6 w-6 text-red-600" />
+          Pagamentos Mensais Fixos - Contas Rise
+        </h2>
+        <span className="text-sm text-gray-500">{pagamentosMensais.length} contas cadastradas</span>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-md">Nova Conta Mensal</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Tipo de Conta *</Label>
+              <Input
+                placeholder="Ex: Aluguel, Água, Luz, Internet..."
+                value={novoPagamentoMensal.tipoConta}
+                onChange={(e) => setNovoPagamentoMensal({...novoPagamentoMensal, tipoConta: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Nome da Empresa *</Label>
+              <Input
+                placeholder="Nome da empresa fornecedora"
+                value={novoPagamentoMensal.nomeEmpresa}
+                onChange={(e) => setNovoPagamentoMensal({...novoPagamentoMensal, nomeEmpresa: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Valor *</Label>
+              <Input
+                type="number"
+                placeholder="0,00"
+                step="0.01"
+                value={novoPagamentoMensal.valor}
+                onChange={(e) => setNovoPagamentoMensal({...novoPagamentoMensal, valor: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Valor de Juros (se houver)</Label>
+              <Input
+                type="number"
+                placeholder="0,00"
+                step="0.01"
+                value={novoPagamentoMensal.valorJuros}
+                onChange={(e) => setNovoPagamentoMensal({...novoPagamentoMensal, valorJuros: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Data de Pagamento</Label>
+              <Input
+                type="date"
+                value={novoPagamentoMensal.dataPagamento}
+                onChange={(e) => setNovoPagamentoMensal({...novoPagamentoMensal, dataPagamento: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Conta Usada para Pagamento</Label>
+              <Input
+                placeholder="Ex: Itaú, Inter, Mercado Pago..."
+                value={novoPagamentoMensal.contaPagamento}
+                onChange={(e) => setNovoPagamentoMensal({...novoPagamentoMensal, contaPagamento: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="statusPago"
+                  checked={novoPagamentoMensal.statusPago}
+                  onChange={(e) => setNovoPagamentoMensal({...novoPagamentoMensal, statusPago: e.target.checked})}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="statusPago" className="cursor-pointer">
+                  ✅ Marcar como pago
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <Button onClick={adicionarPagamentoMensal} className="flex items-center space-x-2">
+              <Plus className="h-4 w-4" />
+              <span>Adicionar Conta Mensal</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Lista de contas mensais cadastradas */}
+      {pagamentosMensais.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Contas Mensais Cadastradas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {pagamentosMensais.map((pagamento) => (
+                <div key={pagamento.id} className="p-4 border border-gray-200 rounded-lg">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-bold text-lg text-gray-800">{pagamento.tipoConta}</h4>
+                      <p className="text-sm text-gray-600">Empresa: {pagamento.nomeEmpresa}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        pagamento.statusPago 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {pagamento.statusPago ? '✅ Pago' : '❌ Não Pago'}
+                      </span>
+                      <Button
+                        onClick={() => duplicarPagamentoProximoMes(pagamento)}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                      >
+                        📅 Duplicar p/ próximo mês
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">Valor:</span>
+                      <p className="font-semibold text-blue-600">
+                        R$ {parseFloat(pagamento.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    
+                    {pagamento.valorJuros && parseFloat(pagamento.valorJuros) > 0 && (
+                      <div>
+                        <span className="text-gray-500">Juros:</span>
+                        <p className="font-semibold text-red-600">
+                          R$ {parseFloat(pagamento.valorJuros).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {pagamento.dataPagamento && (
+                      <div>
+                        <span className="text-gray-500">Vencimento:</span>
+                        <p className="font-medium">{new Date(pagamento.dataPagamento).toLocaleDateString('pt-BR')}</p>
+                      </div>
+                    )}
+                    
+                    {pagamento.contaPagamento && (
+                      <div>
+                        <span className="text-gray-500">Conta:</span>
+                        <p className="font-medium">{pagamento.contaPagamento}</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {pagamento.valorJuros && parseFloat(pagamento.valorJuros) > 0 && (
+                    <div className="mt-3 p-2 bg-yellow-50 rounded border-l-4 border-yellow-400">
+                      <span className="text-sm text-gray-700">
+                        <strong>Total com juros:</strong> R$ {
+                          (parseFloat(pagamento.valor || 0) + parseFloat(pagamento.valorJuros || 0))
+                            .toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                        }
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
   const renderContent = () => {
     switch (activeSection) {
       case 'investimentos':
