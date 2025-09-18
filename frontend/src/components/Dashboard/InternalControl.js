@@ -1092,6 +1092,18 @@ const InternalControl = () => {
               <Link className="inline h-4 w-4 mr-1" />
               Links/Serviços
             </button>
+            
+            <button
+              onClick={() => setActiveSection('pagamentosMensais')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeSection === 'pagamentosMensais'
+                  ? 'bg-red-100 text-red-700 border border-red-300'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <Calendar className="inline h-4 w-4 mr-1" />
+              Pagamentos Mensais
+            </button>
           </div>
         </div>
       </div>
