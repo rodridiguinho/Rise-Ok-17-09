@@ -1233,6 +1233,7 @@ const EnhancedTransactions = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -2056,14 +2057,73 @@ const EnhancedTransactions = () => {
                               </datalist>
                             </div>
                           </div>
+
+                          {/* NOVOS CAMPOS PARA MILHAS - Dados do Milheiro */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-3 bg-green-50 rounded-md mt-3 border-l-4 border-green-400">
+                          <div className="md:col-span-3 mb-2">
+                            <Label className="font-bold text-green-700">💳 Dados do Milheiro (apenas registro)</Label>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Conta Usada</Label>
+                            <Input
+                              placeholder="Ex: Itaú, Nubank, Inter..."
+                              value={supplier.milesAccount || ''}
+                              onChange={(e) => updateSupplier(index, 'milesAccount', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Número da Conta</Label>
+                            <Input
+                              placeholder="Ex: 12345-6"
+                              value={supplier.milesAccountNumber || ''}
+                              onChange={(e) => updateSupplier(index, 'milesAccountNumber', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>E-mail</Label>
+                            <Input
+                              type="email"
+                              placeholder="Ex: email@milheiro.com"
+                              value={supplier.milesEmail || ''}
+                              onChange={(e) => updateSupplier(index, 'milesEmail', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Usuário</Label>
+                            <Input
+                              placeholder="Nome de usuário"
+                              value={supplier.milesUser || ''}
+                              onChange={(e) => updateSupplier(index, 'milesUser', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Senha</Label>
+                            <Input
+                              type="password"
+                              placeholder="••••••••"
+                              value={supplier.milesPassword || ''}
+                              onChange={(e) => updateSupplier(index, 'milesPassword', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Contato do Milheiro</Label>
+                            <Input
+                              placeholder="Ex: (11) 99999-9999"
+                              value={supplier.milesContact || ''}
+                              onChange={(e) => updateSupplier(index, 'milesContact', e.target.value)}
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              </div>
+                  )}
+                </div>
 
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
@@ -2073,8 +2133,9 @@ const EnhancedTransactions = () => {
                   Salvar Transação
                 </Button>
               </div>
-            </form>
-          </DialogContent>
+            </div>
+          </form>
+        </DialogContent>
         </Dialog>
 
         {/* Edit Transaction Modal */}
@@ -2498,6 +2559,69 @@ const EnhancedTransactions = () => {
                               </div>
                             </div>
                           </div>
+
+                          {/* NOVOS CAMPOS PARA MILHAS - Dados do Milheiro (MODAL EDIÇÃO) */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-3 bg-green-50 rounded-md mt-3 border-l-4 border-green-400">
+                            <div className="md:col-span-3 mb-2">
+                              <Label className="font-bold text-green-700">💳 Dados do Milheiro (apenas registro)</Label>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Conta Usada</Label>
+                              <Input
+                                placeholder="Ex: Itaú, Nubank, Inter..."
+                                value={supplier.milesAccount || ''}
+                                onChange={(e) => updateSupplier(index, 'milesAccount', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Número da Conta</Label>
+                              <Input
+                                placeholder="Ex: 12345-6"
+                                value={supplier.milesAccountNumber || ''}
+                                onChange={(e) => updateSupplier(index, 'milesAccountNumber', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>E-mail</Label>
+                              <Input
+                                type="email"
+                                placeholder="Ex: email@milheiro.com"
+                                value={supplier.milesEmail || ''}
+                                onChange={(e) => updateSupplier(index, 'milesEmail', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Usuário</Label>
+                              <Input
+                                placeholder="Nome de usuário"
+                                value={supplier.milesUser || ''}
+                                onChange={(e) => updateSupplier(index, 'milesUser', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Senha</Label>
+                              <Input
+                                type="password"
+                                placeholder="••••••••"
+                                value={supplier.milesPassword || ''}
+                                onChange={(e) => updateSupplier(index, 'milesPassword', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Contato do Milheiro</Label>
+                              <Input
+                                placeholder="Ex: (11) 99999-9999"
+                                value={supplier.milesContact || ''}
+                                onChange={(e) => updateSupplier(index, 'milesContact', e.target.value)}
+                              />
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -2693,6 +2817,7 @@ const EnhancedTransactions = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </>
       </div>
 
       {/* Search and Filter */}
@@ -2922,6 +3047,7 @@ const EnhancedTransactions = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

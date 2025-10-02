@@ -2065,6 +2065,41 @@ async def get_airports(search: str = ""):
     
     return {"airports": airports}
 
+# CONTROLE INTERNO ENDPOINTS - Para salvar dados persistentes
+@api_router.get("/internal-control/{section}")
+async def get_internal_control_data(section: str):
+    """Buscar dados do controle interno por seção"""
+    try:
+        doc = await db.internal_control.find_one({"section": section})
+        return {"data": doc.get("data", []) if doc else []}
+    except Exception as e:
+        logging.error(f"Get internal control error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar dados: {str(e)}")
+
+@api_router.post("/internal-control/{section}")
+async def save_internal_control_data(section: str, request: dict):
+    """Salvar dados do controle interno"""
+    try:
+        data = request.get("data", [])
+        
+        # Salvar ou atualizar os dados da seção
+        await db.internal_control.update_one(
+            {"section": section},
+            {
+                "$set": {
+                    "section": section,
+                    "data": data,
+                    "updatedAt": datetime.utcnow()
+                }
+            },
+            upsert=True
+        )
+        
+        return {"message": f"Dados da seção {section} salvos com sucesso", "count": len(data)}
+    except Exception as e:
+        logging.error(f"Save internal control error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar dados: {str(e)}")
+
 # Include the main router in the app  
 app.include_router(api_router)
 

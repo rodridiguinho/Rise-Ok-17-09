@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -102,8 +103,66 @@ const InternalControl = () => {
     statusPago: false
   });
 
+  // FUNÇÕES DE PERSISTÊNCIA - Salvar/Carregar dados do backend
+  const carregarDados = async (secao) => {
+    try {
+      const response = await api.get(`/internal-control/${secao}`);
+      return response.data.data || [];
+    } catch (error) {
+      console.error(`Erro ao carregar ${secao}:`, error);
+      return [];
+    }
+  };
+
+  const salvarDados = async (secao, dados) => {
+    try {
+      await api.post(`/internal-control/${secao}`, { data: dados });
+      toast({
+        title: "Dados salvos",
+        description: `Seção ${secao} salva com sucesso no banco de dados!`,
+      });
+    } catch (error) {
+      console.error(`Erro ao salvar ${secao}:`, error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao salvar",
+        description: `Não foi possível salvar a seção ${secao}.`,
+      });
+    }
+  };
+
+  // Carregar dados ao montar componente
+  useEffect(() => {
+    const carregarTodosDados = async () => {
+      const [
+        dadosInvestimentos,
+        dadosPagamentos, 
+        dadosMilhas,
+        dadosSocios,
+        dadosLinks,
+        dadosPagamentosMensais
+      ] = await Promise.all([
+        carregarDados('investimentos'),
+        carregarDados('pagamentos'),
+        carregarDados('milhas'),
+        carregarDados('socios'),
+        carregarDados('links'),
+        carregarDados('pagamentosMensais')
+      ]);
+
+      setInvestimentos(dadosInvestimentos);
+      setPagamentosParcelados(dadosPagamentos);
+      setControleMilhas(dadosMilhas);
+      setContasSocios(dadosSocios);
+      setLinksConsolidadoras(dadosLinks);
+      setPagamentosMensais(dadosPagamentosMensais);
+    };
+
+    carregarTodosDados();
+  }, []);
+
   // Funções para adicionar registros
-  const adicionarInvestimento = () => {
+  const adicionarInvestimento = async () => {
     if (!novoInvestimento.nomeSocio || !novoInvestimento.valorInvestido) {
       toast({
         variant: "destructive",
@@ -113,7 +172,12 @@ const InternalControl = () => {
       return;
     }
 
-    setInvestimentos([...investimentos, { ...novoInvestimento, id: Date.now() }]);
+    const novosInvestimentos = [...investimentos, { ...novoInvestimento, id: Date.now() }];
+    setInvestimentos(novosInvestimentos);
+    
+    // Salvar no backend
+    await salvarDados('investimentos', novosInvestimentos);
+    
     setNovoInvestimento({
       nomeSocio: '',
       negocioInvestimento: '',
@@ -125,7 +189,7 @@ const InternalControl = () => {
       valoresMensais: '',
       valorFinalPrazo: ''
     });
-    
+
     toast({
       title: "Investimento adicionado",
       description: "Registro salvo com sucesso!"
@@ -245,7 +309,7 @@ const InternalControl = () => {
   };
 
   // NOVA FUNÇÃO: Adicionar Pagamento Mensal
-  const adicionarPagamentoMensal = () => {
+  const adicionarPagamentoMensal = async () => {
     if (!novoPagamentoMensal.tipoConta || !novoPagamentoMensal.nomeEmpresa || !novoPagamentoMensal.valor) {
       toast({
         variant: "destructive",
@@ -255,7 +319,12 @@ const InternalControl = () => {
       return;
     }
 
-    setPagamentosMensais([...pagamentosMensais, { ...novoPagamentoMensal, id: Date.now() }]);
+    const novosPagamentosMensais = [...pagamentosMensais, { ...novoPagamentoMensal, id: Date.now() }];
+    setPagamentosMensais(novosPagamentosMensais);
+    
+    // Salvar no backend
+    await salvarDados('pagamentosMensais', novosPagamentosMensais);
+    
     setNovoPagamentoMensal({
       tipoConta: '',
       nomeEmpresa: '',
@@ -273,7 +342,7 @@ const InternalControl = () => {
   };
 
   // NOVA FUNÇÃO: Duplicar Pagamento para Próximo Mês
-  const duplicarPagamentoProximoMes = (pagamento) => {
+  const duplicarPagamentoProximoMes = async (pagamento) => {
     const dataAtual = new Date(pagamento.dataPagamento);
     const proximoMes = new Date(dataAtual.setMonth(dataAtual.getMonth() + 1));
     
@@ -284,7 +353,11 @@ const InternalControl = () => {
       statusPago: false // Resetar status para não pago
     };
 
-    setPagamentosMensais([...pagamentosMensais, novoPagamento]);
+    const novosPagamentosMensais = [...pagamentosMensais, novoPagamento];
+    setPagamentosMensais(novosPagamentosMensais);
+
+    // Salvar no backend
+    await salvarDados('pagamentosMensais', novosPagamentosMensais);
 
     toast({
       title: "Sucesso",
@@ -293,8 +366,12 @@ const InternalControl = () => {
   };
 
   // NOVA FUNÇÃO: Excluir Pagamento Mensal
-  const excluirPagamentoMensal = (id) => {
-    setPagamentosMensais(pagamentosMensais.filter(pagamento => pagamento.id !== id));
+  const excluirPagamentoMensal = async (id) => {
+    const novosPagamentosMensais = pagamentosMensais.filter(pagamento => pagamento.id !== id);
+    setPagamentosMensais(novosPagamentosMensais);
+    
+    // Salvar no backend
+    await salvarDados('pagamentosMensais', novosPagamentosMensais);
     
     toast({
       title: "Sucesso",
