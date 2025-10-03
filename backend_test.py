@@ -11995,13 +11995,13 @@ def test_passenger_control_investigation():
         print_result(False, "Database analysis failed", str(e))
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend API Test Suite - INVESTIGAÇÃO CRÍTICA DADOS DE PASSAGEIROS")
+    print("🚀 Starting Backend API Test Suite - SISTEMA DE LOGIN RISE TRAVEL")
     print(f"🔗 Testing API at: {API_URL}")
     print("="*80)
     
-    # Run the passenger control investigation (highest priority)
-    test_passenger_control_investigation()
+    # Run the login system investigation (review request priority)
+    test_login_functionality_review_request()
     
     print("\n" + "="*80)
-    print("🏁 Backend API Test Suite Complete - INVESTIGAÇÃO PASSAGEIROS CONCLUÍDA")
+    print("🏁 Backend API Test Suite Complete - TESTE DE LOGIN CONCLUÍDO")
     print("="*80)
