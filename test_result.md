@@ -985,7 +985,7 @@ frontend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "✅ API INTEGRATION WORKING PERFECTLY: All API calls confirmed working - GET /api/users (list), POST /api/users (create), PUT /api/users/{id} (update), DELETE /api/users/{id} (delete). Proper authentication headers sent, correct backend URL used (https://travel-agency-hub-5.preview.emergentagent.com/api), no CORS issues, all responses handled correctly."
+          comment: "✅ API INTEGRATION WORKING PERFECTLY: All API calls confirmed working - GET /api/users (list), POST /api/users (create), PUT /api/users/{id} (update), DELETE /api/users/{id} (delete). Proper authentication headers sent, correct backend URL used (https://travelpay.preview.emergentagent.com/api), no CORS issues, all responses handled correctly."
 
   - task: "User Management - UI/UX"
     implemented: true
