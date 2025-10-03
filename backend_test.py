@@ -1095,8 +1095,91 @@ def test_login_functionality_review_request():
     except Exception as e:
         print_result(False, "Test User Creation - Exception", str(e))
     
-    # Test 2: Test POST /api/auth/login with invalid credentials
-    print("\n🎯 TEST 2: LOGIN WITH INVALID CREDENTIALS")
+    # Test 4: Check if users exist in database
+    print("\n🎯 TEST 4: VERIFY USERS EXIST IN DATABASE")
+    try:
+        # Try to get users list (this might require authentication)
+        if auth_token:
+            headers = {"Authorization": f"Bearer {auth_token}"}
+            response = requests.get(f"{API_URL}/users", headers=headers, timeout=10)
+        else:
+            response = requests.get(f"{API_URL}/users", timeout=10)
+        
+        print(f"Users List Response Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            users = response.json()
+            print_result(True, "Users Database - Access Successful", 
+                       f"Retrieved {len(users)} users from database")
+            
+            # Check if known users exist
+            found_users = []
+            for user in users:
+                if user.get("email") in known_users:
+                    found_users.append({
+                        "email": user.get("email"),
+                        "name": user.get("name"),
+                        "role": user.get("role"),
+                        "status": user.get("status")
+                    })
+            
+            if found_users:
+                print_result(True, "Users Database - Known Users Found", 
+                           f"Found {len(found_users)} known users in database")
+                for user in found_users:
+                    print(f"   📧 {user['email']} → {user['name']} ({user['role']}) - Status: {user['status']}")
+            else:
+                print_result(False, "Users Database - No Known Users Found", 
+                           "None of the known users found in database")
+                
+        elif response.status_code == 401:
+            print_result(False, "Users Database - Authentication Required", 
+                       "Cannot access users list - authentication required")
+        else:
+            print_result(False, f"Users Database - HTTP {response.status_code}", 
+                       f"Cannot access users list: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Users Database - Exception", str(e))
+    
+    # Test 5: Test password hashing verification
+    print("\n🎯 TEST 5: PASSWORD HASHING SYSTEM VERIFICATION")
+    try:
+        # Test with known user and wrong password to see error message
+        wrong_password_data = {
+            "email": "rodrigo@risetravel.com.br",
+            "password": "WrongPassword123"
+        }
+        
+        response = requests.post(f"{API_URL}/auth/login", json=wrong_password_data, timeout=10)
+        print(f"Wrong Password Response Status: {response.status_code}")
+        print(f"Wrong Password Response Text: {response.text}")
+        
+        if response.status_code == 401:
+            try:
+                error_data = response.json()
+                error_message = error_data.get("detail", "")
+                
+                if "Email ou senha inválidos" in error_message:
+                    print_result(True, "Password Hashing - Proper Error Message", 
+                               f"Correct error message: {error_message}")
+                    print_result(True, "Password Hashing - Security", 
+                               "System doesn't reveal whether email or password is wrong")
+                else:
+                    print_result(False, "Password Hashing - Unexpected Error Message", 
+                               f"Unexpected error message: {error_message}")
+            except:
+                print_result(False, "Password Hashing - Response Format Error", 
+                           "Cannot parse error response")
+        else:
+            print_result(False, f"Password Hashing - Unexpected Status {response.status_code}", 
+                       f"Expected 401, got {response.status_code}")
+            
+    except Exception as e:
+        print_result(False, "Password Hashing - Exception", str(e))
+    
+    # Test 6: Test with invalid credentials
+    print("\n🎯 TEST 6: LOGIN WITH INVALID CREDENTIALS")
     try:
         invalid_login_data = {
             "email": INVALID_EMAIL,  # invalid@test.com
