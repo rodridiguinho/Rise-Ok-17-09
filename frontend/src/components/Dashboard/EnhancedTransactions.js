@@ -2139,7 +2139,7 @@ const EnhancedTransactions = () => {
         </Dialog>
 
         {/* Edit Transaction Modal */}
-        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        {/*<Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>*/}
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Editar Transação - Agência de Viagens</DialogTitle>
