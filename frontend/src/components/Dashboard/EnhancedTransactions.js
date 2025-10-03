@@ -2788,7 +2788,7 @@ const EnhancedTransactions = () => {
               </div>
             </form>
           </DialogContent>
-        </Dialog>
+        </Dialog>*/}
 
         {/* Delete Confirmation Modal */}
         <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
