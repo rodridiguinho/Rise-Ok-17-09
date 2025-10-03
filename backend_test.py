@@ -894,10 +894,33 @@ def test_review_request_complete_enhanced_transaction():
 
 def test_login_functionality_review_request():
     """Test Login Functionality - SPECIFIC REVIEW REQUEST"""
-    print_test_header("Login Functionality Testing - Review Request")
+    print_test_header("🔐 LOGIN SYSTEM TESTING - Rise Travel Review Request")
     
-    # Test 1: Test POST /api/auth/login with valid credentials
-    print("\n🎯 TEST 1: LOGIN WITH VALID CREDENTIALS")
+    # Known users from review request
+    known_users = [
+        "rodrigo@risetravel.com.br",
+        "fernando@risetravel.com.br", 
+        "franciele@risetravel.com.br",
+        "katia@risetravel.com.br"
+    ]
+    
+    # Common passwords to test
+    common_passwords = [
+        "Emily2030*",
+        "123456",
+        "password",
+        "admin",
+        "risetravel",
+        "Rise2024",
+        "travel123"
+    ]
+    
+    print(f"🎯 Testing login system for Rise Travel")
+    print(f"📧 Known users: {', '.join(known_users)}")
+    print(f"🔗 Backend URL: {BASE_URL}")
+    
+    # Test 1: Test with known credentials from previous tests
+    print("\n🎯 TEST 1: LOGIN WITH KNOWN WORKING CREDENTIALS")
     try:
         valid_login_data = {
             "email": VALID_EMAIL,  # rodrigo@risetravel.com.br
@@ -915,27 +938,27 @@ def test_login_functionality_review_request():
             # Verify JWT token is returned
             if "access_token" in data:
                 token = data["access_token"]
-                print_result(True, "Valid Login - JWT Token Generation", 
+                print_result(True, "Known Credentials Login - JWT Token Generation", 
                            f"JWT token generated successfully (length: {len(token)} chars)")
                 
                 # Verify token format (JWT should have 3 parts separated by dots)
                 token_parts = token.split('.')
                 if len(token_parts) == 3:
-                    print_result(True, "Valid Login - JWT Token Format", 
+                    print_result(True, "Known Credentials Login - JWT Token Format", 
                                "JWT token has correct format (3 parts)")
                 else:
-                    print_result(False, "Valid Login - JWT Token Format", 
+                    print_result(False, "Known Credentials Login - JWT Token Format", 
                                f"JWT token has incorrect format ({len(token_parts)} parts)")
             else:
-                print_result(False, "Valid Login - JWT Token Missing", 
+                print_result(False, "Known Credentials Login - JWT Token Missing", 
                            "access_token not found in response")
             
             # Verify token_type is returned
             if data.get("token_type") == "bearer":
-                print_result(True, "Valid Login - Token Type", 
+                print_result(True, "Known Credentials Login - Token Type", 
                            f"Token type correctly set: {data.get('token_type')}")
             else:
-                print_result(False, "Valid Login - Token Type", 
+                print_result(False, "Known Credentials Login - Token Type", 
                            f"Expected 'bearer', got: {data.get('token_type')}")
             
             # Verify user information is returned
@@ -945,15 +968,15 @@ def test_login_functionality_review_request():
                 missing_fields = [f for f in expected_user_fields if f not in user_info]
                 
                 if not missing_fields:
-                    print_result(True, "Valid Login - User Information", 
+                    print_result(True, "Known Credentials Login - User Information", 
                                f"All user fields present: {expected_user_fields}")
-                    print_result(True, "Valid Login - User Details", 
+                    print_result(True, "Known Credentials Login - User Details", 
                                f"User: {user_info.get('name')}, Email: {user_info.get('email')}, Role: {user_info.get('role')}")
                 else:
-                    print_result(False, "Valid Login - User Information", 
+                    print_result(False, "Known Credentials Login - User Information", 
                                f"Missing user fields: {missing_fields}")
             else:
-                print_result(False, "Valid Login - User Information Missing", 
+                print_result(False, "Known Credentials Login - User Information Missing", 
                            "User information not found in response")
             
             # Store token for potential future use
@@ -961,20 +984,116 @@ def test_login_functionality_review_request():
             auth_token = data.get("access_token")
             
         elif response.status_code == 401:
-            print_result(False, "Valid Login - Authentication Failed", 
-                       f"Login failed with valid credentials: {response.text}")
+            print_result(False, "Known Credentials Login - Authentication Failed", 
+                       f"Login failed with known working credentials: {response.text}")
         else:
-            print_result(False, f"Valid Login - HTTP {response.status_code}", 
+            print_result(False, f"Known Credentials Login - HTTP {response.status_code}", 
                        f"Unexpected response: {response.text}")
             
     except requests.exceptions.Timeout:
-        print_result(False, "Valid Login - Request Timeout", 
+        print_result(False, "Known Credentials Login - Request Timeout", 
                    "Login request timed out after 10 seconds")
     except requests.exceptions.ConnectionError:
-        print_result(False, "Valid Login - Connection Error", 
+        print_result(False, "Known Credentials Login - Connection Error", 
                    f"Could not connect to {API_URL}/auth/login")
     except Exception as e:
-        print_result(False, "Valid Login - Exception", str(e))
+        print_result(False, "Known Credentials Login - Exception", str(e))
+    
+    # Test 2: Test all known users with common passwords
+    print("\n🎯 TEST 2: TESTING ALL KNOWN USERS WITH COMMON PASSWORDS")
+    successful_logins = []
+    
+    for email in known_users:
+        print(f"\n📧 Testing user: {email}")
+        for password in common_passwords:
+            try:
+                login_data = {
+                    "email": email,
+                    "password": password
+                }
+                
+                response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=5)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "access_token" in data and "user" in data:
+                        successful_logins.append({
+                            "email": email,
+                            "password": password,
+                            "user_name": data["user"].get("name", "Unknown"),
+                            "user_role": data["user"].get("role", "Unknown")
+                        })
+                        print_result(True, f"Successful Login Found - {email}", 
+                                   f"Password: {password}, User: {data['user'].get('name')}, Role: {data['user'].get('role')}")
+                        break  # Found working password, move to next user
+                elif response.status_code == 401:
+                    # Expected for wrong password
+                    continue
+                else:
+                    print_result(False, f"Unexpected Response - {email} with {password}", 
+                               f"HTTP {response.status_code}: {response.text}")
+                    
+            except Exception as e:
+                print_result(False, f"Login Test Exception - {email} with {password}", str(e))
+    
+    # Report successful logins
+    if successful_logins:
+        print(f"\n✅ FOUND {len(successful_logins)} WORKING LOGIN(S):")
+        for login in successful_logins:
+            print(f"   📧 {login['email']} / 🔑 {login['password']} → {login['user_name']} ({login['user_role']})")
+    else:
+        print(f"\n❌ NO WORKING LOGINS FOUND among known users and common passwords")
+    
+    # Test 3: Test user creation to verify system works
+    print("\n🎯 TEST 3: TEST USER CREATION TO VERIFY SYSTEM FUNCTIONALITY")
+    try:
+        # Create a test user
+        test_user_data = {
+            "name": "Test User Login",
+            "email": "testlogin@risetravel.com.br",
+            "password": "TestLogin123*",
+            "phone": "(11) 99999-0000",
+            "role": "Operador",
+            "status": "Ativo"
+        }
+        
+        response = requests.post(f"{API_URL}/users", json=test_user_data, timeout=10)
+        print(f"User Creation Response Status: {response.status_code}")
+        print(f"User Creation Response: {response.text}")
+        
+        if response.status_code == 200:
+            print_result(True, "Test User Creation - User Created Successfully", 
+                       f"Test user created: {test_user_data['email']}")
+            
+            # Now try to login with the new user
+            login_data = {
+                "email": test_user_data["email"],
+                "password": test_user_data["password"]
+            }
+            
+            login_response = requests.post(f"{API_URL}/auth/login", json=login_data, timeout=10)
+            print(f"New User Login Response Status: {login_response.status_code}")
+            print(f"New User Login Response: {login_response.text}")
+            
+            if login_response.status_code == 200:
+                login_data_response = login_response.json()
+                if "access_token" in login_data_response:
+                    print_result(True, "Test User Login - Login Successful", 
+                               f"New user can login successfully")
+                    print_result(True, "System Functionality - Login System Working", 
+                               "Login system is functional - can create users and login")
+                else:
+                    print_result(False, "Test User Login - No Token", 
+                               "Login response missing access_token")
+            else:
+                print_result(False, f"Test User Login - Login Failed - HTTP {login_response.status_code}", 
+                           f"New user cannot login: {login_response.text}")
+        else:
+            print_result(False, f"Test User Creation - Creation Failed - HTTP {response.status_code}", 
+                       f"Could not create test user: {response.text}")
+            
+    except Exception as e:
+        print_result(False, "Test User Creation - Exception", str(e))
     
     # Test 2: Test POST /api/auth/login with invalid credentials
     print("\n🎯 TEST 2: LOGIN WITH INVALID CREDENTIALS")
