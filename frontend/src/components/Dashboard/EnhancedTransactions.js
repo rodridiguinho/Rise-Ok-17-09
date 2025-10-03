@@ -9,7 +9,7 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger 
-} from '../ui/dialog';
+} from '../ui/dialog.jsx';
 import { 
   Select,
   SelectContent,
